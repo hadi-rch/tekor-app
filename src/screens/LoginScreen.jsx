@@ -54,7 +54,7 @@ const LoginScreen = ({ navigation }) => {
         if (validateForm()) {
             // Logika untuk login jika form valid
             console.log('Data yang akan dikirim:', formData);
-            // navigation.navigate('MainApp'); // Contoh navigasi setelah login
+            navigation.navigate('MainApp');
         } else {
             console.log('Validasi gagal:', errors);
         }
