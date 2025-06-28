@@ -18,7 +18,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
         } else if (!/\S+@\S+\.\S+/.test(email)) {
             newError = 'Format email tidak valid';
         }
-        
+
         setError(newError);
         return !newError; // Return true jika tidak ada error
     };
@@ -26,12 +26,8 @@ const ForgotPasswordScreen = ({ navigation }) => {
     const handleSendLink = () => {
         if (validateEmail()) {
             console.log('Mengirim link reset ke:', email);
-            // Di sini Anda akan memanggil API untuk mengirim link reset
-            Alert.alert(
-                "Link Terkirim",
-                `Tautan untuk mengatur ulang kata sandi telah dikirimkan ke ${email}. Silakan periksa kotak masuk Anda.`
-            );
-            navigation.goBack(); // Kembali ke halaman login setelah link dikirim
+
+            navigation.navigate('ResetLinkSent', { email: email });
         }
     };
 
@@ -69,7 +65,6 @@ const ForgotPasswordScreen = ({ navigation }) => {
                 <CustomButton
                     title="Kirim Link Reset"
                     onPress={handleSendLink}
-                    // Kita berikan style custom untuk mengubah warna background
                     style={{ backgroundColor: COLORS.primary, borderRadius: 24, paddingVertical: 15 }}
                 />
             </View>
@@ -93,7 +88,7 @@ const styles = StyleSheet.create({
         marginBottom: 24,
     },
     backButton: {
-        padding: 5, // Area sentuh lebih besar
+        padding: 5, // biar area sentuh lebih besar
     },
     headerTitle: {
         fontSize: 20,
@@ -101,7 +96,7 @@ const styles = StyleSheet.create({
         color: COLORS.text,
     },
     content: {
-        flex: 1, // Mendorong tombol ke bawah
+        flex: 1,
     },
     description: {
         fontSize: 16,

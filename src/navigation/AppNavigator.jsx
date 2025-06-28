@@ -7,6 +7,8 @@ import RegisterScreen from '../screens/RegisterScreen';
 import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
 import { StatusBar } from 'react-native'; 
 import { COLORS } from '../constants/colors';
+import ResetLinkSentScreen from '../screens/ResetLinkSentScreen';
+import CreateNewPasswordScreen from '../screens/CreateNewPasswordScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -21,6 +23,8 @@ const AppNavigator = () => {
                 <Stack.Screen name="Login" component={LoginScreen} />
                 <Stack.Screen name="Register" component={RegisterScreen} />
                 <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+                <Stack.Screen name="ResetLinkSent" component={ResetLinkSentScreen} />
+                <Stack.Screen name="CreateNewPassword" component={CreateNewPasswordScreen} /> 
             </Stack.Navigator>
         </NavigationContainer>
 
