@@ -4,23 +4,26 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
-// Import WelcomeScreen jika Anda sudah membuatnya
-// import WelcomeScreen from '../screens/WelcomeScreen';
+import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
+import { StatusBar } from 'react-native'; 
+import { COLORS } from '../constants/colors';
 
 const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => {
     return (
         <NavigationContainer>
+            <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
             <Stack.Navigator
-                initialRouteName="Register" // Ubah ke "Welcome" jika sudah ada
-                screenOptions={{ headerShown: false }} // Menyembunyikan header default
+                initialRouteName="Login"
+                screenOptions={{ headerShown: false }}
             >
-                {/* <Stack.Screen name="Welcome" component={WelcomeScreen} /> */}
                 <Stack.Screen name="Login" component={LoginScreen} />
                 <Stack.Screen name="Register" component={RegisterScreen} />
+                <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
             </Stack.Navigator>
         </NavigationContainer>
+
     );
 };
 
