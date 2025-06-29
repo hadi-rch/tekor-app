@@ -15,6 +15,8 @@ import CreateNewPasswordScreen from '../screens/CreateNewPasswordScreen';
 import MainTabNavigator from './MainTabNavigator';
 import TransactionHistoryScreen from '../screens/TransactionHistoryScreen';
 import EditProfileScreen from '../screens/EditProfileScreen';
+import ChangePasswordScreen from '../screens/ChangePasswordScreen';
+import ProductDetailScreen from '../screens/ProductDetailScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -38,6 +40,8 @@ const AppNavigator = () => {
                 <Stack.Screen name="MainApp" component={MainTabNavigator} />
                 <Stack.Screen name="TransactionHistory" component={TransactionHistoryScreen} />
                 <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+                <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
+                <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
 
             </Stack.Navigator>
         </NavigationContainer>
