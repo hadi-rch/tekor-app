@@ -8,14 +8,7 @@ import { COLORS } from '../constants/colors';
 import LessonsScreen from '../screens/LessonsScreen';
 import ProductsScreen from '../screens/ProductsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
-
-
-const PlaceholderScreen = ({ route }) => (
-    <View style={styles.placeholderContainer}>
-        <Text style={styles.placeholderText}>{route.name}</Text>
-        <Text>Layar ini sedang dalam pengembangan.</Text>
-    </View>
-);
+import { fontPixel, heightPixel } from '../../helper';
 
 const Tab = createBottomTabNavigator();
 
@@ -24,7 +17,7 @@ const MainTabNavigator = () => {
         <Tab.Navigator
             screenOptions={({ route }) => ({
                 headerShown: false, // Menyembunyikan header default di setiap tab
-                tabBarIcon: ({ focused, color, size }) => {
+                tabBarIcon: ({ focused, color }) => {
                     let iconName;
 
                     if (route.name === 'Home') {
@@ -37,7 +30,7 @@ const MainTabNavigator = () => {
                         iconName = focused ? 'person' : 'person-outline';
                     }
 
-                    return <Ionicons name={iconName} size={size} color={color} />;
+                    return <Ionicons name={iconName} size={fontPixel(24)} color={color} />;
                 },
                 tabBarActiveTintColor: COLORS.accent,
                 tabBarInactiveTintColor: COLORS.gray,
@@ -45,11 +38,11 @@ const MainTabNavigator = () => {
                     backgroundColor: COLORS.white,
                     borderTopWidth: 1,
                     borderTopColor: COLORS.borderColor,
-                    height: 60,
+                    height: heightPixel(65),
                     paddingBottom: 5,
                 },
                 tabBarLabelStyle: {
-                    fontSize: 12,
+                    fontSize: fontPixel(12),
                     fontWeight: '500',
                 },
             })}
