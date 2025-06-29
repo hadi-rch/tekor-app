@@ -6,7 +6,7 @@ import CustomButton from '../components/CustomButton';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 
 const featuredProducts = [
-    { id: '1', title: 'Tes Level Bahasa Korea', description: 'Uji level bahasa Koreamu dengan tes komprehensif.', image: require('../../assets/images/g1.png')},
+    { id: '1', title: 'Tes Level Bahasa Korea', description: 'Uji level bahasa Koreamu dengan tes komprehensif.', image: require('../../assets/images/g1.png') },
     { id: '2', title: 'Tes Topik', description: 'Persiapkan diri untuk ujian TOPIK dengan simulasi tes.', image: require('../../assets/images/g2.png') },
     { id: '3', title: 'Materi Belajar', description: 'Akses ribuan materi belajar interaktif.', image: require('../../assets/images/g3.png') },
 ];
@@ -41,7 +41,11 @@ const FeatureCard = ({ item }) => (
 const HomeScreen = ({ navigation }) => {
     return (
         <View style={styles.screenContainer}>
-            <FocusAwareStatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
+            <FocusAwareStatusBar
+                barStyle="dark-content"
+                backgroundColor="transparent"
+                translucent={true}
+            />
             <ScrollView style={styles.scrollView}>
                 {/* 1. Hero Section */}
                 <View style={styles.heroSection}>

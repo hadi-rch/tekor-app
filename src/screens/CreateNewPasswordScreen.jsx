@@ -72,7 +72,11 @@ const CreateNewPasswordScreen = ({ navigation, route }) => {
 
     return (
         <View style={styles.screenContainer}>
-            <FocusAwareStatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
+            <FocusAwareStatusBar
+                barStyle="dark-content"
+                backgroundColor="transparent"
+                translucent={true}
+            />
             <View style={styles.container}>
                 <View>
                     <Text style={styles.title}>Buat Kata Sandi Baru</Text>

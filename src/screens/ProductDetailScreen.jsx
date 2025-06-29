@@ -37,7 +37,11 @@ const ProductDetailScreen = ({ navigation, route }) => {
 
     return (
         <View style={styles.screenContainer}>
-            <FocusAwareStatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
+            <FocusAwareStatusBar
+                barStyle="dark-content"
+                backgroundColor="transparent"
+                translucent={true}
+            />
 
             {/* Header Kustom */}
             <View style={styles.header}>
@@ -105,7 +109,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     scrollContainer: {
-        flex: 1,
+        paddingBottom: heightPixel(120), // Memberi ruang agar tidak tertutup footer
     },
     productImage: {
         width: '100%',
@@ -156,7 +160,9 @@ const styles = StyleSheet.create({
         lineHeight: fontPixel(24),
     },
     footer: {
-        padding: pixelSizeHorizontal(20),
+        paddingHorizontal: pixelSizeHorizontal(20),
+        paddingTop: pixelSizeVertical(10),
+        paddingBottom: pixelSizeVertical(50), // Ruang aman dari navigasi sistem
         borderTopWidth: 1,
         borderTopColor: COLORS.borderColor,
         backgroundColor: COLORS.white,

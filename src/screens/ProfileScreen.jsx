@@ -56,7 +56,11 @@ const ProfileScreen = ({ navigation }) => {
 
     return (
         <View style={styles.screenContainer}>
-            <FocusAwareStatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
+            <FocusAwareStatusBar
+                barStyle="dark-content"
+                backgroundColor="transparent"
+                translucent={true}
+            />
             {/* Header */}
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>Profil</Text>

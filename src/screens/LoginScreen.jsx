@@ -68,7 +68,11 @@ const LoginScreen = ({ navigation }) => {
 
     return (
         <View style={styles.screenContainer}>
-            <FocusAwareStatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
+            <FocusAwareStatusBar
+                barStyle="dark-content"
+                backgroundColor="transparent"
+                translucent={true}
+            />
             <ScrollView contentContainerStyle={styles.container}>
 
                 <Text style={styles.title}>Selamat Datang</Text>
@@ -121,7 +125,7 @@ const LoginScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-        screenContainer: {
+    screenContainer: {
         flex: 1,
         backgroundColor: COLORS.white,
         paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,

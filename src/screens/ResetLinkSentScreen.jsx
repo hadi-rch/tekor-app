@@ -24,7 +24,11 @@ const ResetLinkSentScreen = ({ navigation, route }) => {
 
     return (
         <View style={styles.screenContainer}>
-            <FocusAwareStatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
+            <FocusAwareStatusBar
+                barStyle="dark-content"
+                backgroundColor="transparent"
+                translucent={true}
+            />
             <View style={styles.container}>
                 {/* Header Kustom */}
                 <View style={styles.header}>

@@ -88,7 +88,11 @@ const ChangePasswordScreen = ({ navigation }) => {
 
     return (
         <View style={styles.screenContainer}>
-            <FocusAwareStatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
+            <FocusAwareStatusBar
+                barStyle="dark-content"
+                backgroundColor="transparent"
+                translucent={true}
+            />
 
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerButton}>
@@ -139,7 +143,7 @@ const ChangePasswordScreen = ({ navigation }) => {
                 <CustomButton
                     title="Simpan Perubahan"
                     onPress={handleSaveChanges}
-                    style={{ backgroundColor: COLORS.accent, marginTop: pixelSizeVertical(40) }}
+                    style={{ backgroundColor: COLORS.accent, marginTop: pixelSizeVertical(40), marginBottom: pixelSizeVertical(50), }}
                 />
             </ScrollView>
         </View>

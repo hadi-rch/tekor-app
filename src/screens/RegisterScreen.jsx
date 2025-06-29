@@ -125,7 +125,11 @@ const RegisterScreen = ({ navigation }) => {
 
     return (
         <View style={styles.screenContainer}>
-            <FocusAwareStatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
+            <FocusAwareStatusBar
+                barStyle="dark-content"
+                backgroundColor="transparent"
+                translucent={true}
+            />
             <ScrollView contentContainerStyle={styles.container}>
 
                 <Text style={styles.title}>Daftar</Text>
