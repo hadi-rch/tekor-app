@@ -7,6 +7,8 @@ import {
     Image,
     TouchableOpacity,
     Alert,
+    Platform,
+    StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors';
@@ -64,7 +66,7 @@ const ProfileScreen = ({ navigation }) => {
     };
 
     return (
-        <SafeAreaView style={styles.safeArea}>
+        <View style={styles.screenContainer}>
             <FocusAwareStatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
             {/* Header */}
             <View style={styles.header}>
@@ -105,14 +107,15 @@ const ProfileScreen = ({ navigation }) => {
                     />
                 </View>
             </View>
-        </SafeAreaView>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
-    safeArea: {
+    screenContainer: {
         flex: 1,
         backgroundColor: COLORS.white,
+        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
     },
     header: {
         paddingVertical: 15,

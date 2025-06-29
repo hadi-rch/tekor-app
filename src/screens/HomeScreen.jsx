@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Image, FlatList } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Image, FlatList, Platform, StatusBar } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors';
 import CustomButton from '../components/CustomButton';
@@ -40,7 +40,7 @@ const FeatureCard = ({ item }) => (
 // --- Komponen Utama HomeScreen ---
 const HomeScreen = ({ navigation }) => {
     return (
-        <SafeAreaView style={styles.safeArea}>
+        <View style={styles.screenContainer}>
             <FocusAwareStatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
             <ScrollView style={styles.scrollView}>
                 {/* 1. Hero Section */}
@@ -102,12 +102,16 @@ const HomeScreen = ({ navigation }) => {
                 </View>
 
             </ScrollView>
-        </SafeAreaView>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
-    safeArea: { flex: 1, backgroundColor: '#FFF8F6' },
+    screenContainer: {
+        flex: 1,
+        backgroundColor: COLORS.white,
+        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+    },
     scrollView: { flex: 1 },
     sectionContainer: { marginBottom: 30 },
     sectionTitle: { fontSize: 20, fontWeight: 'bold', color: COLORS.text, marginBottom: 16, paddingHorizontal: 20, },

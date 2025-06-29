@@ -58,18 +58,4 @@ const MainTabNavigator = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    placeholderContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#f5f5f5',
-    },
-    placeholderText: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 10,
-    },
-});
-
 export default MainTabNavigator;

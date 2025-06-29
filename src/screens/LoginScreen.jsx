@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Keyboard } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Keyboard, Platform, StatusBar } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import CustomTextInput from '../components/CustomTextInput';
@@ -67,7 +67,7 @@ const LoginScreen = ({ navigation }) => {
 
 
     return (
-        <SafeAreaView style={styles.safeArea}>
+        <View style={styles.screenContainer}>
             <FocusAwareStatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
             <ScrollView contentContainerStyle={styles.container}>
 
@@ -116,12 +116,16 @@ const LoginScreen = ({ navigation }) => {
                 </View>
 
             </ScrollView>
-        </SafeAreaView>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
-    safeArea: { flex: 1, backgroundColor: COLORS.white },
+        screenContainer: {
+        flex: 1,
+        backgroundColor: COLORS.white,
+        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+    },
     container: {
         flexGrow: 1, // Menggunakan flexGrow agar bisa scroll jika konten panjang
         padding: 24,

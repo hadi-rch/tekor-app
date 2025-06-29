@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Platform, StatusBar } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import CustomButton from '../components/CustomButton';
@@ -23,7 +23,7 @@ const ResetLinkSentScreen = ({ navigation, route }) => {
     };
 
     return (
-        <SafeAreaView style={styles.safeArea}>
+        <View style={styles.screenContainer}>
             <FocusAwareStatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
             <View style={styles.container}>
                 {/* Header Kustom */}
@@ -53,7 +53,7 @@ const ResetLinkSentScreen = ({ navigation, route }) => {
                 <CustomButton
                     title="DEV: Ke Buat Sandi Baru"
                     onPress={() => navigation.navigate('CreateNewPassword')}
-                    style={{ marginBottom: 10, backgroundColor: 'green' }} 
+                    style={{ marginBottom: 10, backgroundColor: 'green' }}
                 />
 
                 <CustomButton
@@ -63,14 +63,15 @@ const ResetLinkSentScreen = ({ navigation, route }) => {
                     textStyle={styles.backButtonText}
                 />
             </View>
-        </SafeAreaView>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
-    safeArea: {
+    screenContainer: {
         flex: 1,
         backgroundColor: COLORS.white,
+        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
     },
     container: {
         flex: 1,

@@ -3,7 +3,6 @@ import {
     View,
     Text,
     StyleSheet,
-    SafeAreaView,
     Image,
     TouchableOpacity,
     TextInput,
@@ -11,6 +10,7 @@ import {
     Modal,
     Pressable,
     Platform,
+    StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -81,7 +81,7 @@ const EditProfileScreen = ({ navigation }) => {
 
 
     return (
-        <SafeAreaView style={styles.safeArea}>
+        <View style={styles.screenContainer}>
             <FocusAwareStatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
             {/* Header Kustom */}
             <View style={styles.header}>
@@ -151,14 +151,15 @@ const EditProfileScreen = ({ navigation }) => {
                 </Pressable>
             </Modal>
 
-        </SafeAreaView>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
-    safeArea: {
+    screenContainer: {
         flex: 1,
         backgroundColor: COLORS.white,
+        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
     },
     header: {
         flexDirection: 'row',

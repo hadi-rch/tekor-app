@@ -3,10 +3,11 @@ import {
     View,
     Text,
     StyleSheet,
-    SafeAreaView,
     FlatList,
     Image,
     TouchableOpacity,
+    StatusBar,
+    Platform,
 } from 'react-native'
 import { COLORS } from '../constants/colors'
 import { Ionicons } from '@expo/vector-icons'
@@ -126,7 +127,7 @@ const LessonsScreen = () => {
     }
 
     return (
-        <SafeAreaView style={styles.safeArea}>
+        <View style={styles.screenContainer}>
             <FocusAwareStatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
             {/* Header */}
             <View style={styles.header}>
@@ -165,14 +166,15 @@ const LessonsScreen = () => {
 
             {/* Konten dinamis berdasarkan tab yang aktif */}
             {renderContent()}
-        </SafeAreaView>
+        </View>
     )
 }
 
 const styles = StyleSheet.create({
-    safeArea: {
+    screenContainer: {
         flex: 1,
         backgroundColor: COLORS.white,
+        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
     },
     header: {
         padding: 20,
