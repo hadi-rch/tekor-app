@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import CustomTextInput from '../components/CustomTextInput';
 import CustomButton from '../components/CustomButton';
 import { COLORS } from '../constants/colors';
+import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 
 const LoginScreen = ({ navigation }) => {
     // 1. Gunakan satu state untuk semua data form
@@ -67,6 +68,7 @@ const LoginScreen = ({ navigation }) => {
 
     return (
         <SafeAreaView style={styles.safeArea}>
+            <FocusAwareStatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
             <ScrollView contentContainerStyle={styles.container}>
 
                 <Text style={styles.title}>Selamat Datang</Text>

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Ima
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors';
 import CustomButton from '../components/CustomButton';
+import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 
 const featuredProducts = [
     { id: '1', title: 'Tes Level Bahasa Korea', description: 'Uji level bahasa Koreamu dengan tes komprehensif.', image: 'https://placehold.co/300x400/F5E8E8/333?text=Tes+Level' },
@@ -40,6 +41,7 @@ const FeatureCard = ({ item }) => (
 const HomeScreen = ({ navigation }) => {
     return (
         <SafeAreaView style={styles.safeArea}>
+            <FocusAwareStatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
             <ScrollView style={styles.scrollView}>
                 {/* 1. Hero Section */}
                 <View style={styles.heroSection}>

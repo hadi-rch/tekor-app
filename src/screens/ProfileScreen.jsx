@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors';
+import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 
 // --- Komponen kecil yang dapat digunakan kembali untuk setiap item menu ---
 const ProfileMenuItem = ({ icon, label, onPress, isLogout = false }) => (
@@ -64,6 +65,7 @@ const ProfileScreen = ({ navigation }) => {
 
     return (
         <SafeAreaView style={styles.safeArea}>
+            <FocusAwareStatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
             {/* Header */}
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>Profil</Text>
@@ -83,12 +85,12 @@ const ProfileScreen = ({ navigation }) => {
                     <ProfileMenuItem
                         icon="receipt-outline"
                         label="Riwayat transaksi"
-                        onPress={() => { /* Navigasi ke Riwayat Transaksi */ }}
+                        onPress={() => navigation.navigate('TransactionHistory')}
                     />
                     <ProfileMenuItem
                         icon="create-outline"
                         label="Edit Profil"
-                        onPress={() => { /* Navigasi ke Edit Profil */ }}
+                        onPress={() => navigation.navigate('EditProfile')}
                     />
                     <ProfileMenuItem
                         icon="lock-closed-outline"

@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import CustomButton from '../components/CustomButton';
 import { COLORS } from '../constants/colors';
+import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 
 // Menerima 'navigation' dan 'route' sebagai props
 const ResetLinkSentScreen = ({ navigation, route }) => {
@@ -23,6 +24,7 @@ const ResetLinkSentScreen = ({ navigation, route }) => {
 
     return (
         <SafeAreaView style={styles.safeArea}>
+            <FocusAwareStatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
             <View style={styles.container}>
                 {/* Header Kustom */}
                 <View style={styles.header}>

@@ -13,13 +13,14 @@ import CreateNewPasswordScreen from '../screens/CreateNewPasswordScreen';
 
 // Import Navigator Utama (yang berisi Tab)
 import MainTabNavigator from './MainTabNavigator';
+import TransactionHistoryScreen from '../screens/TransactionHistoryScreen';
+import EditProfileScreen from '../screens/EditProfileScreen';
 
 const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => {
     return (
         <NavigationContainer>
-            <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
 
             <Stack.Navigator
                 initialRouteName="Login" // Aplikasi dimulai dari halaman Login
@@ -35,6 +36,8 @@ const AppNavigator = () => {
                 {/* Layar untuk Aplikasi Utama (setelah login) */}
                 {/* MainTabNavigator diperlakukan sebagai satu layar tunggal di sini */}
                 <Stack.Screen name="MainApp" component={MainTabNavigator} />
+                <Stack.Screen name="TransactionHistory" component={TransactionHistoryScreen} />
+                <Stack.Screen name="EditProfile" component={EditProfileScreen} />
 
             </Stack.Navigator>
         </NavigationContainer>

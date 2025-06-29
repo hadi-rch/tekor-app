@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors'; // Pastikan path ini benar
+import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 
 // --- Data Mockup ---
 const productsData = [
@@ -71,6 +72,7 @@ const ProductCard = ({ item, type = 'product' }) => (
 const ProductsScreen = () => {
     return (
         <SafeAreaView style={styles.safeArea}>
+            <FocusAwareStatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
             {/* Header */}
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>Products</Text>

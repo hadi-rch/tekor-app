@@ -10,6 +10,7 @@ import {
 } from 'react-native'
 import { COLORS } from '../constants/colors'
 import { Ionicons } from '@expo/vector-icons'
+import FocusAwareStatusBar from '../components/FocusAwareStatusBar'
 
 const lessonsData = [
     {
@@ -126,6 +127,7 @@ const LessonsScreen = () => {
 
     return (
         <SafeAreaView style={styles.safeArea}>
+            <FocusAwareStatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
             {/* Header */}
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>Materi Belajar</Text>

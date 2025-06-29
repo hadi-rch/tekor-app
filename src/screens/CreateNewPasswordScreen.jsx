@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import CustomTextInput from '../components/CustomTextInput';
 import CustomButton from '../components/CustomButton';
 import { COLORS } from '../constants/colors';
+import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 
 // Komponen kecil(chekbox) untuk menampilkan kriteria validasi
 const ValidationCriteria = ({ isValid, text }) => (
@@ -71,6 +72,7 @@ const CreateNewPasswordScreen = ({ navigation, route }) => {
 
     return (
         <SafeAreaView style={styles.safeArea}>
+            <FocusAwareStatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
             <View style={styles.container}>
                 <View>
                     <Text style={styles.title}>Buat Kata Sandi Baru</Text>

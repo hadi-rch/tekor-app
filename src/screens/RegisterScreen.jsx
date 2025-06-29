@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import CustomTextInput from '../components/CustomTextInput';
 import CustomButton from '../components/CustomButton';
 import { COLORS } from '../constants/colors';
+import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 
 const RegisterScreen = ({ navigation }) => {
     const [nama, setNama] = useState('');
@@ -124,6 +125,7 @@ const RegisterScreen = ({ navigation }) => {
 
     return (
         <SafeAreaView style={styles.safeArea}>
+            <FocusAwareStatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
             <ScrollView contentContainerStyle={styles.container}>
 
                 <Text style={styles.title}>Daftar</Text>
