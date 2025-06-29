@@ -6,9 +6,9 @@ import CustomButton from '../components/CustomButton';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 
 const featuredProducts = [
-    { id: '1', title: 'Tes Level Bahasa Korea', description: 'Uji level bahasa Koreamu dengan tes komprehensif.', image: 'https://placehold.co/300x400/F5E8E8/333?text=Tes+Level' },
-    { id: '2', title: 'Tes Topik', description: 'Persiapkan diri untuk ujian TOPIK dengan simulasi tes.', image: 'https://placehold.co/300x400/E96479/FFF?text=Tes+Topik' },
-    { id: '3', title: 'Materi Belajar', description: 'Akses ribuan materi belajar interaktif.', image: 'https://placehold.co/300x400/4C6FFF/FFF?text=Materi' },
+    { id: '1', title: 'Tes Level Bahasa Korea', description: 'Uji level bahasa Koreamu dengan tes komprehensif.', image: require('../../assets/images/g1.png')},
+    { id: '2', title: 'Tes Topik', description: 'Persiapkan diri untuk ujian TOPIK dengan simulasi tes.', image: require('../../assets/images/g2.png') },
+    { id: '3', title: 'Materi Belajar', description: 'Akses ribuan materi belajar interaktif.', image: require('../../assets/images/g3.png') },
 ];
 
 const whyUsFeatures = [
@@ -20,7 +20,7 @@ const whyUsFeatures = [
 // --- Komponen Kecil untuk Kartu ---
 const ProductCard = ({ item }) => (
     <View style={styles.productCard}>
-        <Image source={{ uri: item.image }} style={styles.productImage} />
+        <Image source={item.image} style={styles.productImage} />
         <Text style={styles.productTitle}>{item.title}</Text>
         <Text style={styles.productDescription}>{item.description}</Text>
     </View>
