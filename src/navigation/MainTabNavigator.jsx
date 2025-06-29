@@ -6,6 +6,8 @@ import { Ionicons } from '@expo/vector-icons';
 import HomeScreen from '../screens/HomeScreen';
 import { COLORS } from '../constants/colors';
 import LessonsScreen from '../screens/LessonsScreen';
+import ProductsScreen from '../screens/ProductsScreen';
+import ProfileScreen from '../screens/ProfileScreen';
 
 
 const PlaceholderScreen = ({ route }) => (
@@ -54,8 +56,8 @@ const MainTabNavigator = () => {
         >
             <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: 'Beranda' }} />
             <Tab.Screen name="Les" component={LessonsScreen} />
-            <Tab.Screen name="Produk" component={PlaceholderScreen} />
-            <Tab.Screen name="Profil" component={PlaceholderScreen} />
+            <Tab.Screen name="Produk" component={ProductsScreen} />
+            <Tab.Screen name="Profil" component={ProfileScreen} />
         </Tab.Navigator>
     );
 };

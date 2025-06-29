@@ -11,7 +11,6 @@ import {
 import { COLORS } from '../constants/colors'
 import { Ionicons } from '@expo/vector-icons'
 
-// --- Data Mockup untuk Materi Belajar ---
 const lessonsData = [
     {
         id: '1',
@@ -51,11 +50,11 @@ const lessonsData = [
     },
 ]
 
-// --- Data Mockup untuk History Jawaban ---
+
 const historyData = [
-    { id: 'h1', title: 'eps-topik soal 1', date: 'Selesai pada 12 Mei 2024', score: '80/100', correct: 16, wrong: 4 },
-    { id: 'h2', title: 'eps-topik soal 1', date: 'Selesai pada 12 Mei 2024', score: '80/100', correct: 16, wrong: 4 },
-    { id: 'h3', title: 'eps-topik soal 1', date: 'Selesai pada 12 Mei 2024', score: '80/100', correct: 16, wrong: 4 },
+    { id: 'h1', title: 'eps-topik soal 1', date: 'Selesai pada 12 Mei 2024', score: '80/100', correct: 32, wrong: 8 },
+    { id: 'h2', title: 'eps-topik soal 1', date: 'Selesai pada 12 Mei 2024', score: '80/100', correct: 32, wrong: 8 },
+    { id: 'h3', title: 'eps-topik soal 1', date: 'Selesai pada 12 Mei 2024', score: '80/100', correct: 32, wrong: 8 },
 ];
 
 // --- Komponen untuk setiap item dalam daftar Produk ---
@@ -101,7 +100,7 @@ const HistoryItem = ({ item }) => (
 
 // --- Komponen Utama LessonsScreen ---
 const LessonsScreen = () => {
-    const [activeTab, setActiveTab] = useState('Produk') // 'Produk' atau 'History'
+    const [activeTab, setActiveTab] = useState('Produk') //Produk atau History
 
     const renderContent = () => {
         if (activeTab === 'Produk') {
@@ -259,7 +258,7 @@ const styles = StyleSheet.create({
         marginBottom: 12,
     },
     historyTitle: {
-        fontSize: 16,
+        fontSize: 20,
         fontWeight: 'bold',
         color: COLORS.text,
     },
