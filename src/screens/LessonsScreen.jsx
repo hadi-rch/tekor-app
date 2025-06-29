@@ -8,10 +8,13 @@ import {
     TouchableOpacity,
     StatusBar,
     Platform,
+    Modal,
+    Pressable,
 } from 'react-native'
 import { COLORS } from '../constants/colors'
 import { Ionicons } from '@expo/vector-icons'
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar'
+import { fontPixel } from '../../helper'
 
 const lessonsData = [
     {
@@ -60,8 +63,8 @@ const historyData = [
 ];
 
 // --- Komponen untuk setiap item dalam daftar Produk ---
-const LessonItem = ({ item }) => (
-    <TouchableOpacity style={styles.itemContainer}>
+const LessonItem = ({ item, onPress }) => (
+    <TouchableOpacity style={styles.itemContainer} onPress={onPress}>
         <View style={styles.itemTextContainer}>
             <Text style={styles.itemCategory}>{item.category}</Text>
             <Text style={styles.itemTitle}>{item.title}</Text>
@@ -99,17 +102,37 @@ const HistoryItem = ({ item }) => (
     </View>
 );
 
+const WarningItem = ({ icon, text }) => (
+    <View style={styles.warningItem}>
+        <Text style={styles.warningIcon}>{icon}</Text>
+        <Text style={styles.warningText}>{text}</Text>
+    </View>
+);
+
 
 // --- Komponen Utama LessonsScreen ---
-const LessonsScreen = () => {
+const LessonsScreen = ({ navigation }) => {
     const [activeTab, setActiveTab] = useState('Produk') //Produk atau History
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [selectedLesson, setSelectedLesson] = useState(null);
+
+    const handleLessonPress = (item) => {
+        setSelectedLesson(item);
+        setIsModalVisible(true);
+    };
+
+    const handleStartTest = () => {
+        console.log("Mulai mengerjakan:", selectedLesson.title);
+        setIsModalVisible(false);
+        navigation.navigate('Test', { lesson: selectedLesson });
+    };
 
     const renderContent = () => {
         if (activeTab === 'Produk') {
             return (
                 <FlatList
                     data={lessonsData}
-                    renderItem={({ item }) => <LessonItem item={item} />}
+                    renderItem={({ item }) => <LessonItem item={item} onPress={() => handleLessonPress(item)} />}
                     keyExtractor={(item) => item.id}
                     contentContainerStyle={styles.listContainer}
                 />
@@ -128,7 +151,11 @@ const LessonsScreen = () => {
 
     return (
         <View style={styles.screenContainer}>
-            <FocusAwareStatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
+            <FocusAwareStatusBar
+                barStyle="dark-content"
+                backgroundColor="transparent"
+                translucent={true}
+            />
             {/* Header */}
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>Materi Belajar</Text>
@@ -166,6 +193,37 @@ const LessonsScreen = () => {
 
             {/* Konten dinamis berdasarkan tab yang aktif */}
             {renderContent()}
+
+            {/* Modal Konfirmasi Mengerjakan */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={isModalVisible}
+                onRequestClose={() => setIsModalVisible(false)}
+            >
+                <Pressable style={styles.modalOverlay} onPress={() => setIsModalVisible(false)}>
+                    <Pressable style={styles.confirmModalContent}>
+                        <View style={styles.dragHandle} />
+                        <Text style={styles.modalTitle}>Anda Yakin Ingin Mengerjakan?</Text>
+
+                        <View style={styles.warningsContainer}>
+                            <WarningItem icon="⚠️" text="Ujian ini hanya bisa dikerjakan 1 (satu) kali. Progres tidak dapat diulang atau dibatalkan setelah dimulai." />
+                            <WarningItem icon="⏱️" text="Waktu pengerjaan adalah 50 menit dan timer tidak bisa dijeda (pause)." />
+                            <WarningItem icon="📶" text="Pastikan koneksi internet Anda stabil." />
+                        </View>
+
+                        <View style={styles.modalButtonContainer}>
+                            <TouchableOpacity style={[styles.modalButton, styles.cancelButton]} onPress={() => setIsModalVisible(false)}>
+                                <Text style={styles.cancelButtonText}>Nanti saja</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={[styles.modalButton, styles.startButton]} onPress={handleStartTest}>
+                                <Text style={styles.startButtonText}>Mulai Sekarang</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </Pressable>
+                </Pressable>
+            </Modal>
+
         </View>
     )
 }
@@ -177,7 +235,8 @@ const styles = StyleSheet.create({
         paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
     },
     header: {
-        padding: 20,
+        paddingVertical: 15,
+        paddingHorizontal: 20,
         alignItems: 'center',
         borderBottomWidth: 1,
         borderBottomColor: COLORS.borderColor,
@@ -294,6 +353,21 @@ const styles = StyleSheet.create({
         color: COLORS.text,
         fontWeight: 'bold',
     },
+    //style modal
+    modalOverlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)', },
+    confirmModalContent: { backgroundColor: 'white', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, alignItems: 'center', },
+    dragHandle: { width: 40, height: 5, backgroundColor: COLORS.borderColor, borderRadius: 3, marginBottom: 15, },
+    modalTitle: { fontSize: fontPixel(20), fontWeight: 'bold', color: COLORS.text, marginBottom: 20, },
+    warningsContainer: { width: '100%', marginBottom: 25, },
+    warningItem: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 15, },
+    warningIcon: { fontSize: fontPixel(16), marginRight: 10, },
+    warningText: { flex: 1, fontSize: fontPixel(14), color: COLORS.text, lineHeight: fontPixel(20), },
+    modalButtonContainer: { flexDirection: 'row', width: '100%', justifyContent: 'space-between', },
+    modalButton: { flex: 1, paddingVertical: 15, borderRadius: 12, alignItems: 'center', },
+    cancelButton: { backgroundColor: COLORS.buttonSecondary, marginRight: 10, },
+    startButton: { backgroundColor: COLORS.accent, marginLeft: 10, },
+    cancelButtonText: { color: COLORS.accent, fontWeight: 'bold', fontSize: fontPixel(16), },
+    startButtonText: { color: COLORS.white, fontWeight: 'bold', fontSize: fontPixel(16), },
 })
 
 export default LessonsScreen

@@ -17,6 +17,7 @@ import TransactionHistoryScreen from '../screens/TransactionHistoryScreen';
 import EditProfileScreen from '../screens/EditProfileScreen';
 import ChangePasswordScreen from '../screens/ChangePasswordScreen';
 import ProductDetailScreen from '../screens/ProductDetailScreen';
+import TestScreen from '../screens/TestScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -42,6 +43,7 @@ const AppNavigator = () => {
                 <Stack.Screen name="EditProfile" component={EditProfileScreen} />
                 <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
                 <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
+                <Stack.Screen name="Test" component={TestScreen} />
 
             </Stack.Navigator>
         </NavigationContainer>
