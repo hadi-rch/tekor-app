@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
     },
     progressBar: {
         height: '100%',
-        backgroundColor: COLORS.accent,
+        backgroundColor: COLORS.primary,
         borderRadius: 4,
     },
     gameGrid: {
@@ -295,7 +295,7 @@ const styles = StyleSheet.create({
         color: COLORS.text,
     },
     shuffleButton: {
-        backgroundColor: COLORS.accent,
+        backgroundColor: COLORS.primary,
         paddingVertical: pixelSizeVertical(15),
         borderRadius: 12,
         alignItems: 'center',

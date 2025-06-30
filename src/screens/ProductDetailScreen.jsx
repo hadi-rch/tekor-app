@@ -79,7 +79,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
                 <CustomButton
                     title="Beli"
                     onPress={() => { /* Logika untuk membeli */ }}
-                    style={{ backgroundColor: COLORS.accent }}
+                    style={{ backgroundColor: COLORS.primary }}
                 />
             </View>
         </View>

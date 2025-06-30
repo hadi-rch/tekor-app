@@ -84,7 +84,7 @@ const HistoryItem = ({ item }) => (
             </View>
             <TouchableOpacity style={styles.discussionButton}>
                 <Text style={styles.discussionText}>Lihat Pembahasan</Text>
-                <Ionicons name="arrow-forward" size={16} color={COLORS.accent} />
+                <Ionicons name="arrow-forward" size={16} color={COLORS.primary} />
             </TouchableOpacity>
         </View>
         <View style={styles.scoreRow}>
@@ -260,14 +260,14 @@ const styles = StyleSheet.create({
         borderBottomColor: 'transparent',
     },
     activeTab: {
-        borderBottomColor: COLORS.accent,
+        borderBottomColor: COLORS.primary,
     },
     tabText: {
         fontSize: 16,
         color: COLORS.gray,
     },
     activeTabText: {
-        color: COLORS.accent,
+        color: COLORS.primary,
         fontWeight: 'bold',
     },
     listContainer: {
@@ -335,7 +335,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     discussionText: {
-        color: COLORS.accent,
+        color: COLORS.primary,
         fontWeight: 'bold',
         marginRight: 4,
     },
@@ -364,9 +364,9 @@ const styles = StyleSheet.create({
     warningText: { flex: 1, fontSize: fontPixel(14), color: COLORS.text, lineHeight: fontPixel(20), },
     modalButtonContainer: { flexDirection: 'row', width: '100%', justifyContent: 'space-between', },
     modalButton: { flex: 1, paddingVertical: 15, borderRadius: 12, alignItems: 'center', },
-    cancelButton: { backgroundColor: COLORS.buttonSecondary, marginRight: 10, },
-    startButton: { backgroundColor: COLORS.accent, marginLeft: 10, },
-    cancelButtonText: { color: COLORS.accent, fontWeight: 'bold', fontSize: fontPixel(16), },
+    cancelButton: { backgroundColor: COLORS.secondary, marginRight: 10, },
+    startButton: { backgroundColor: COLORS.primary, marginLeft: 10, },
+    cancelButtonText: { color: COLORS.primary, fontWeight: 'bold', fontSize: fontPixel(16), },
     startButtonText: { color: COLORS.white, fontWeight: 'bold', fontSize: fontPixel(16), },
 })
 

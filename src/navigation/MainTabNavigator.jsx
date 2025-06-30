@@ -35,7 +35,7 @@ const MainTabNavigator = () => {
 
                     return <Ionicons name={iconName} size={fontPixel(24)} color={color} />;
                 },
-                tabBarActiveTintColor: COLORS.accent,
+                tabBarActiveTintColor: COLORS.primary,
                 tabBarInactiveTintColor: COLORS.gray,
                 tabBarStyle: {
                     backgroundColor: COLORS.white,

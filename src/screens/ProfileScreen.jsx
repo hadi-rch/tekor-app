@@ -20,14 +20,14 @@ import { fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical } from '
 // --- Komponen kecil yang dapat digunakan kembali untuk setiap item menu ---
 const ProfileMenuItem = ({ icon, label, onPress, isLogout = false }) => (
     <TouchableOpacity style={styles.menuItem} onPress={onPress}>
-        <View style={[styles.iconContainer, isLogout && { backgroundColor: '#FFF0F0' }]}>
+        <View style={[styles.iconContainer, isLogout && { backgroundColor: COLORS.secondary }]}>
             <Ionicons
                 name={icon}
                 size={22}
-                color={isLogout ? COLORS.accent : COLORS.gray}
+                color={isLogout ? COLORS.primary : COLORS.gray}
             />
         </View>
-        <Text style={[styles.menuLabel, isLogout && { color: COLORS.accent }]}>
+        <Text style={[styles.menuLabel, isLogout && { color: COLORS.primary }]}>
             {label}
         </Text>
         <Ionicons name="chevron-forward-outline" size={22} color={COLORS.gray} />
@@ -248,15 +248,15 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     cancelButton: {
-        backgroundColor: COLORS.buttonSecondary,
+        backgroundColor: COLORS.secondary,
         marginRight: pixelSizeHorizontal(10),
     },
     logoutButton: {
-        backgroundColor: COLORS.accent,
+        backgroundColor: COLORS.primary,
         marginLeft: pixelSizeHorizontal(10),
     },
     cancelButtonText: {
-        color: COLORS.accent,
+        color: COLORS.primary,
         fontWeight: 'bold',
         fontSize: fontPixel(16),
     },

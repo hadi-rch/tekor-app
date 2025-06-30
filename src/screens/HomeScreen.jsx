@@ -58,7 +58,7 @@ const HomeScreen = ({ navigation }) => {
                     <CustomButton
                         title="Mulai Tes Sekarang!"
                         onPress={() => { /* Navigasi ke halaman tes */ }}
-                        style={{ backgroundColor: COLORS.accent }}
+                        style={{ backgroundColor: COLORS.primary }}
                     />
                 </View>
 
@@ -120,8 +120,8 @@ const styles = StyleSheet.create({
     sectionContainer: { marginBottom: 30 },
     sectionTitle: { fontSize: 20, fontWeight: 'bold', color: COLORS.text, marginBottom: 16, paddingHorizontal: 20, },
     // Hero
-    heroSection: { backgroundColor: '#FFECEC', padding: 20, paddingTop: 40, alignItems: 'center', marginBottom: 20 },
-    heroTitle: { fontSize: 32, fontWeight: 'bold', color: COLORS.accent },
+    heroSection: { backgroundColor: COLORS.secondary, padding: 20, paddingTop: 40, alignItems: 'center', marginBottom: 20 },
+    heroTitle: { fontSize: 32, fontWeight: 'bold', color: COLORS.primary },
     heroSubtitle: { fontSize: 16, color: COLORS.text, textAlign: 'center', marginVertical: 12, },
     heroLogo: {
         width: 150,
@@ -134,8 +134,8 @@ const styles = StyleSheet.create({
     specialOfferText: { flex: 1, marginRight: 10 },
     specialOfferTitle: { fontSize: 16, fontWeight: 'bold' },
     specialOfferDesc: { fontSize: 14, color: COLORS.gray, marginVertical: 8 },
-    buyNowButton: { backgroundColor: '#FFF0F0', borderRadius: 20, paddingVertical: 8, paddingHorizontal: 16, alignSelf: 'flex-start' },
-    buyNowText: { color: COLORS.accent, fontWeight: 'bold' },
+    buyNowButton: { backgroundColor: COLORS.secondary, borderRadius: 20, paddingVertical: 8, paddingHorizontal: 16, alignSelf: 'flex-start' },
+    buyNowText: { color: COLORS.primary, fontWeight: 'bold' },
     specialOfferImage: { width: 80, height: 80, borderRadius: 8 },
     // Product
     productCard: { width: 160, marginRight: 16, backgroundColor: 'white', borderRadius: 12, padding: 12, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2, },

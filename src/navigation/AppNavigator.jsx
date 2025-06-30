@@ -18,7 +18,6 @@ import EditProfileScreen from '../screens/EditProfileScreen';
 import ChangePasswordScreen from '../screens/ChangePasswordScreen';
 import ProductDetailScreen from '../screens/ProductDetailScreen';
 import TestScreen from '../screens/TestScreen';
-import FlipCardGameScreen from '../screens/FlipCardGameScreen';
 import GameCategoryScreen from '../screens/GameCategoryScreen';
 import MemoryCardGameScreen from '../screens/MemoryCardGameScreen';
 import TestResultScreen from '../screens/TestResultScreen';

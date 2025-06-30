@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
         color: COLORS.text,
     },
     playButton: {
-        backgroundColor: COLORS.accent,
+        backgroundColor: COLORS.primary,
         borderRadius: 20,
         paddingVertical: 8,
         paddingHorizontal: 20,

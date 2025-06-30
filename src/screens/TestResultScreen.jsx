@@ -11,7 +11,7 @@ import {
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 import CustomButton from '../components/CustomButton';
-import {  fontPixel, heightPixel, pixelSizeVertical, pixelSizeHorizontal, widthPixel } from '../../helper';
+import { fontPixel, heightPixel, pixelSizeVertical, pixelSizeHorizontal, widthPixel } from '../../helper';
 
 // --- Komponen untuk Kotak Statistik ---
 const StatBox = ({ label, value, fullWidth = false }) => (
@@ -81,7 +81,7 @@ const TestResultScreen = ({ navigation, route }) => {
                 <CustomButton
                     title="Lihat Pembahasan"
                     onPress={() => navigation.navigate('Review', { userAnswers: userAnswers })}
-                    style={{ backgroundColor: COLORS.accent, marginBottom: pixelSizeVertical(50) }}
+                    style={{ backgroundColor: COLORS.primary, marginBottom: pixelSizeVertical(50) }}
                 />
             </View>
         </View>
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
     },
     progressBar: {
         height: '100%',
-        backgroundColor: COLORS.accent,
+        backgroundColor: COLORS.primary,
         borderRadius: 4,
     },
     summarySection: {

@@ -143,7 +143,7 @@ const ChangePasswordScreen = ({ navigation }) => {
                 <CustomButton
                     title="Simpan Perubahan"
                     onPress={handleSaveChanges}
-                    style={{ backgroundColor: COLORS.accent, marginTop: pixelSizeVertical(40), marginBottom: pixelSizeVertical(50), }}
+                    style={{ backgroundColor: COLORS.primary, marginTop: pixelSizeVertical(40), marginBottom: pixelSizeVertical(50), }}
                 />
             </ScrollView>
         </View>

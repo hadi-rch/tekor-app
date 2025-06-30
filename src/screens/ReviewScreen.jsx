@@ -69,7 +69,7 @@ const ReviewScreen = ({ navigation, route }) => {
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <Text style={styles.progressText}>Pertanyaan {currentQuestionIndex + 1}/{dummyQuestions.length}</Text>
                 <View style={styles.questionHeader}>
-                    <View style={[styles.indicator, { backgroundColor: isCorrect ? '#28a745' : COLORS.accent }]} />
+                    <View style={[styles.indicator, { backgroundColor: isCorrect ? '#28a745' : COLORS.primary }]} />
                     <Text style={styles.questionText}>{currentQuestion.id}. {currentQuestion.question}</Text>
                 </View>
 
@@ -283,16 +283,16 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     prevButton: {
-        backgroundColor: '#e9ecef',
+        backgroundColor: COLORS.secondary,
         marginRight: 10,
     },
     prevButtonText: {
-        color: COLORS.text,
+        color: COLORS.primary,
         fontWeight: 'bold',
         fontSize: fontPixel(16),
     },
     nextButton: {
-        backgroundColor: COLORS.accent,
+        backgroundColor: COLORS.primary,
     },
     nextButtonText: {
         color: COLORS.white,
