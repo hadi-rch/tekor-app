@@ -280,6 +280,7 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         borderTopColor: COLORS.borderColor,
         backgroundColor: COLORS.white,
+        paddingBottom: pixelSizeVertical(50),
     },
     resetButton: {
         backgroundColor: '#f0f0f0',

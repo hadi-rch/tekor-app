@@ -6,6 +6,7 @@ import CustomTextInput from '../components/CustomTextInput';
 import CustomButton from '../components/CustomButton';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
+import { pixelSizeVertical } from '../../helper';
 
 // Komponen kecil(chekbox) untuk menampilkan kriteria validasi
 const ValidationCriteria = ({ isValid, text }) => (
@@ -119,7 +120,7 @@ const CreateNewPasswordScreen = ({ navigation, route }) => {
                     <CustomButton
                         title="Simpan Kata Sandi Baru"
                         onPress={handleSavePassword}
-                        style={{ backgroundColor: COLORS.primary, borderRadius: 24, paddingVertical: 15 }}
+                        style={{ backgroundColor: COLORS.primary, borderRadius: 24, paddingVertical: 15, marginBottom: pixelSizeVertical(50)}}
                     />
                 </View>
             </View>

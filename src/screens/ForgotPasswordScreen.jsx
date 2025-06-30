@@ -6,6 +6,7 @@ import CustomTextInput from '../components/CustomTextInput';
 import CustomButton from '../components/CustomButton';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
+import { pixelSizeVertical } from '../../helper';
 
 const ForgotPasswordScreen = ({ navigation }) => {
     const [email, setEmail] = useState('');
@@ -71,7 +72,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
                 <CustomButton
                     title="Kirim Link Reset"
                     onPress={handleSendLink}
-                    style={{ backgroundColor: COLORS.primary, borderRadius: 24, paddingVertical: 15 }}
+                    style={{ backgroundColor: COLORS.primary, borderRadius: 24, paddingVertical: 15, marginBottom: pixelSizeVertical(50) }}
                 />
             </View>
         </View>

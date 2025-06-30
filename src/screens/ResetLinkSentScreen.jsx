@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import CustomButton from '../components/CustomButton';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
+import { pixelSizeVertical } from '../../helper';
 
 // Menerima 'navigation' dan 'route' sebagai props
 const ResetLinkSentScreen = ({ navigation, route }) => {
@@ -130,6 +131,7 @@ const styles = StyleSheet.create({
     },
     backButtonComponent: {
         backgroundColor: COLORS.primary,
+        marginBottom: pixelSizeVertical(50),
     },
     backButtonText: {
         color: COLORS.black,
