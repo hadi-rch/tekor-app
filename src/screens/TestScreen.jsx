@@ -11,10 +11,11 @@ import {
     Modal,
     Pressable,
     FlatList,
-    AppState
+    AppState,
+    BackHandler
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Audio } from 'expo-av';
+import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 import { fontPixel, heightPixel, pixelSizeVertical, pixelSizeHorizontal } from '../../helper';
@@ -28,12 +29,11 @@ const dummyQuestions = Array.from({ length: 40 }, (_, i) => {
         type: isReading ? 'reading' : 'listening',
         question: `Ini adalah pertanyaan nomor ${questionNumber}. Pilih jawaban yang paling tepat.`,
         image: isReading && i < 5 ? require('../../assets/images/g3.png') : null,
-        audio: !isReading ? 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' : null,
+        audio: !isReading ? 'https://res.cloudinary.com/dtxx1gcip/video/upload/v1751277302/azwiimofq22elme9rda1.mp3' : null,
         options: ['Jawaban A', 'Jawaban B', 'Jawaban C', 'Jawaban D'],
         correctAnswer: i % 4,
     };
 });
-
 
 // --- Komponen-komponen Kecil ---
 const Timer = ({ timeLeft }) => {
@@ -50,46 +50,36 @@ const Timer = ({ timeLeft }) => {
 };
 
 const AudioPlayer = ({ uri }) => {
-    const soundRef = useRef(new Audio.Sound());
-    const [isPlaying, setIsPlaying] = useState(false);
+    const player = useAudioPlayer(uri);
+    const status = useAudioPlayerStatus(player);
 
-    useEffect(() => {
-        // Fungsi cleanup untuk unload audio saat komponen di-unmount
-        const sound = soundRef.current;
-        return () => {
-            console.log('Unloading Sound');
-            sound.unloadAsync();
-        };
-    }, []);
-
-    async function playSound() {
-        if (isPlaying) return; // Mencegah pemutaran ganda
-
+    const handlePlayPause = async () => {
         try {
-            console.log('Loading Sound');
-            await soundRef.current.loadAsync({ uri });
-            soundRef.current.setOnPlaybackStatusUpdate((status) => {
-                if (status.didJustFinish) {
-                    setIsPlaying(false);
-                    soundRef.current.unloadAsync();
+            if (status.isLoaded) {
+                if (status.playing) {
+                    player.pause();
+                } else {
+                    player.play();
                 }
-            });
-            console.log('Playing Sound');
-            await soundRef.current.playAsync();
-            setIsPlaying(true);
+            }
         } catch (error) {
-            console.error('Error playing sound:', error);
+            console.warn('Audio playback error:', error);
         }
-    }
+    };
 
     return (
-        <TouchableOpacity style={styles.audioPlayer} onPress={playSound}>
-            <Ionicons name={isPlaying ? "pause-circle" : "play-circle"} size={fontPixel(32)} color={COLORS.primary} />
-            <Text style={styles.audioText}>Audio {isPlaying ? '(Memutar)' : ''}</Text>
+        <TouchableOpacity style={styles.audioPlayer} onPress={handlePlayPause}>
+            <Ionicons
+                name={status.playing ? "pause-circle" : "play-circle"}
+                size={fontPixel(32)}
+                color={COLORS.primary}
+            />
+            <Text style={styles.audioText}>
+                Audio {status.playing ? '(Memutar)' : ''}
+            </Text>
         </TouchableOpacity>
     );
 };
-
 
 // --- Komponen Utama TestScreen ---
 const TestScreen = ({ navigation }) => {
@@ -108,9 +98,19 @@ const TestScreen = ({ navigation }) => {
 
     const timerRef = useRef(null);
 
-
     // --- Logika untuk AppState ---
     useEffect(() => {
+        // Mencegat tombol kembali di Android
+        const backAction = () => {
+            setIsExitModalVisible(true); // Tampilkan modal konfirmasi keluar
+            return true; // Mencegah aplikasi keluar
+        };
+
+        const backHandler = BackHandler.addEventListener(
+            "hardwareBackPress",
+            backAction
+        );
+
         const subscription = AppState.addEventListener('change', nextAppState => {
             if (
                 appState.current.match(/inactive|background/) &&
@@ -125,10 +125,10 @@ const TestScreen = ({ navigation }) => {
         });
 
         return () => {
+            backHandler.remove();
             subscription.remove();
         };
     }, [leaveAttempts]);
-
 
     const handleAppLeave = () => {
         if (leaveAttempts <= 0) return; // Jika sudah di-force submit, abaikan
@@ -166,12 +166,10 @@ const TestScreen = ({ navigation }) => {
         setUserAnswers(prev => ({ ...prev, [currentQuestionIndex]: optionIndex }));
     };
 
-
     const handleExit = () => {
         clearInterval(timerRef.current);
         navigation.goBack();
     };
-
 
     const handleNext = () => {
         if (currentQuestionIndex < dummyQuestions.length - 1) {
@@ -247,7 +245,9 @@ const TestScreen = ({ navigation }) => {
                 <View style={styles.topSection}>
                     <Timer timeLeft={timeLeft} />
                     <Text style={styles.progressText}>Pertanyaan {currentQuestionIndex + 1}/{dummyQuestions.length}</Text>
-                    <View style={styles.progressBarBackground}><View style={[styles.progressBar, { width: `${progress}%` }]} /></View>
+                    <View style={styles.progressBarBackground}>
+                        <View style={[styles.progressBar, { width: `${progress}%` }]} />
+                    </View>
                 </View>
 
                 <View style={styles.questionContainer}>
@@ -409,23 +409,24 @@ const TestScreen = ({ navigation }) => {
                 transparent={true}
                 visible={isWarningModalVisible}
             >
-                <View style={styles.modalOverlay}>
-                    <View style={styles.warningModalContent}>
-                        <Ionicons name="warning" size={fontPixel(48)} color="#f0ad4e" />
-                        <Text style={styles.warningTitle}>Peringatan</Text>
-                        <Text style={styles.warningText}>{warningMessage}</Text>
-                        {leaveAttempts > 0 && (
-                            <TouchableOpacity
-                                style={styles.warningButton}
-                                onPress={() => setIsWarningModalVisible(false)}
-                            >
-                                <Text style={styles.warningButtonText}>Saya Mengerti</Text>
-                            </TouchableOpacity>
-                        )}
-                    </View>
-                </View>
+                <Pressable style={styles.modalOverlay} onPress={() => { if (leaveAttempts > 0) setIsWarningModalVisible(false) }}>
+                    <Pressable>
+                        <View style={styles.warningModalContent}>
+                            <Ionicons name="warning" size={fontPixel(48)} color="#f0ad4e" />
+                            <Text style={styles.warningTitle}>Peringatan</Text>
+                            <Text style={styles.warningText}>{warningMessage}</Text>
+                            {leaveAttempts > 0 && (
+                                <TouchableOpacity
+                                    style={styles.warningButton}
+                                    onPress={() => setIsWarningModalVisible(false)}
+                                >
+                                    <Text style={styles.warningButtonText}>Saya Mengerti</Text>
+                                </TouchableOpacity>
+                            )}
+                        </View>
+                    </Pressable>
+                </Pressable>
             </Modal>
-
         </View>
     );
 };
