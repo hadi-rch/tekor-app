@@ -18,6 +18,11 @@ import EditProfileScreen from '../screens/EditProfileScreen';
 import ChangePasswordScreen from '../screens/ChangePasswordScreen';
 import ProductDetailScreen from '../screens/ProductDetailScreen';
 import TestScreen from '../screens/TestScreen';
+import FlipCardGameScreen from '../screens/FlipCardGameScreen';
+import GameCategoryScreen from '../screens/GameCategoryScreen';
+import MemoryCardGameScreen from '../screens/MemoryCardGameScreen';
+import TestResultScreen from '../screens/TestResultScreen';
+import ReviewScreen from '../screens/ReviewScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -44,6 +49,12 @@ const AppNavigator = () => {
                 <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
                 <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
                 <Stack.Screen name="Test" component={TestScreen} />
+                <Stack.Screen name="FlipCardGame" component={FlipCardGameScreen} />
+                <Stack.Screen name="GameCategory" component={GameCategoryScreen} />
+                <Stack.Screen name="MemoryCardGame" component={MemoryCardGameScreen} />
+                <Stack.Screen name="TestResult" component={TestResultScreen} /> 
+                <Stack.Screen name="Review" component={ReviewScreen} /> 
+                
 
             </Stack.Navigator>
         </NavigationContainer>

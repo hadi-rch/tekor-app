@@ -57,6 +57,8 @@ const ProductCard = ({ item, type = 'product', navigation }) => ( // 1. Terima '
             // Hanya navigasi jika ini adalah produk, bukan game
             if (type === 'product') {
                 navigation.navigate('ProductDetail', { product: item })
+            } else if (type === 'game') {
+                navigation.navigate('GameCategory');
             }
             // Anda bisa menambahkan logika lain untuk tombol 'Play' pada game di sini
         }}
