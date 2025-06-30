@@ -98,6 +98,8 @@ const TestScreen = ({ navigation }) => {
     const [timeLeft, setTimeLeft] = useState(50 * 60);
     const [userAnswers, setUserAnswers] = useState({});
     const [isNavModalVisible, setIsNavModalVisible] = useState(false);
+    const [isExitModalVisible, setIsExitModalVisible] = useState(false);
+    const [isSubmitModalVisible, setIsSubmitModalVisible] = useState(false);
 
     const timerRef = useRef(null);
 
@@ -111,6 +113,13 @@ const TestScreen = ({ navigation }) => {
     const handleSelectAnswer = (optionIndex) => {
         setUserAnswers(prev => ({ ...prev, [currentQuestionIndex]: optionIndex }));
     };
+
+
+    const handleExit = () => {
+        clearInterval(timerRef.current);
+        navigation.goBack();
+    };
+
 
     const handleNext = () => {
         if (currentQuestionIndex < dummyQuestions.length - 1) {
@@ -131,9 +140,33 @@ const TestScreen = ({ navigation }) => {
 
     const handleSubmit = () => {
         clearInterval(timerRef.current);
-        Alert.alert("Tes Selesai", "Anda telah menyelesaikan tes. Hasil akan ditampilkan.", [
-            { text: "OK", onPress: () => navigation.goBack() }
-        ]);
+        setIsSubmitModalVisible(true);
+    };
+
+    const confirmSubmit = () => {
+        setIsSubmitModalVisible(false); // Tutup modal
+        clearInterval(timerRef.current);
+        let correctCount = 0;
+        dummyQuestions.forEach((question, index) => {
+            if (userAnswers[index] === question.correctAnswer) {
+                correctCount++;
+            }
+        });
+
+        const totalQuestions = dummyQuestions.length;
+        const score = Math.round((correctCount / totalQuestions) * 100);
+        const wrongCount = totalQuestions - correctCount;
+        const timeSpentInSeconds = (50 * 60) - timeLeft;
+        const timeTaken = `${Math.floor(timeSpentInSeconds / 60)} menit`;
+
+        // Navigasi ke layar hasil dengan membawa data
+        navigation.replace('TestResult', {
+            score: score,
+            correctAnswers: correctCount,
+            wrongAnswers: wrongCount,
+            timeTaken: timeTaken,
+            userAnswers: userAnswers,
+        });
     };
 
     const currentQuestion = dummyQuestions[currentQuestionIndex];
@@ -148,7 +181,7 @@ const TestScreen = ({ navigation }) => {
             />
 
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerButton}>
+                <TouchableOpacity onPress={() => setIsExitModalVisible(true)} style={styles.headerButton}>
                     <Ionicons name="close" size={fontPixel(28)} color={COLORS.text} />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Tes</Text>
@@ -253,6 +286,70 @@ const TestScreen = ({ navigation }) => {
                 </Pressable>
             </Modal>
 
+            {/* Modal Konfirmasi Keluar */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={isExitModalVisible}
+                onRequestClose={() => setIsExitModalVisible(false)}
+            >
+                <Pressable style={styles.modalOverlay} onPress={() => setIsExitModalVisible(false)}>
+                    <Pressable style={styles.exitModalContent}>
+                        <View style={styles.dragHandle} />
+                        <Text style={styles.modalTitle}>Yakin Ingin Keluar dari Ujian?</Text>
+                        <Text style={styles.modalSubtitle}>
+                            Progres Anda untuk ujian ini tidak akan tersimpan. Anda harus memulai kembali dari awal jika keluar sekarang.
+                        </Text>
+                        <View style={styles.modalButtonContainer}>
+                            <TouchableOpacity
+                                style={[styles.modalButton, styles.cancelButton]}
+                                onPress={() => setIsExitModalVisible(false)}
+                            >
+                                <Text style={styles.cancelButtonText}>Batal</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.modalButton, styles.exitButton]}
+                                onPress={handleExit}
+                            >
+                                <Text style={styles.exitButtonText}>Ya Keluar</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </Pressable>
+                </Pressable>
+            </Modal>
+
+            {/* Modal Konfirmasi Submit */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={isSubmitModalVisible}
+                onRequestClose={() => setIsSubmitModalVisible(false)}
+            >
+                <Pressable style={styles.modalOverlay} onPress={() => setIsSubmitModalVisible(false)}>
+                    <Pressable style={styles.exitModalContent}>
+                        <View style={styles.dragHandle} />
+                        <Text style={styles.modalTitle}>Kumpulkan Jawaban?</Text>
+                        <Text style={styles.modalSubtitle}>
+                            Pastikan Anda telah memeriksa semua jawaban. Anda tidak dapat mengubah jawaban setelah dikumpulkan.
+                        </Text>
+                        <View style={styles.modalButtonContainer}>
+                            <TouchableOpacity
+                                style={[styles.modalButton, styles.cancelButton]}
+                                onPress={() => setIsSubmitModalVisible(false)}
+                            >
+                                <Text style={styles.cancelButtonText}>Periksa Kembali</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.modalButton, styles.exitButton]}
+                                onPress={confirmSubmit}
+                            >
+                                <Text style={styles.exitButtonText}>Ya, Kumpulkan</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </Pressable>
+                </Pressable>
+            </Modal>
+
         </View>
     );
 };
@@ -297,6 +394,17 @@ const styles = StyleSheet.create({
     navGridText: { fontSize: fontPixel(16), color: COLORS.text },
     navGridTextCurrent: { color: COLORS.white, fontWeight: 'bold' },
     navGridTextAnswered: { color: COLORS.primary, fontWeight: 'bold' },
+    // Exit & Submit Modal Styles
+    exitModalContent: { position: 'absolute', bottom: 0, width: '100%', backgroundColor: 'white', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: pixelSizeHorizontal(20), alignItems: 'center', },
+    dragHandle: { width: pixelSizeHorizontal(40), height: heightPixel(5), backgroundColor: COLORS.borderColor, borderRadius: heightPixel(3), marginBottom: pixelSizeVertical(15), },
+    modalTitle: { fontSize: fontPixel(20), fontWeight: 'bold', color: COLORS.text, marginBottom: pixelSizeVertical(8), textAlign: 'center' },
+    modalSubtitle: { fontSize: fontPixel(14), color: COLORS.gray, textAlign: 'center', marginBottom: pixelSizeVertical(25), lineHeight: fontPixel(20), },
+    modalButtonContainer: { flexDirection: 'row', width: '100%', justifyContent: 'space-between', },
+    modalButton: { flex: 1, paddingVertical: pixelSizeVertical(15), borderRadius: pixelSizeHorizontal(12), alignItems: 'center', },
+    cancelButton: { backgroundColor: COLORS.buttonSecondary, marginRight: pixelSizeHorizontal(10), },
+    exitButton: { backgroundColor: COLORS.accent, marginLeft: pixelSizeHorizontal(10), },
+    cancelButtonText: { color: COLORS.accent, fontWeight: 'bold', fontSize: fontPixel(16), },
+    exitButtonText: { color: COLORS.white, fontWeight: 'bold', fontSize: fontPixel(16), },
 });
 
 export default TestScreen;
