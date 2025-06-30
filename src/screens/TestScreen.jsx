@@ -11,13 +11,13 @@ import {
     Modal,
     Pressable,
     FlatList,
-    Alert,
+    AppState
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
-import { fontPixel, heightPixel, pixelSizeVertical, pixelSizeHorizontal, widthPixel } from '../../helper';
+import { fontPixel, heightPixel, pixelSizeVertical, pixelSizeHorizontal } from '../../helper';
 
 // --- Data Dummy Soal ---
 const dummyQuestions = Array.from({ length: 40 }, (_, i) => {
@@ -49,7 +49,6 @@ const Timer = ({ timeLeft }) => {
     );
 };
 
-// PERBAIKAN 2: Memperbarui komponen AudioPlayer dengan API baru
 const AudioPlayer = ({ uri }) => {
     const soundRef = useRef(new Audio.Sound());
     const [isPlaying, setIsPlaying] = useState(false);
@@ -101,7 +100,60 @@ const TestScreen = ({ navigation }) => {
     const [isExitModalVisible, setIsExitModalVisible] = useState(false);
     const [isSubmitModalVisible, setIsSubmitModalVisible] = useState(false);
 
+    // --- State untuk Deteksi Kecurangan ---
+    const [leaveAttempts, setLeaveAttempts] = useState(3);
+    const [isWarningModalVisible, setIsWarningModalVisible] = useState(false);
+    const [warningMessage, setWarningMessage] = useState('');
+    const appState = useRef(AppState.currentState);
+
     const timerRef = useRef(null);
+
+
+    // --- Logika untuk AppState ---
+    useEffect(() => {
+        const subscription = AppState.addEventListener('change', nextAppState => {
+            if (
+                appState.current.match(/inactive|background/) &&
+                nextAppState === 'active'
+            ) {
+                console.log('App has come to the foreground!');
+            } else if (nextAppState.match(/inactive|background/)) {
+                // App masuk ke background
+                handleAppLeave();
+            }
+            appState.current = nextAppState;
+        });
+
+        return () => {
+            subscription.remove();
+        };
+    }, [leaveAttempts]);
+
+
+    const handleAppLeave = () => {
+        if (leaveAttempts <= 0) return; // Jika sudah di-force submit, abaikan
+
+        const newAttempts = leaveAttempts - 1;
+        setLeaveAttempts(newAttempts);
+
+        if (newAttempts > 0) {
+            setWarningMessage(`Anda telah keluar dari ujian. Kesempatan tersisa: ${newAttempts} kali.`);
+            setIsWarningModalVisible(true);
+        } else {
+            // Kesempatan habis, paksa submit
+            forceSubmit();
+        }
+    };
+
+    const forceSubmit = () => {
+        setWarningMessage('Anda telah kehabisan kesempatan. Ujian akan dikumpulkan secara otomatis.');
+        setIsWarningModalVisible(true);
+        // Menunggu sejenak agar user bisa membaca pesan sebelum submit
+        setTimeout(() => {
+            setIsWarningModalVisible(false);
+            confirmSubmit(true); // Kirim flag 'force'
+        }, 3000);
+    };
 
     useEffect(() => {
         timerRef.current = setInterval(() => {
@@ -143,9 +195,10 @@ const TestScreen = ({ navigation }) => {
         setIsSubmitModalVisible(true);
     };
 
-    const confirmSubmit = () => {
-        setIsSubmitModalVisible(false); // Tutup modal
+    const confirmSubmit = (isForced = false) => {
+        if (!isForced) setIsSubmitModalVisible(false);
         clearInterval(timerRef.current);
+
         let correctCount = 0;
         dummyQuestions.forEach((question, index) => {
             if (userAnswers[index] === question.correctAnswer) {
@@ -350,6 +403,29 @@ const TestScreen = ({ navigation }) => {
                 </Pressable>
             </Modal>
 
+            {/* Modal Peringatan Keluar Aplikasi */}
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={isWarningModalVisible}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.warningModalContent}>
+                        <Ionicons name="warning" size={fontPixel(48)} color="#f0ad4e" />
+                        <Text style={styles.warningTitle}>Peringatan</Text>
+                        <Text style={styles.warningText}>{warningMessage}</Text>
+                        {leaveAttempts > 0 && (
+                            <TouchableOpacity
+                                style={styles.warningButton}
+                                onPress={() => setIsWarningModalVisible(false)}
+                            >
+                                <Text style={styles.warningButtonText}>Saya Mengerti</Text>
+                            </TouchableOpacity>
+                        )}
+                    </View>
+                </View>
+            </Modal>
+
         </View>
     );
 };
@@ -405,6 +481,37 @@ const styles = StyleSheet.create({
     exitButton: { backgroundColor: COLORS.primary, marginLeft: pixelSizeHorizontal(10), },
     cancelButtonText: { color: COLORS.primary, fontWeight: 'bold', fontSize: fontPixel(16), },
     exitButtonText: { color: COLORS.white, fontWeight: 'bold', fontSize: fontPixel(16), },
+    // Warning Modal Styles
+    warningModalContent: {
+        width: '80%',
+        backgroundColor: 'white',
+        borderRadius: 15,
+        padding: pixelSizeHorizontal(20),
+        alignItems: 'center',
+    },
+    warningTitle: {
+        fontSize: fontPixel(20),
+        fontWeight: 'bold',
+        marginTop: pixelSizeVertical(10),
+        marginBottom: pixelSizeVertical(10),
+    },
+    warningText: {
+        fontSize: fontPixel(16),
+        textAlign: 'center',
+        marginBottom: pixelSizeVertical(20),
+        color: COLORS.gray,
+    },
+    warningButton: {
+        backgroundColor: COLORS.accent,
+        paddingVertical: pixelSizeVertical(12),
+        paddingHorizontal: pixelSizeHorizontal(30),
+        borderRadius: 8,
+    },
+    warningButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
+        fontSize: fontPixel(16),
+    },
 });
 
 export default TestScreen;
