@@ -49,7 +49,6 @@ const AppNavigator = () => {
                 <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
                 <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
                 <Stack.Screen name="Test" component={TestScreen} />
-                <Stack.Screen name="FlipCardGame" component={FlipCardGameScreen} />
                 <Stack.Screen name="GameCategory" component={GameCategoryScreen} />
                 <Stack.Screen name="MemoryCardGame" component={MemoryCardGameScreen} />
                 <Stack.Screen name="TestResult" component={TestResultScreen} /> 
