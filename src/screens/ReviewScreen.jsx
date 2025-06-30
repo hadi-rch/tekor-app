@@ -229,8 +229,8 @@ const styles = StyleSheet.create({
     radioInnerCircle: {
         height: 10,
         width: 10,
-        borderRadius: 5,
-        backgroundColor: '#dc3545', // Default merah
+        borderRadius: 15,
+        backgroundColor: '#34E55D', // Default merah
     },
     optionText: {
         flex: 1,
