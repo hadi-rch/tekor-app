@@ -12,10 +12,13 @@ import {
     Pressable,
     FlatList,
     AppState,
-    BackHandler
+    BackHandler,
+    Alert
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import NetInfo from '@react-native-community/netinfo';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 import { fontPixel, heightPixel, pixelSizeVertical, pixelSizeHorizontal } from '../../helper';
@@ -64,10 +67,10 @@ const AudioPlayer = ({ uri, questionId, playedAudios, setPlayedAudios }) => {
             if (status.isLoaded && !status.playing) {
                 // Tandai audio sebagai sudah diputar
                 setPlayedAudios(prev => [...prev, questionId]);
-                
+
                 // Putar audio
                 await player.play();
-                
+
                 // Listener untuk ketika audio selesai
                 player.addListener('playbackStatusUpdate', (playbackStatus) => {
                     if (playbackStatus.didJustFinish) {
@@ -82,11 +85,11 @@ const AudioPlayer = ({ uri, questionId, playedAudios, setPlayedAudios }) => {
     };
 
     return (
-        <TouchableOpacity 
+        <TouchableOpacity
             style={[
-                styles.audioPlayer, 
+                styles.audioPlayer,
                 hasBeenPlayed && styles.audioPlayerPlayed
-            ]} 
+            ]}
             onPress={handlePlayAudio}
             disabled={hasBeenPlayed && !status.playing}
         >
@@ -99,8 +102,8 @@ const AudioPlayer = ({ uri, questionId, playedAudios, setPlayedAudios }) => {
                 styles.audioText,
                 hasBeenPlayed && styles.audioTextPlayed
             ]}>
-                {status.playing ? 'Audio sedang diputar...' : 
-                 hasBeenPlayed ? 'Audio sudah diputar' : 'Putar Audio'}
+                {status.playing ? 'Audio sedang diputar...' :
+                    hasBeenPlayed ? 'Audio sudah diputar' : 'Putar Audio'}
             </Text>
         </TouchableOpacity>
     );
@@ -114,7 +117,7 @@ const TestScreen = ({ navigation }) => {
     const [isNavModalVisible, setIsNavModalVisible] = useState(false);
     const [isExitModalVisible, setIsExitModalVisible] = useState(false);
     const [isSubmitModalVisible, setIsSubmitModalVisible] = useState(false);
-    
+
     // State untuk tracking audio yang sudah diputar
     const [playedAudios, setPlayedAudios] = useState([]);
 
@@ -125,6 +128,56 @@ const TestScreen = ({ navigation }) => {
     const appState = useRef(AppState.currentState);
 
     const timerRef = useRef(null);
+
+    useEffect(() => {
+        const loadProgress = async () => {
+            try {
+                const savedProgress = await AsyncStorage.getItem('exam_progress');
+                if (savedProgress !== null) {
+                    Alert.alert(
+                        "Ujian Ditemukan",
+                        "Kami menemukan progres ujian yang belum selesai. Ingin melanjutkannya?",
+                        [
+                            { text: "Mulai Baru", onPress: () => AsyncStorage.removeItem('exam_progress'), style: "cancel" },
+                            {
+                                text: "Lanjutkan",
+                                onPress: () => {
+                                    const { userAnswers, currentQuestionIndex, timeLeft, playedAudios } = JSON.parse(savedProgress);
+                                    setUserAnswers(userAnswers || {});
+                                    setCurrentQuestionIndex(currentQuestionIndex || 0);
+                                    setTimeLeft(timeLeft || (50 * 60));
+                                    setPlayedAudios(playedAudios || []);
+                                }
+                            }
+                        ]
+                    );
+                }
+            } catch (e) {
+                console.error("Gagal memuat progres:", e);
+            }
+        };
+        loadProgress();
+    }, []);
+
+    useEffect(() => {
+        const saveProgress = async () => {
+            try {
+                const progress = JSON.stringify({
+                    userAnswers,
+                    currentQuestionIndex,
+                    timeLeft,
+                    playedAudios,
+                });
+                await AsyncStorage.setItem('exam_progress', progress);
+            } catch (e) {
+                console.error("Gagal menyimpan progres:", e);
+            }
+        };
+        // Simpan setiap ada perubahan state penting
+        saveProgress();
+    }, [userAnswers, currentQuestionIndex, timeLeft, playedAudios]);
+
+
 
     // --- Logika untuk AppState ---
     useEffect(() => {
@@ -196,6 +249,8 @@ const TestScreen = ({ navigation }) => {
 
     const handleExit = () => {
         clearInterval(timerRef.current);
+
+        AsyncStorage.removeItem('exam_progress');
         navigation.goBack();
     };
 
@@ -221,9 +276,17 @@ const TestScreen = ({ navigation }) => {
         setIsSubmitModalVisible(true);
     };
 
-    const confirmSubmit = (isForced = false) => {
+    const confirmSubmit = async (isForced = false) => {
         if (!isForced) setIsSubmitModalVisible(false);
         clearInterval(timerRef.current);
+
+        const netState = await NetInfo.fetch();
+        if (!netState.isConnected) {
+            Alert.alert("Tidak Ada Koneksi", "Jawaban Anda telah disimpan. Ujian akan dikumpulkan secara otomatis saat koneksi kembali stabil.");
+            // Di sini Anda bisa menyimpan hasil ke 'pending_submission' jika perlu
+            navigation.popToTop();
+            return;
+        }
 
         let correctCount = 0;
         dummyQuestions.forEach((question, index) => {
@@ -237,6 +300,9 @@ const TestScreen = ({ navigation }) => {
         const wrongCount = totalQuestions - correctCount;
         const timeSpentInSeconds = (50 * 60) - timeLeft;
         const timeTaken = `${Math.floor(timeSpentInSeconds / 60)} menit`;
+
+        // Hapus progres setelah berhasil dihitung
+        await AsyncStorage.removeItem('exam_progress');
 
         // Navigasi ke layar hasil dengan membawa data
         navigation.replace('TestResult', {
@@ -284,8 +350,8 @@ const TestScreen = ({ navigation }) => {
                         <Image source={currentQuestion.image} style={styles.questionImage} />
                     )}
                     {currentQuestion.type === 'listening' && currentQuestion.audio && (
-                        <AudioPlayer 
-                            uri={currentQuestion.audio} 
+                        <AudioPlayer
+                            uri={currentQuestion.audio}
                             questionId={currentQuestion.id}
                             playedAudios={playedAudios}
                             setPlayedAudios={setPlayedAudios}
