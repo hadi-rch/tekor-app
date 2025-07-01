@@ -49,18 +49,32 @@ const Timer = ({ timeLeft }) => {
     );
 };
 
-const AudioPlayer = ({ uri }) => {
+const AudioPlayer = ({ uri, questionId, playedAudios, setPlayedAudios }) => {
     const player = useAudioPlayer(uri);
     const status = useAudioPlayerStatus(player);
+    const hasBeenPlayed = playedAudios.includes(questionId);
 
-    const handlePlayPause = async () => {
+    const handlePlayAudio = async () => {
         try {
-            if (status.isLoaded) {
-                if (status.playing) {
-                    player.pause();
-                } else {
-                    player.play();
-                }
+            // Jika audio sudah pernah diputar, tidak bisa diputar lagi
+            if (hasBeenPlayed) {
+                return;
+            }
+
+            if (status.isLoaded && !status.playing) {
+                // Tandai audio sebagai sudah diputar
+                setPlayedAudios(prev => [...prev, questionId]);
+                
+                // Putar audio
+                await player.play();
+                
+                // Listener untuk ketika audio selesai
+                player.addListener('playbackStatusUpdate', (playbackStatus) => {
+                    if (playbackStatus.didJustFinish) {
+                        // Audio selesai diputar, tidak perlu melakukan apa-apa
+                        // Karena sudah ditandai sebagai played
+                    }
+                });
             }
         } catch (error) {
             console.warn('Audio playback error:', error);
@@ -68,14 +82,25 @@ const AudioPlayer = ({ uri }) => {
     };
 
     return (
-        <TouchableOpacity style={styles.audioPlayer} onPress={handlePlayPause}>
+        <TouchableOpacity 
+            style={[
+                styles.audioPlayer, 
+                hasBeenPlayed && styles.audioPlayerPlayed
+            ]} 
+            onPress={handlePlayAudio}
+            disabled={hasBeenPlayed && !status.playing}
+        >
             <Ionicons
-                name={status.playing ? "pause-circle" : "play-circle"}
+                name={status.playing ? "volume-high" : (hasBeenPlayed ? "checkmark-circle" : "play-circle")}
                 size={fontPixel(32)}
-                color={COLORS.primary}
+                color={hasBeenPlayed ? "#666" : COLORS.primary}
             />
-            <Text style={styles.audioText}>
-                Audio {status.playing ? '(Memutar)' : ''}
+            <Text style={[
+                styles.audioText,
+                hasBeenPlayed && styles.audioTextPlayed
+            ]}>
+                {status.playing ? 'Audio sedang diputar...' : 
+                 hasBeenPlayed ? 'Audio sudah diputar' : 'Putar Audio'}
             </Text>
         </TouchableOpacity>
     );
@@ -89,6 +114,9 @@ const TestScreen = ({ navigation }) => {
     const [isNavModalVisible, setIsNavModalVisible] = useState(false);
     const [isExitModalVisible, setIsExitModalVisible] = useState(false);
     const [isSubmitModalVisible, setIsSubmitModalVisible] = useState(false);
+    
+    // State untuk tracking audio yang sudah diputar
+    const [playedAudios, setPlayedAudios] = useState([]);
 
     // --- State untuk Deteksi Kecurangan ---
     const [leaveAttempts, setLeaveAttempts] = useState(3);
@@ -256,7 +284,12 @@ const TestScreen = ({ navigation }) => {
                         <Image source={currentQuestion.image} style={styles.questionImage} />
                     )}
                     {currentQuestion.type === 'listening' && currentQuestion.audio && (
-                        <AudioPlayer uri={currentQuestion.audio} />
+                        <AudioPlayer 
+                            uri={currentQuestion.audio} 
+                            questionId={currentQuestion.id}
+                            playedAudios={playedAudios}
+                            setPlayedAudios={setPlayedAudios}
+                        />
                     )}
                 </View>
 
@@ -447,7 +480,9 @@ const styles = StyleSheet.create({
     questionText: { fontSize: fontPixel(16), color: COLORS.text, lineHeight: fontPixel(24), marginBottom: pixelSizeVertical(15), },
     questionImage: { width: '100%', height: heightPixel(180), borderRadius: 8, resizeMode: 'contain' },
     audioPlayer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f5f5f5', borderRadius: 8, padding: pixelSizeHorizontal(10), },
+    audioPlayerPlayed: { backgroundColor: '#e0e0e0', },
     audioText: { marginLeft: pixelSizeHorizontal(10), fontSize: fontPixel(14), color: COLORS.text },
+    audioTextPlayed: { color: '#666', },
     optionsContainer: { backgroundColor: COLORS.white, borderRadius: 12, padding: pixelSizeHorizontal(15), },
     optionButton: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: COLORS.borderColor, borderRadius: 8, padding: pixelSizeHorizontal(15), marginBottom: pixelSizeVertical(10), },
     selectedOption: { borderColor: COLORS.primary, backgroundColor: COLORS.secondary },
