@@ -12,10 +12,13 @@ import {
     Pressable,
     FlatList,
     AppState,
-    BackHandler
+    BackHandler,
+    Alert
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import NetInfo from '@react-native-community/netinfo';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 import { fontPixel, heightPixel, pixelSizeVertical, pixelSizeHorizontal } from '../../helper';
@@ -49,18 +52,32 @@ const Timer = ({ timeLeft }) => {
     );
 };
 
-const AudioPlayer = ({ uri }) => {
+const AudioPlayer = ({ uri, questionId, playedAudios, setPlayedAudios }) => {
     const player = useAudioPlayer(uri);
     const status = useAudioPlayerStatus(player);
+    const hasBeenPlayed = playedAudios.includes(questionId);
 
-    const handlePlayPause = async () => {
+    const handlePlayAudio = async () => {
         try {
-            if (status.isLoaded) {
-                if (status.playing) {
-                    player.pause();
-                } else {
-                    player.play();
-                }
+            // Jika audio sudah pernah diputar, tidak bisa diputar lagi
+            if (hasBeenPlayed) {
+                return;
+            }
+
+            if (status.isLoaded && !status.playing) {
+                // Tandai audio sebagai sudah diputar
+                setPlayedAudios(prev => [...prev, questionId]);
+
+                // Putar audio
+                await player.play();
+
+                // Listener untuk ketika audio selesai
+                player.addListener('playbackStatusUpdate', (playbackStatus) => {
+                    if (playbackStatus.didJustFinish) {
+                        // Audio selesai diputar, tidak perlu melakukan apa-apa
+                        // Karena sudah ditandai sebagai played
+                    }
+                });
             }
         } catch (error) {
             console.warn('Audio playback error:', error);
@@ -68,14 +85,25 @@ const AudioPlayer = ({ uri }) => {
     };
 
     return (
-        <TouchableOpacity style={styles.audioPlayer} onPress={handlePlayPause}>
+        <TouchableOpacity
+            style={[
+                styles.audioPlayer,
+                hasBeenPlayed && styles.audioPlayerPlayed
+            ]}
+            onPress={handlePlayAudio}
+            disabled={hasBeenPlayed && !status.playing}
+        >
             <Ionicons
-                name={status.playing ? "pause-circle" : "play-circle"}
+                name={status.playing ? "volume-high" : (hasBeenPlayed ? "checkmark-circle" : "play-circle")}
                 size={fontPixel(32)}
-                color={COLORS.primary}
+                color={hasBeenPlayed ? "#666" : COLORS.primary}
             />
-            <Text style={styles.audioText}>
-                Audio {status.playing ? '(Memutar)' : ''}
+            <Text style={[
+                styles.audioText,
+                hasBeenPlayed && styles.audioTextPlayed
+            ]}>
+                {status.playing ? 'Audio sedang diputar...' :
+                    hasBeenPlayed ? 'Audio sudah diputar' : 'Putar Audio'}
             </Text>
         </TouchableOpacity>
     );
@@ -90,6 +118,9 @@ const TestScreen = ({ navigation }) => {
     const [isExitModalVisible, setIsExitModalVisible] = useState(false);
     const [isSubmitModalVisible, setIsSubmitModalVisible] = useState(false);
 
+    // State untuk tracking audio yang sudah diputar
+    const [playedAudios, setPlayedAudios] = useState([]);
+
     // --- State untuk Deteksi Kecurangan ---
     const [leaveAttempts, setLeaveAttempts] = useState(3);
     const [isWarningModalVisible, setIsWarningModalVisible] = useState(false);
@@ -97,6 +128,56 @@ const TestScreen = ({ navigation }) => {
     const appState = useRef(AppState.currentState);
 
     const timerRef = useRef(null);
+
+    useEffect(() => {
+        const loadProgress = async () => {
+            try {
+                const savedProgress = await AsyncStorage.getItem('exam_progress');
+                if (savedProgress !== null) {
+                    Alert.alert(
+                        "Ujian Ditemukan",
+                        "Kami menemukan progres ujian yang belum selesai. Ingin melanjutkannya?",
+                        [
+                            { text: "Mulai Baru", onPress: () => AsyncStorage.removeItem('exam_progress'), style: "cancel" },
+                            {
+                                text: "Lanjutkan",
+                                onPress: () => {
+                                    const { userAnswers, currentQuestionIndex, timeLeft, playedAudios } = JSON.parse(savedProgress);
+                                    setUserAnswers(userAnswers || {});
+                                    setCurrentQuestionIndex(currentQuestionIndex || 0);
+                                    setTimeLeft(timeLeft || (50 * 60));
+                                    setPlayedAudios(playedAudios || []);
+                                }
+                            }
+                        ]
+                    );
+                }
+            } catch (e) {
+                console.error("Gagal memuat progres:", e);
+            }
+        };
+        loadProgress();
+    }, []);
+
+    useEffect(() => {
+        const saveProgress = async () => {
+            try {
+                const progress = JSON.stringify({
+                    userAnswers,
+                    currentQuestionIndex,
+                    timeLeft,
+                    playedAudios,
+                });
+                await AsyncStorage.setItem('exam_progress', progress);
+            } catch (e) {
+                console.error("Gagal menyimpan progres:", e);
+            }
+        };
+        // Simpan setiap ada perubahan state penting
+        saveProgress();
+    }, [userAnswers, currentQuestionIndex, timeLeft, playedAudios]);
+
+
 
     // --- Logika untuk AppState ---
     useEffect(() => {
@@ -168,6 +249,8 @@ const TestScreen = ({ navigation }) => {
 
     const handleExit = () => {
         clearInterval(timerRef.current);
+
+        AsyncStorage.removeItem('exam_progress');
         navigation.goBack();
     };
 
@@ -193,9 +276,17 @@ const TestScreen = ({ navigation }) => {
         setIsSubmitModalVisible(true);
     };
 
-    const confirmSubmit = (isForced = false) => {
+    const confirmSubmit = async (isForced = false) => {
         if (!isForced) setIsSubmitModalVisible(false);
         clearInterval(timerRef.current);
+
+        const netState = await NetInfo.fetch();
+        if (!netState.isConnected) {
+            Alert.alert("Tidak Ada Koneksi", "Jawaban Anda telah disimpan. Ujian akan dikumpulkan secara otomatis saat koneksi kembali stabil.");
+            // Di sini Anda bisa menyimpan hasil ke 'pending_submission' jika perlu
+            navigation.popToTop();
+            return;
+        }
 
         let correctCount = 0;
         dummyQuestions.forEach((question, index) => {
@@ -209,6 +300,9 @@ const TestScreen = ({ navigation }) => {
         const wrongCount = totalQuestions - correctCount;
         const timeSpentInSeconds = (50 * 60) - timeLeft;
         const timeTaken = `${Math.floor(timeSpentInSeconds / 60)} menit`;
+
+        // Hapus progres setelah berhasil dihitung
+        await AsyncStorage.removeItem('exam_progress');
 
         // Navigasi ke layar hasil dengan membawa data
         navigation.replace('TestResult', {
@@ -256,7 +350,12 @@ const TestScreen = ({ navigation }) => {
                         <Image source={currentQuestion.image} style={styles.questionImage} />
                     )}
                     {currentQuestion.type === 'listening' && currentQuestion.audio && (
-                        <AudioPlayer uri={currentQuestion.audio} />
+                        <AudioPlayer
+                            uri={currentQuestion.audio}
+                            questionId={currentQuestion.id}
+                            playedAudios={playedAudios}
+                            setPlayedAudios={setPlayedAudios}
+                        />
                     )}
                 </View>
 
@@ -447,7 +546,9 @@ const styles = StyleSheet.create({
     questionText: { fontSize: fontPixel(16), color: COLORS.text, lineHeight: fontPixel(24), marginBottom: pixelSizeVertical(15), },
     questionImage: { width: '100%', height: heightPixel(180), borderRadius: 8, resizeMode: 'contain' },
     audioPlayer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f5f5f5', borderRadius: 8, padding: pixelSizeHorizontal(10), },
+    audioPlayerPlayed: { backgroundColor: '#e0e0e0', },
     audioText: { marginLeft: pixelSizeHorizontal(10), fontSize: fontPixel(14), color: COLORS.text },
+    audioTextPlayed: { color: '#666', },
     optionsContainer: { backgroundColor: COLORS.white, borderRadius: 12, padding: pixelSizeHorizontal(15), },
     optionButton: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: COLORS.borderColor, borderRadius: 8, padding: pixelSizeHorizontal(15), marginBottom: pixelSizeVertical(10), },
     selectedOption: { borderColor: COLORS.primary, backgroundColor: COLORS.secondary },
