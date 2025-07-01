@@ -7,6 +7,8 @@ import {
     FlatList,
     Image,
     TouchableOpacity,
+    Platform,
+    StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors';
@@ -88,8 +90,12 @@ const TransactionHistoryScreen = ({ navigation }) => {
     }, [activeTab]);
 
     return (
-        <SafeAreaView style={styles.safeArea}>
-            <FocusAwareStatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
+        <View style={styles.screenContainer}>
+            <FocusAwareStatusBar
+                barStyle="dark-content"
+                backgroundColor="transparent"
+                translucent={true}
+            />
             {/* Header Kustom */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
@@ -126,14 +132,15 @@ const TransactionHistoryScreen = ({ navigation }) => {
                     </View>
                 }
             />
-        </SafeAreaView>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
-    safeArea: {
+    screenContainer: {
         flex: 1,
         backgroundColor: COLORS.white,
+        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
     },
     header: {
         flexDirection: 'row',

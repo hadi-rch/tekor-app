@@ -35,7 +35,7 @@ const MainTabNavigator = () => {
 
                     return <Ionicons name={iconName} size={fontPixel(24)} color={color} />;
                 },
-                tabBarActiveTintColor: COLORS.accent,
+                tabBarActiveTintColor: COLORS.primary,
                 tabBarInactiveTintColor: COLORS.gray,
                 tabBarStyle: {
                     backgroundColor: COLORS.white,
@@ -57,19 +57,5 @@ const MainTabNavigator = () => {
         </Tab.Navigator>
     );
 };
-
-const styles = StyleSheet.create({
-    placeholderContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#f5f5f5',
-    },
-    placeholderText: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 10,
-    },
-});
 
 export default MainTabNavigator;

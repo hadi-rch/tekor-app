@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Keyboard, Alert, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Keyboard, StatusBar, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import CustomTextInput from '../components/CustomTextInput';
 import CustomButton from '../components/CustomButton';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
+import { pixelSizeVertical } from '../../helper';
 
 const ForgotPasswordScreen = ({ navigation }) => {
     const [email, setEmail] = useState('');
@@ -33,8 +34,12 @@ const ForgotPasswordScreen = ({ navigation }) => {
     };
 
     return (
-        <SafeAreaView style={styles.safeArea}>
-            <FocusAwareStatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
+        <View style={styles.screenContainer}>
+            <FocusAwareStatusBar
+                barStyle="dark-content"
+                backgroundColor="transparent"
+                translucent={true}
+            />
             <View style={styles.container}>
                 <View style={styles.header}>
                     <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
@@ -67,17 +72,18 @@ const ForgotPasswordScreen = ({ navigation }) => {
                 <CustomButton
                     title="Kirim Link Reset"
                     onPress={handleSendLink}
-                    style={{ backgroundColor: COLORS.primary, borderRadius: 24, paddingVertical: 15 }}
+                    style={{ backgroundColor: COLORS.primary, borderRadius: 24, paddingVertical: 15, marginBottom: pixelSizeVertical(50) }}
                 />
             </View>
-        </SafeAreaView>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
-    safeArea: {
+    screenContainer: {
         flex: 1,
         backgroundColor: COLORS.white,
+        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
     },
     container: {
         flex: 1,

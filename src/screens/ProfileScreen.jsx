@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     View,
     Text,
@@ -7,22 +7,27 @@ import {
     Image,
     TouchableOpacity,
     Alert,
+    Platform,
+    StatusBar,
+    Modal,
+    Pressable,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
+import { fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical } from '../../helper';
 
 // --- Komponen kecil yang dapat digunakan kembali untuk setiap item menu ---
 const ProfileMenuItem = ({ icon, label, onPress, isLogout = false }) => (
     <TouchableOpacity style={styles.menuItem} onPress={onPress}>
-        <View style={[styles.iconContainer, isLogout && { backgroundColor: '#FFF0F0' }]}>
+        <View style={[styles.iconContainer, isLogout && { backgroundColor: COLORS.secondary }]}>
             <Ionicons
                 name={icon}
                 size={22}
-                color={isLogout ? COLORS.accent : COLORS.gray}
+                color={isLogout ? COLORS.primary : COLORS.gray}
             />
         </View>
-        <Text style={[styles.menuLabel, isLogout && { color: COLORS.accent }]}>
+        <Text style={[styles.menuLabel, isLogout && { color: COLORS.primary }]}>
             {label}
         </Text>
         <Ionicons name="chevron-forward-outline" size={22} color={COLORS.gray} />
@@ -32,6 +37,7 @@ const ProfileMenuItem = ({ icon, label, onPress, isLogout = false }) => (
 
 // --- Komponen Utama ProfileScreen ---
 const ProfileScreen = ({ navigation }) => {
+    const [isLogoutModalVisible, setIsLogoutModalVisible] = useState(false);
     // Data pengguna (bisa didapat dari state management atau API)
     const user = {
         name: 'Jaehyun Park',
@@ -40,32 +46,21 @@ const ProfileScreen = ({ navigation }) => {
     };
 
     const handleLogout = () => {
-        Alert.alert(
-            "Keluar",
-            "Apakah Anda yakin ingin keluar?",
-            [
-                {
-                    text: "Batal",
-                    style: "cancel"
-                },
-                {
-                    text: "Ya, Keluar",
-                    onPress: () => {
-                        // Kembali ke stack navigator Autentikasi dan reset history
-                        navigation.reset({
-                            index: 0,
-                            routes: [{ name: 'Login' }],
-                        });
-                    },
-                    style: 'destructive'
-                }
-            ]
-        );
+        // Kembali ke stack navigator Autentikasi dan reset history
+        setIsLogoutModalVisible(false); // Tutup modal dulu
+        navigation.reset({
+            index: 0,
+            routes: [{ name: 'Login' }],
+        });
     };
 
     return (
-        <SafeAreaView style={styles.safeArea}>
-            <FocusAwareStatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
+        <View style={styles.screenContainer}>
+            <FocusAwareStatusBar
+                barStyle="dark-content"
+                backgroundColor="transparent"
+                translucent={true}
+            />
             {/* Header */}
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>Profil</Text>
@@ -95,24 +90,58 @@ const ProfileScreen = ({ navigation }) => {
                     <ProfileMenuItem
                         icon="lock-closed-outline"
                         label="Ganti kata sandi"
-                        onPress={() => { /* Navigasi ke Ganti Kata Sandi */ }}
+                        onPress={() => navigation.navigate('ChangePassword')}
                     />
                     <ProfileMenuItem
                         icon="log-out-outline"
                         label="Keluar"
-                        onPress={handleLogout}
+                        onPress={() => setIsLogoutModalVisible(true)}
                         isLogout={true}
                     />
                 </View>
             </View>
-        </SafeAreaView>
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={isLogoutModalVisible}
+                onRequestClose={() => setIsLogoutModalVisible(false)}
+            >
+                <Pressable
+                    style={styles.modalOverlay}
+                    onPress={() => setIsLogoutModalVisible(false)}
+                >
+                    <Pressable style={styles.logoutModalContent}>
+                        <View style={styles.dragHandle} />
+                        <Text style={styles.modalTitle}>Anda Yakin Ingin Keluar</Text>
+                        <Text style={styles.modalSubtitle}>
+                            Anda perlu masuk kembali untuk mengakses progres dan kelas anda
+                        </Text>
+                        <View style={styles.modalButtonContainer}>
+                            <TouchableOpacity
+                                style={[styles.modalButton, styles.cancelButton]}
+                                onPress={() => setIsLogoutModalVisible(false)}
+                            >
+                                <Text style={styles.cancelButtonText}>Batal</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.modalButton, styles.logoutButton]}
+                                onPress={handleLogout}
+                            >
+                                <Text style={styles.logoutButtonText}>Ya Keluar</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </Pressable>
+                </Pressable>
+            </Modal>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
-    safeArea: {
+    screenContainer: {
         flex: 1,
         backgroundColor: COLORS.white,
+        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
     },
     header: {
         paddingVertical: 15,
@@ -175,6 +204,66 @@ const styles = StyleSheet.create({
         flex: 1,
         fontSize: 16,
         color: COLORS.text,
+    }, modalOverlay: {
+        flex: 1,
+        justifyContent: 'flex-end',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+    },
+    logoutModalContent: {
+        backgroundColor: 'white',
+        borderTopLeftRadius: pixelSizeHorizontal(20),
+        borderTopRightRadius: pixelSizeHorizontal(20),
+        padding: pixelSizeHorizontal(20),
+        alignItems: 'center',
+    },
+    dragHandle: {
+        width: pixelSizeHorizontal(40),
+        height: heightPixel(5),
+        backgroundColor: COLORS.borderColor,
+        borderRadius: heightPixel(3),
+        marginBottom: pixelSizeVertical(15),
+    },
+    modalTitle: {
+        fontSize: fontPixel(20),
+        fontWeight: 'bold',
+        color: COLORS.text,
+        marginBottom: pixelSizeVertical(8),
+    },
+    modalSubtitle: {
+        fontSize: fontPixel(14),
+        color: COLORS.gray,
+        textAlign: 'center',
+        marginBottom: pixelSizeVertical(25),
+        lineHeight: fontPixel(20),
+    },
+    modalButtonContainer: {
+        flexDirection: 'row',
+        width: '100%',
+        justifyContent: 'space-between',
+    },
+    modalButton: {
+        flex: 1,
+        paddingVertical: pixelSizeVertical(15),
+        borderRadius: pixelSizeHorizontal(12),
+        alignItems: 'center',
+    },
+    cancelButton: {
+        backgroundColor: COLORS.secondary,
+        marginRight: pixelSizeHorizontal(10),
+    },
+    logoutButton: {
+        backgroundColor: COLORS.primary,
+        marginLeft: pixelSizeHorizontal(10),
+    },
+    cancelButtonText: {
+        color: COLORS.primary,
+        fontWeight: 'bold',
+        fontSize: fontPixel(16),
+    },
+    logoutButtonText: {
+        color: COLORS.white,
+        fontWeight: 'bold',
+        fontSize: fontPixel(16),
     },
 });
 

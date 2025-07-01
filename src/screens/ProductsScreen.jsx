@@ -3,12 +3,12 @@ import {
     View,
     Text,
     StyleSheet,
-    SafeAreaView,
-    FlatList,
     Image,
     TouchableOpacity,
     TextInput,
     ScrollView,
+    Platform,
+    StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors'; // Pastikan path ini benar
@@ -49,8 +49,20 @@ const gamesData = [
 ]
 
 // --- Komponen untuk setiap item dalam daftar ---
-const ProductCard = ({ item, type = 'product' }) => (
-    <View style={styles.cardContainer}>
+const ProductCard = ({ item, type = 'product', navigation }) => ( // 1. Terima 'navigation'
+    // 2. Ganti View menjadi TouchableOpacity
+    <TouchableOpacity
+        style={styles.cardContainer}
+        onPress={() => {
+            // Hanya navigasi jika ini adalah produk, bukan game
+            if (type === 'product') {
+                navigation.navigate('ProductDetail', { product: item })
+            } else if (type === 'game') {
+                navigation.navigate('GameCategory');
+            }
+            // Anda bisa menambahkan logika lain untuk tombol 'Play' pada game di sini
+        }}
+    >
         <View style={styles.cardTextContainer}>
             <Text style={styles.cardTitle}>{item.title}</Text>
             <Text style={styles.cardDescription}>{item.description}</Text>
@@ -65,14 +77,18 @@ const ProductCard = ({ item, type = 'product' }) => (
             )}
         </View>
         <Image source={item.image} style={styles.cardImage} />
-    </View>
+    </TouchableOpacity>
 );
 
 // --- Komponen Utama ProductsScreen ---
-const ProductsScreen = () => {
+const ProductsScreen = ({ navigation }) => {
     return (
-        <SafeAreaView style={styles.safeArea}>
-            <FocusAwareStatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
+        <View style={styles.screenContainer}>
+            <FocusAwareStatusBar
+                barStyle="dark-content"
+                backgroundColor="transparent"
+                translucent={true}
+            />
             {/* Header */}
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>Products</Text>
@@ -104,24 +120,25 @@ const ProductsScreen = () => {
                 {/* Daftar Produk */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Products</Text>
-                    {productsData.map(item => <ProductCard key={item.id} item={item} type="product" />)}
+                    {productsData.map(item => <ProductCard key={item.id} item={item} type="product" navigation={navigation} />)}
                 </View>
 
                 {/* Daftar Games */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Games</Text>
-                    {gamesData.map(item => <ProductCard key={item.id} item={item} type="game" />)}
+                    {gamesData.map(item => <ProductCard key={item.id} item={item} type="game" navigation={navigation} />)}
                 </View>
 
             </ScrollView>
-        </SafeAreaView>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
-    safeArea: {
+    screenContainer: {
         flex: 1,
         backgroundColor: COLORS.white,
+        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
     },
     header: {
         paddingVertical: 15,
@@ -212,7 +229,7 @@ const styles = StyleSheet.create({
         color: COLORS.text,
     },
     playButton: {
-        backgroundColor: COLORS.accent,
+        backgroundColor: COLORS.primary,
         borderRadius: 20,
         paddingVertical: 8,
         paddingHorizontal: 20,

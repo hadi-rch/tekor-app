@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Platform, StatusBar } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import CustomTextInput from '../components/CustomTextInput';
@@ -12,9 +12,9 @@ const RegisterScreen = ({ navigation }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false);    
+    const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    
+
     // State untuk error messages
     const [errors, setErrors] = useState({});
     const [isSubmitted, setIsSubmitted] = useState(false);
@@ -53,18 +53,18 @@ const RegisterScreen = ({ navigation }) => {
     // Validasi semua field
     const validateForm = () => {
         const newErrors = {};
-        
+
         newErrors.nama = validateUsername(nama);
         newErrors.email = validateEmail(email);
         newErrors.password = validatePassword(password);
         newErrors.confirmPassword = validateConfirmPassword(confirmPassword, password);
-        
+
         // Filter out empty errors
         const filteredErrors = Object.keys(newErrors).reduce((acc, key) => {
             if (newErrors[key]) acc[key] = newErrors[key];
             return acc;
         }, {});
-        
+
         setErrors(filteredErrors);
         return Object.keys(filteredErrors).length === 0;
     };
@@ -87,8 +87,8 @@ const RegisterScreen = ({ navigation }) => {
             case 'password':
                 setPassword(value);
                 if (isSubmitted) {
-                    setErrors(prev => ({ 
-                        ...prev, 
+                    setErrors(prev => ({
+                        ...prev,
                         password: validatePassword(value),
                         confirmPassword: validateConfirmPassword(confirmPassword, value)
                     }));
@@ -105,7 +105,7 @@ const RegisterScreen = ({ navigation }) => {
 
     const handleRegister = () => {
         setIsSubmitted(true);
-        
+
         if (validateForm()) {
             // Logika untuk mendaftar
             console.log('Form valid:', { nama, email, password, confirmPassword });
@@ -124,8 +124,12 @@ const RegisterScreen = ({ navigation }) => {
     };
 
     return (
-        <SafeAreaView style={styles.safeArea}>
-            <FocusAwareStatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
+        <View style={styles.screenContainer}>
+            <FocusAwareStatusBar
+                barStyle="dark-content"
+                backgroundColor="transparent"
+                translucent={true}
+            />
             <ScrollView contentContainerStyle={styles.container}>
 
                 <Text style={styles.title}>Daftar</Text>
@@ -159,10 +163,10 @@ const RegisterScreen = ({ navigation }) => {
                         hasError={!!errors.password}
                         rightIcon={
                             <TouchableOpacity onPress={togglePasswordVisibility} style={styles.eyeIcon}>
-                                <Ionicons 
-                                    name={showPassword ? 'eye-off' : 'eye'} 
-                                    size={20} 
-                                    color={COLORS.gray} 
+                                <Ionicons
+                                    name={showPassword ? 'eye-off' : 'eye'}
+                                    size={20}
+                                    color={COLORS.gray}
                                 />
                             </TouchableOpacity>
                         }
@@ -177,10 +181,10 @@ const RegisterScreen = ({ navigation }) => {
                         hasError={!!errors.confirmPassword}
                         rightIcon={
                             <TouchableOpacity onPress={toggleConfirmPasswordVisibility} style={styles.eyeIcon}>
-                                <Ionicons 
-                                    name={showConfirmPassword ? 'eye-off' : 'eye'} 
-                                    size={20} 
-                                    color={COLORS.gray} 
+                                <Ionicons
+                                    name={showConfirmPassword ? 'eye-off' : 'eye'}
+                                    size={20}
+                                    color={COLORS.gray}
                                 />
                             </TouchableOpacity>
                         }
@@ -201,16 +205,15 @@ const RegisterScreen = ({ navigation }) => {
                 </View>
 
             </ScrollView>
-        </SafeAreaView>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
-    safeArea: {
+    screenContainer: {
         flex: 1,
         backgroundColor: COLORS.white,
-        justifyContent: 'center', 
-        padding: 25, 
+        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
     },
     container: {
         padding: 24,

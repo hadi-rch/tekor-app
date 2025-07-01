@@ -1,14 +1,14 @@
 import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Image, FlatList } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Image, FlatList, Platform, StatusBar } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors';
 import CustomButton from '../components/CustomButton';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 
 const featuredProducts = [
-    { id: '1', title: 'Tes Level Bahasa Korea', description: 'Uji level bahasa Koreamu dengan tes komprehensif.', image: 'https://placehold.co/300x400/F5E8E8/333?text=Tes+Level' },
-    { id: '2', title: 'Tes Topik', description: 'Persiapkan diri untuk ujian TOPIK dengan simulasi tes.', image: 'https://placehold.co/300x400/E96479/FFF?text=Tes+Topik' },
-    { id: '3', title: 'Materi Belajar', description: 'Akses ribuan materi belajar interaktif.', image: 'https://placehold.co/300x400/4C6FFF/FFF?text=Materi' },
+    { id: '1', title: 'Tes Level Bahasa Korea', description: 'Uji level bahasa Koreamu dengan tes komprehensif.', image: require('../../assets/images/g1.png') },
+    { id: '2', title: 'Tes Topik', description: 'Persiapkan diri untuk ujian TOPIK dengan simulasi tes.', image: require('../../assets/images/g2.png') },
+    { id: '3', title: 'Materi Belajar', description: 'Akses ribuan materi belajar interaktif.', image: require('../../assets/images/g3.png') },
 ];
 
 const whyUsFeatures = [
@@ -20,7 +20,7 @@ const whyUsFeatures = [
 // --- Komponen Kecil untuk Kartu ---
 const ProductCard = ({ item }) => (
     <View style={styles.productCard}>
-        <Image source={{ uri: item.image }} style={styles.productImage} />
+        <Image source={item.image} style={styles.productImage} />
         <Text style={styles.productTitle}>{item.title}</Text>
         <Text style={styles.productDescription}>{item.description}</Text>
     </View>
@@ -40,8 +40,12 @@ const FeatureCard = ({ item }) => (
 // --- Komponen Utama HomeScreen ---
 const HomeScreen = ({ navigation }) => {
     return (
-        <SafeAreaView style={styles.safeArea}>
-            <FocusAwareStatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
+        <View style={styles.screenContainer}>
+            <FocusAwareStatusBar
+                barStyle="dark-content"
+                backgroundColor="transparent"
+                translucent={true}
+            />
             <ScrollView style={styles.scrollView}>
                 {/* 1. Hero Section */}
                 <View style={styles.heroSection}>
@@ -54,7 +58,7 @@ const HomeScreen = ({ navigation }) => {
                     <CustomButton
                         title="Mulai Tes Sekarang!"
                         onPress={() => { /* Navigasi ke halaman tes */ }}
-                        style={{ backgroundColor: COLORS.accent }}
+                        style={{ backgroundColor: COLORS.primary }}
                     />
                 </View>
 
@@ -102,18 +106,22 @@ const HomeScreen = ({ navigation }) => {
                 </View>
 
             </ScrollView>
-        </SafeAreaView>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
-    safeArea: { flex: 1, backgroundColor: '#FFF8F6' },
+    screenContainer: {
+        flex: 1,
+        backgroundColor: COLORS.white,
+        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+    },
     scrollView: { flex: 1 },
     sectionContainer: { marginBottom: 30 },
     sectionTitle: { fontSize: 20, fontWeight: 'bold', color: COLORS.text, marginBottom: 16, paddingHorizontal: 20, },
     // Hero
-    heroSection: { backgroundColor: '#FFECEC', padding: 20, paddingTop: 40, alignItems: 'center', marginBottom: 20 },
-    heroTitle: { fontSize: 32, fontWeight: 'bold', color: COLORS.accent },
+    heroSection: { backgroundColor: COLORS.secondary, padding: 20, paddingTop: 40, alignItems: 'center', marginBottom: 20 },
+    heroTitle: { fontSize: 32, fontWeight: 'bold', color: COLORS.primary },
     heroSubtitle: { fontSize: 16, color: COLORS.text, textAlign: 'center', marginVertical: 12, },
     heroLogo: {
         width: 150,
@@ -126,8 +134,8 @@ const styles = StyleSheet.create({
     specialOfferText: { flex: 1, marginRight: 10 },
     specialOfferTitle: { fontSize: 16, fontWeight: 'bold' },
     specialOfferDesc: { fontSize: 14, color: COLORS.gray, marginVertical: 8 },
-    buyNowButton: { backgroundColor: '#FFF0F0', borderRadius: 20, paddingVertical: 8, paddingHorizontal: 16, alignSelf: 'flex-start' },
-    buyNowText: { color: COLORS.accent, fontWeight: 'bold' },
+    buyNowButton: { backgroundColor: COLORS.secondary, borderRadius: 20, paddingVertical: 8, paddingHorizontal: 16, alignSelf: 'flex-start' },
+    buyNowText: { color: COLORS.primary, fontWeight: 'bold' },
     specialOfferImage: { width: 80, height: 80, borderRadius: 8 },
     // Product
     productCard: { width: 160, marginRight: 16, backgroundColor: 'white', borderRadius: 12, padding: 12, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2, },

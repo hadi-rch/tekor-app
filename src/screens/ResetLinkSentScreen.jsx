@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Platform, StatusBar } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import CustomButton from '../components/CustomButton';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
+import { pixelSizeVertical } from '../../helper';
 
 // Menerima 'navigation' dan 'route' sebagai props
 const ResetLinkSentScreen = ({ navigation, route }) => {
@@ -23,8 +24,12 @@ const ResetLinkSentScreen = ({ navigation, route }) => {
     };
 
     return (
-        <SafeAreaView style={styles.safeArea}>
-            <FocusAwareStatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
+        <View style={styles.screenContainer}>
+            <FocusAwareStatusBar
+                barStyle="dark-content"
+                backgroundColor="transparent"
+                translucent={true}
+            />
             <View style={styles.container}>
                 {/* Header Kustom */}
                 <View style={styles.header}>
@@ -53,7 +58,7 @@ const ResetLinkSentScreen = ({ navigation, route }) => {
                 <CustomButton
                     title="DEV: Ke Buat Sandi Baru"
                     onPress={() => navigation.navigate('CreateNewPassword')}
-                    style={{ marginBottom: 10, backgroundColor: 'green' }} 
+                    style={{ marginBottom: 10, backgroundColor: 'green' }}
                 />
 
                 <CustomButton
@@ -63,14 +68,15 @@ const ResetLinkSentScreen = ({ navigation, route }) => {
                     textStyle={styles.backButtonText}
                 />
             </View>
-        </SafeAreaView>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
-    safeArea: {
+    screenContainer: {
         flex: 1,
         backgroundColor: COLORS.white,
+        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
     },
     container: {
         flex: 1,
@@ -125,6 +131,7 @@ const styles = StyleSheet.create({
     },
     backButtonComponent: {
         backgroundColor: COLORS.primary,
+        marginBottom: pixelSizeVertical(50),
     },
     backButtonText: {
         color: COLORS.black,

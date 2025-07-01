@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Keyboard, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Keyboard, Alert, Platform, StatusBar } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import CustomTextInput from '../components/CustomTextInput';
 import CustomButton from '../components/CustomButton';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
+import { pixelSizeVertical } from '../../helper';
 
 // Komponen kecil(chekbox) untuk menampilkan kriteria validasi
 const ValidationCriteria = ({ isValid, text }) => (
@@ -71,8 +72,12 @@ const CreateNewPasswordScreen = ({ navigation, route }) => {
     };
 
     return (
-        <SafeAreaView style={styles.safeArea}>
-            <FocusAwareStatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
+        <View style={styles.screenContainer}>
+            <FocusAwareStatusBar
+                barStyle="dark-content"
+                backgroundColor="transparent"
+                translucent={true}
+            />
             <View style={styles.container}>
                 <View>
                     <Text style={styles.title}>Buat Kata Sandi Baru</Text>
@@ -115,23 +120,24 @@ const CreateNewPasswordScreen = ({ navigation, route }) => {
                     <CustomButton
                         title="Simpan Kata Sandi Baru"
                         onPress={handleSavePassword}
-                        style={{ backgroundColor: COLORS.primary, borderRadius: 24, paddingVertical: 15 }}
+                        style={{ backgroundColor: COLORS.primary, borderRadius: 24, paddingVertical: 15, marginBottom: pixelSizeVertical(50)}}
                     />
                 </View>
             </View>
-        </SafeAreaView>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
-    safeArea: {
+    screenContainer: {
         flex: 1,
         backgroundColor: COLORS.white,
+        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
     },
     container: {
         flex: 1,
         padding: 24,
-        justifyContent: 'space-between', 
+        justifyContent: 'space-between',
     },
     title: {
         fontSize: 26,

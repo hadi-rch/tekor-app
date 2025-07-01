@@ -15,6 +15,13 @@ import CreateNewPasswordScreen from '../screens/CreateNewPasswordScreen';
 import MainTabNavigator from './MainTabNavigator';
 import TransactionHistoryScreen from '../screens/TransactionHistoryScreen';
 import EditProfileScreen from '../screens/EditProfileScreen';
+import ChangePasswordScreen from '../screens/ChangePasswordScreen';
+import ProductDetailScreen from '../screens/ProductDetailScreen';
+import TestScreen from '../screens/TestScreen';
+import GameCategoryScreen from '../screens/GameCategoryScreen';
+import MemoryCardGameScreen from '../screens/MemoryCardGameScreen';
+import TestResultScreen from '../screens/TestResultScreen';
+import ReviewScreen from '../screens/ReviewScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -38,6 +45,14 @@ const AppNavigator = () => {
                 <Stack.Screen name="MainApp" component={MainTabNavigator} />
                 <Stack.Screen name="TransactionHistory" component={TransactionHistoryScreen} />
                 <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+                <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
+                <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
+                <Stack.Screen name="Test" component={TestScreen} />
+                <Stack.Screen name="GameCategory" component={GameCategoryScreen} />
+                <Stack.Screen name="MemoryCardGame" component={MemoryCardGameScreen} />
+                <Stack.Screen name="TestResult" component={TestResultScreen} /> 
+                <Stack.Screen name="Review" component={ReviewScreen} /> 
+                
 
             </Stack.Navigator>
         </NavigationContainer>
