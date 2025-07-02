@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     View,
     Text,
@@ -13,6 +13,9 @@ import {
     Pressable,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useDispatch, useSelector } from 'react-redux';
+import { logout } from '../store/authSlice';
+
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 import { fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical } from '../../helper';
@@ -39,19 +42,26 @@ const ProfileMenuItem = ({ icon, label, onPress, isLogout = false }) => (
 const ProfileScreen = ({ navigation }) => {
     const [isLogoutModalVisible, setIsLogoutModalVisible] = useState(false);
     // Data pengguna (bisa didapat dari state management atau API)
-    const user = {
-        name: 'Jaehyun Park',
-        email: 'jaehyun.park@email.com',
-        avatar: require('../../assets/images/g1.png')
-    };
+    const dispatch = useDispatch();
+    // Ambil data user dan status autentikasi dari state global
+    const { user, isAuthenticated } = useSelector((state) => state.auth);
 
-    const handleLogout = () => {
-        // Kembali ke stack navigator Autentikasi dan reset history
-        setIsLogoutModalVisible(false); // Tutup modal dulu
-        navigation.reset({
-            index: 0,
-            routes: [{ name: 'Login' }],
-        });
+    // PENAMBAHAN 3: useEffect untuk menangani navigasi setelah logout
+    useEffect(() => {
+        // Jika state isAuthenticated berubah menjadi false (setelah logout),
+        // maka reset navigasi ke layar Login.
+        if (!isAuthenticated) {
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'Login' }],
+            });
+        }
+    }, [isAuthenticated, navigation]);
+
+    // Fungsi ini sekarang hanya perlu memanggil dispatch
+    const handleConfirmLogout = () => {
+        dispatch(logout());
+        setIsLogoutModalVisible(false);
     };
 
     return (
@@ -69,7 +79,7 @@ const ProfileScreen = ({ navigation }) => {
             <View style={styles.container}>
                 {/* Info Pengguna */}
                 <View style={styles.profileInfoContainer}>
-                    <Image source={user.avatar} style={styles.avatar} />
+                    <Image source={user.imageUrl} style={styles.avatar} />
                     <Text style={styles.userName}>{user.name}</Text>
                     <Text style={styles.userEmail}>{user.email}</Text>
                 </View>
@@ -125,7 +135,7 @@ const ProfileScreen = ({ navigation }) => {
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={[styles.modalButton, styles.logoutButton]}
-                                onPress={handleLogout}
+                                onPress={handleConfirmLogout}
                             >
                                 <Text style={styles.logoutButtonText}>Ya Keluar</Text>
                             </TouchableOpacity>
