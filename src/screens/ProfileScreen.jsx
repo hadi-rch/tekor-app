@@ -64,6 +64,10 @@ const ProfileScreen = ({ navigation }) => {
         setIsLogoutModalVisible(false);
     };
 
+    const avatarSource = (user && user.imageUrl)
+        ? { uri: user.imageUrl }
+        : require('../../assets/images/g1.png');
+
     return (
         <View style={styles.screenContainer}>
             <FocusAwareStatusBar
@@ -79,7 +83,7 @@ const ProfileScreen = ({ navigation }) => {
             <View style={styles.container}>
                 {/* Info Pengguna */}
                 <View style={styles.profileInfoContainer}>
-                    <Image source={user.imageUrl} style={styles.avatar} />
+                    <Image source={avatarSource} style={styles.avatar} />
                     <Text style={styles.userName}>{user.name}</Text>
                     <Text style={styles.userEmail}>{user.email}</Text>
                 </View>
