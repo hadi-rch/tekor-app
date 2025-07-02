@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Keyboard, Platform, StatusBar } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, StatusBar, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+// PENAMBAHAN 1: Impor hook dari react-redux dan action dari authSlice
+import { useDispatch, useSelector } from 'react-redux';
+import { loginUser } from '../store/authSlice';
 
 import CustomTextInput from '../components/CustomTextInput';
 import CustomButton from '../components/CustomButton';
@@ -8,84 +11,75 @@ import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 
 const LoginScreen = ({ navigation }) => {
-    // 1. Gunakan satu state untuk semua data form
-    const [formData, setFormData] = useState({
-        email: '',
-        password: '',
-    });
-
+    const [formData, setFormData] = useState({ username: '', password: '' });
     const [showPassword, setShowPassword] = useState(false);
     const [errors, setErrors] = useState({});
 
-    // 2. Buat fungsi handleInputChange yang generik
+    //useDispatch untuk mengirim action
+    const dispatch = useDispatch();
+
+    //Ambil state dari Redux store
+    const { isLoading, error: authError, isAuthenticated } = useSelector((state) => state.auth);
+
+    //Efek untuk menangani navigasi setelah login
+    useEffect(() => {
+        if (isAuthenticated) {
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'MainApp' }],
+            });
+        }
+    }, [isAuthenticated, navigation]);
+
+    //Efek untuk menampilkan error dari Redux
+    useEffect(() => {
+        if (authError) {
+            Alert.alert('Login Gagal', authError.message || 'Terjadi kesalahan.');
+        }
+    }, [authError]);
+
     const handleInputChange = (name, value) => {
-        setFormData(prevState => ({
-            ...prevState,
-            [name]: value,
-        }));
-        // Hapus error untuk field yang sedang diisi
+        setFormData(prevState => ({ ...prevState, [name]: value }));
         if (errors[name]) {
-            setErrors(prevErrors => ({
-                ...prevErrors,
-                [name]: null,
-            }));
+            setErrors(prevErrors => ({ ...prevErrors, [name]: null }));
         }
     };
 
     const validateForm = () => {
-        Keyboard.dismiss(); // Tutup keyboard saat validasi
         let newErrors = {};
-        // Validasi Email
-        if (!formData.email) {
-            newErrors.email = 'Email tidak boleh kosong';
-        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-            newErrors.email = 'Format email tidak valid';
-        }
-        // Validasi Password
-        if (!formData.password) {
-            newErrors.password = 'Kata sandi tidak boleh kosong';
-        }
-
+        if (!formData.username) newErrors.username = 'Username tidak boleh kosong';
+        if (!formData.password) newErrors.password = 'Kata sandi tidak boleh kosong';
         setErrors(newErrors);
-        // Return true jika tidak ada error (Object.keys(newErrors).length === 0)
         return Object.keys(newErrors).length === 0;
     };
 
+    //handleLogin sekarang mengirim action ke Redux
     const handleLogin = () => {
         if (validateForm()) {
-            // Logika untuk login jika form valid
-            console.log('Data yang akan dikirim:', formData);
-            navigation.navigate('MainApp');
-        } else {
-            console.log('Validasi gagal:', errors);
+            // Kirim data login ke async thunk
+            dispatch(loginUser({
+                username: formData.username,
+                password: formData.password
+            }));
         }
     };
 
-    const togglePasswordVisibility = () => {
-        setShowPassword(!showPassword);
-    };
-
+    const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
     return (
         <View style={styles.screenContainer}>
-            <FocusAwareStatusBar
-                barStyle="dark-content"
-                backgroundColor="transparent"
-                translucent={true}
-            />
+            <FocusAwareStatusBar barStyle="dark-content" backgroundColor="transparent" translucent={true} />
             <ScrollView contentContainerStyle={styles.container}>
-
                 <Text style={styles.title}>Selamat Datang</Text>
                 <Text style={styles.subtitle}>Silahkan masuk untuk melanjutkan</Text>
 
                 <View style={styles.form}>
                     <CustomTextInput
-                        label="Email"
-                        value={formData.email}
-                        onChangeText={(value) => handleInputChange('email', value)}
-                        placeholder="contoh@email.com"
-                        keyboardType="email-address"
-                        error={errors.email} // Pass error message
+                        label="Username"
+                        value={formData.username}
+                        onChangeText={(value) => handleInputChange('username', value)}
+                        placeholder="username"
+                        error={errors.username}
                     />
                     <CustomTextInput
                         label="Kata Sandi"
@@ -93,14 +87,10 @@ const LoginScreen = ({ navigation }) => {
                         onChangeText={(value) => handleInputChange('password', value)}
                         placeholder="Masukkan kata sandi"
                         secureTextEntry={!showPassword}
-                        error={errors.password} // Pass error message
-                        rightIcon={ // Pass ikon ke komponen
+                        error={errors.password}
+                        rightIcon={
                             <TouchableOpacity onPress={togglePasswordVisibility} style={styles.eyeIcon}>
-                                <Ionicons
-                                    name={showPassword ? 'eye-off' : 'eye'}
-                                    size={22}
-                                    color={COLORS.gray}
-                                />
+                                <Ionicons name={showPassword ? 'eye-off' : 'eye'} size={22} color={COLORS.gray} />
                             </TouchableOpacity>
                         }
                     />
@@ -110,7 +100,12 @@ const LoginScreen = ({ navigation }) => {
                     <Text style={styles.linkText}>Lupa Kata Sandi?</Text>
                 </TouchableOpacity>
 
-                <CustomButton title="Masuk" onPress={handleLogin} />
+                {/* Tombol akan dinonaktifkan saat loading */}
+                <CustomButton
+                    title={isLoading ? 'Loading...' : 'Masuk'}
+                    onPress={handleLogin}
+                    disabled={isLoading}
+                />
 
                 <View style={styles.footer}>
                     <Text style={styles.footerText}>Belum punya akun? </Text>
@@ -118,7 +113,6 @@ const LoginScreen = ({ navigation }) => {
                         <Text style={[styles.footerText, styles.linkText]}>Daftar</Text>
                     </TouchableOpacity>
                 </View>
-
             </ScrollView>
         </View>
     );
@@ -131,9 +125,9 @@ const styles = StyleSheet.create({
         paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
     },
     container: {
-        flexGrow: 1, // Menggunakan flexGrow agar bisa scroll jika konten panjang
+        flexGrow: 1,
         padding: 24,
-        justifyContent: 'center', // Pusatkan konten secara vertikal
+        justifyContent: 'center',
     },
     title: {
         fontSize: 28,
@@ -163,16 +157,15 @@ const styles = StyleSheet.create({
     footer: {
         flexDirection: 'row',
         justifyContent: 'center',
-        paddingTop: 40 // Beri jarak dari tombol Masuk
+        paddingTop: 40
     },
     footerText: {
         fontSize: 14,
         color: COLORS.text
     },
     eyeIcon: {
-        padding: 10, // Area klik yang lebih besar untuk ikon
+        padding: 10,
     }
 });
-
 
 export default LoginScreen;
