@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Keyboard, Alert, Platform, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Keyboard, Alert, Platform, StatusBar, Modal, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import CustomTextInput from '../components/CustomTextInput';
@@ -7,6 +7,7 @@ import CustomButton from '../components/CustomButton';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 import { pixelSizeVertical } from '../../helper';
+import api from '../../api/axiosConfig';
 
 // Komponen kecil(chekbox) untuk menampilkan kriteria validasi
 const ValidationCriteria = ({ isValid, text }) => (
@@ -24,25 +25,21 @@ const ValidationCriteria = ({ isValid, text }) => (
 
 const CreateNewPasswordScreen = ({ navigation, route }) => {
     // ini dummy doang Di aplikasi real, token dan email akan didapat dari deep link
-    const { email = "hadi@mail.com" } = route.params || {};
-
+    const { email, token } = route.params || { email: "hadi@mail.com", token: "dummy-token" };
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
     const [errors, setErrors] = useState({});
-
-    // State untuk kriteria validasi
     const [isLengthValid, setIsLengthValid] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     // Memeriksa panjang kata sandi setiap kali berubah
     useEffect(() => {
         setIsLengthValid(password.length >= 8);
     }, [password]);
 
-    const handleSavePassword = () => {
+    const handleSavePassword = async () => {
         Keyboard.dismiss();
         let newErrors = {};
 
@@ -61,13 +58,30 @@ const CreateNewPasswordScreen = ({ navigation, route }) => {
         setErrors(newErrors);
 
         if (Object.keys(newErrors).length === 0) {
-            console.log('Menyimpan kata sandi baru untuk:', email);
-            // Logika untuk memanggil API dan menyimpan kata sandi baru
-            Alert.alert(
-                "Kata sandi Berhasil diperbarui",
-                "Kata sandi Anda telah berhasil diubah. Silakan masuk dengan kata sandi baru Anda.",
-                [{ text: "OK", onPress: () => navigation.popToTop() }] // Kembali ke Login
-            );
+            setIsLoading(true);
+            try {
+                const requestBody = {
+                    email: email,
+                    token: token, // Token dari link email
+                    newPassword: password,
+                };
+
+                // Panggil endpoint backend Anda
+                const response = await api.post('/api/v1/auth/reset-password', requestBody);
+
+                Alert.alert(
+                    "Berhasil!",
+                    response.data.message || "Kata sandi Anda telah berhasil diubah.",
+                    [{ text: "OK", onPress: () => navigation.navigate('Login') }]
+                );
+
+            } catch (err) {
+                console.error("Reset Password Error:", err.response ? err.response.data : err.message);
+                const errorMessage = err.response?.data?.message || 'Gagal mengubah kata sandi. Token mungkin tidak valid atau sudah kedaluwarsa.';
+                Alert.alert('Error', errorMessage);
+            } finally {
+                setIsLoading(false);
+            }
         }
     };
 
@@ -120,7 +134,7 @@ const CreateNewPasswordScreen = ({ navigation, route }) => {
                     <CustomButton
                         title="Simpan Kata Sandi Baru"
                         onPress={handleSavePassword}
-                        style={{ backgroundColor: COLORS.primary, borderRadius: 24, paddingVertical: 15, marginBottom: pixelSizeVertical(50)}}
+                        style={{ backgroundColor: COLORS.primary, borderRadius: 24, paddingVertical: 15, marginBottom: pixelSizeVertical(50) }}
                     />
                 </View>
             </View>
@@ -169,3 +183,4 @@ const styles = StyleSheet.create({
 });
 
 export default CreateNewPasswordScreen;
+
