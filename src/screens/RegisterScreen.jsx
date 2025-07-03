@@ -1,28 +1,38 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Platform, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Platform, StatusBar, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import CustomTextInput from '../components/CustomTextInput';
 import CustomButton from '../components/CustomButton';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
+import api from '../../api/axiosConfig';
 
 const RegisterScreen = ({ navigation }) => {
-    const [nama, setNama] = useState('');
+    const [fullname, setFullname] = useState('');
+    const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     // State untuk error messages
     const [errors, setErrors] = useState({});
     const [isSubmitted, setIsSubmitted] = useState(false);
 
-    // Validasi Username
+
+    const validateFullname = (fullname) => {
+        if (!fullname) return 'fullname tidak boleh kosong';
+        if (fullname.length < 2) return 'fullname minimal 2 karakter';
+        if (!/^[A-Za-z\s]+$/.test(fullname)) return 'fullname hanya boleh berisi huruf dan spasi';
+        return '';
+    };
+
     const validateUsername = (username) => {
         if (!username) return 'Username tidak boleh kosong';
-        if (username.length < 6) return 'Username minimal 6 karakter';
+        if (username.length < 4) return 'Username minimal 4 karakter';
         if (!/^[a-zA-Z]/.test(username)) return 'Username harus diawali dengan huruf';
         if (!/^[a-zA-Z0-9]+$/.test(username)) return 'Username hanya boleh berisi huruf dan angka';
         return '';
@@ -54,7 +64,8 @@ const RegisterScreen = ({ navigation }) => {
     const validateForm = () => {
         const newErrors = {};
 
-        newErrors.nama = validateUsername(nama);
+        newErrors.fullname = validateFullname(fullname);
+        newErrors.username = validateUsername(username);
         newErrors.email = validateEmail(email);
         newErrors.password = validatePassword(password);
         newErrors.confirmPassword = validateConfirmPassword(confirmPassword, password);
@@ -72,10 +83,16 @@ const RegisterScreen = ({ navigation }) => {
     // Handle input change with real-time validation
     const handleInputChange = (field, value) => {
         switch (field) {
-            case 'nama':
-                setNama(value);
+            case 'fullname':
+                setFullname(value);
                 if (isSubmitted) {
-                    setErrors(prev => ({ ...prev, nama: validateUsername(value) }));
+                    setErrors(prev => ({ ...prev, fullname: validateFullname(value) }));
+                }
+                break;
+            case 'username':
+                setUsername(value);
+                if (isSubmitted) {
+                    setErrors(prev => ({ ...prev, username: validateUsername(value) }));
                 }
                 break;
             case 'email':
@@ -103,15 +120,45 @@ const RegisterScreen = ({ navigation }) => {
         }
     };
 
-    const handleRegister = () => {
+    const handleRegister = async () => {
         setIsSubmitted(true);
+        if (!validateForm()) {
+            console.log('Form invalid');
+            return;
+        }
 
-        if (validateForm()) {
-            // Logika untuk mendaftar
-            console.log('Form valid:', { nama, email, password, confirmPassword });
-            // navigation.navigate('MainApp'); // Contoh navigasi setelah daftar
-        } else {
-            console.log('Form invalid:', errors);
+        setIsLoading(true); // Mulai loading
+
+        try {
+            // Body request disesuaikan dengan backend Anda
+            const requestBody = {
+                fullName: fullname,
+                username: username,
+                email: email,
+                password: password,
+            };
+
+            // Panggil backend menggunakan axios
+            const response = await api.post('/api/v1/auth/register', requestBody); // Ganti '/auth/register' dengan endpoint Anda
+
+            // Jika request berhasil (status code 2xx)
+            console.log('Response data:', response.data);
+            Alert.alert('Sukses', 'Registrasi berhasil! Silakan login.');
+            navigation.navigate('Login');
+
+        } catch (error) {
+            // Axios secara otomatis melempar error untuk status code non-2xx
+            console.error("Error saat registrasi:", error.response ? error.response.data : error.message);
+
+            if (error.response) {
+                // Ada response dari server (misalnya: email sudah ada, validasi gagal)
+                Alert.alert('Registrasi Gagal', error.response.data.message || 'Terjadi kesalahan pada server.');
+            } else {
+                // Tidak ada response (misalnya: masalah jaringan, server tidak jalan)
+                Alert.alert('Error', 'Tidak dapat terhubung ke server. Periksa koneksi Anda.');
+            }
+        } finally {
+            setIsLoading(false); // Hentikan loading, baik berhasil maupun gagal
         }
     };
 
@@ -137,12 +184,20 @@ const RegisterScreen = ({ navigation }) => {
 
                 <View style={styles.form}>
                     <CustomTextInput
+                        label="Fullname"
+                        value={fullname}
+                        onChangeText={(value) => handleInputChange('fullname', value)}
+                        placeholder="Masukkan fullname Anda"
+                        error={errors.fullname}
+                        hasError={!!errors.fullname}
+                    />
+                    <CustomTextInput
                         label="Username"
-                        value={nama}
-                        onChangeText={(value) => handleInputChange('nama', value)}
+                        value={username}
+                        onChangeText={(value) => handleInputChange('username', value)}
                         placeholder="Masukkan username Anda"
-                        error={errors.nama}
-                        hasError={!!errors.nama}
+                        error={errors.username}
+                        hasError={!!errors.username}
                     />
                     <CustomTextInput
                         label="Email"
@@ -195,7 +250,11 @@ const RegisterScreen = ({ navigation }) => {
                     Dengan mendaftar, Anda menyetujui <Text style={styles.linkText}>Ketentuan Layanan</Text> dan <Text style={styles.linkText}>Kebijakan Privasi</Text> kami.
                 </Text>
 
-                <CustomButton title="Daftar" onPress={handleRegister} />
+                <CustomButton
+                    title={isLoading ? 'Mendaftar...' : 'Daftar'}
+                    onPress={handleRegister}
+                    disabled={isLoading}
+                />
 
                 <View style={styles.footer}>
                     <Text style={styles.footerText}>Sudah punya akun? </Text>
