@@ -68,6 +68,10 @@ const ProfileScreen = ({ navigation }) => {
         ? { uri: user.imageUrl }
         : require('../../assets/images/g1.png');
 
+    if (!user) {
+        return null;
+    }
+
     return (
         <View style={styles.screenContainer}>
             <FocusAwareStatusBar
