@@ -3,7 +3,8 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import * as SecureStore from 'expo-secure-store';
 // Menggunakan helper untuk menyimpan dan menghapus token
 import { saveTokens, deleteTokens } from '../../utils/authStorage';
-import api from '../../api/axiosConfig'; // Menggunakan instance axios kita
+import api from '../../api/axiosConfig';
+
 
 // --- Async Thunk untuk Login ---
 // Ini adalah fungsi yang menangani logika async (panggilan API)
@@ -50,6 +51,33 @@ export const loginUser = createAsyncThunk(
     }
 );
 
+export const updateUserName = createAsyncThunk(
+    'users/updateName',
+    async ({ fullName }, { rejectWithValue }) => {
+        try {
+            const response = await api.patch('/api/v1/users', { fullName });
+            return response.data.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data || { message: 'Gagal memperbarui nama.' });
+        }
+    }
+);
+
+export const updateUserAvatar = createAsyncThunk(
+    'users/updateAvatar',
+    async ({ formData }, { rejectWithValue }) => {
+        try {
+            const response = await api.post('/api/v1/users/avatar', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            return response.data.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data || { message: 'Gagal mengunggah avatar.' });
+        }
+    }
+);
 // --- Slice (Irisan State) untuk Autentikasi ---
 const authSlice = createSlice({
     name: 'auth',
@@ -90,6 +118,38 @@ const authSlice = createSlice({
             })
             // Saat login gagal
             .addCase(loginUser.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.payload;
+            })
+
+            // --- KASUS UNTUK UPDATE NAMA ---
+            .addCase(updateUserName.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(updateUserName.fulfilled, (state, action) => {
+                state.isLoading = false;
+                // Perbarui data user di state
+                state.user = action.payload;
+            })
+            .addCase(updateUserName.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.payload;
+            })
+
+            // --- KASUS UNTUK UPDATE AVATAR ---
+            .addCase(updateUserAvatar.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(updateUserAvatar.fulfilled, (state, action) => {
+                state.isLoading = false;
+                // Perbarui hanya field imageUrl pada user state yang ada
+                if (state.user) {
+                    state.user.imageUrl = action.payload.imageUrl;
+                }
+            })
+            .addCase(updateUserAvatar.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.payload;
             });

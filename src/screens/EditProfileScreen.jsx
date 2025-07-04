@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     View,
     Text,
@@ -11,29 +11,86 @@ import {
     Pressable,
     Platform,
     StatusBar,
+    ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
+import { useDispatch, useSelector } from 'react-redux';
+import { updateUserName, updateUserAvatar, clearAuthError } from '../store/authSlice';
+
 
 // --- Komponen Utama EditProfileScreen ---
 const EditProfileScreen = ({ navigation }) => {
-    // Data awal pengguna, bisa didapat dari route.params atau state management
-    const [fullName, setFullName] = useState('Jaehyun Park');
-    // State avatar sekarang bisa string (uri) atau number (require)
-    const [avatar, setAvatar] = useState(require('../../assets/images/g4.png'));
+
+    const dispatch = useDispatch();
+    const { user, isLoading, error: authError } = useSelector((state) => state.auth);
+
+    const [fullName, setFullName] = useState(user?.fullName || '');
+    // const [avatar, setAvatar] = useState(user?.imageUrl || null); // State untuk URI gambar
+    const [avatarUri, setAvatarUri] = useState(user?.imageUrl || null);
+
+    const [newAvatarFile, setNewAvatarFile] = useState(null); // State untuk file gambar baru
     const [isModalVisible, setIsModalVisible] = useState(false);
+    // useeffect menangani error dari Redux
+    useEffect(() => {
+        if (authError) {
+            Alert.alert('Update Gagal', authError.message || 'Terjadi kesalahan.');
+            dispatch(clearAuthError());
+        }
+    }, [authError, dispatch]);
 
     const handleChangePhoto = () => {
         setIsModalVisible(true); // Buka modal
     };
 
-    const handleSaveChanges = () => {
-        // Logika untuk menyimpan perubahan ke API
-        console.log("Saving changes:", { fullName, avatar });
-        Alert.alert("Profil Disimpan", "Perubahan profil Anda telah berhasil disimpan.");
-        navigation.goBack();
+    const handleSaveChanges = async () => {
+        const isNameChanged = fullName !== user?.fullName && fullName.trim() !== '';
+        const isAvatarChanged = newAvatarFile !== null;
+
+        if (!isNameChanged && !isAvatarChanged) {
+            Alert.alert("Tidak Ada Perubahan", "Anda belum mengubah nama atau foto profil.");
+            return;
+        }// Buat array untuk menampung semua promise API call
+        const updatePromises = [];
+
+        // Jika nama berubah, tambahkan promise untuk update nama
+        if (isNameChanged) {
+            updatePromises.push(dispatch(updateUserName({ fullName })));
+        }
+
+        // Jika avatar berubah, tambahkan promise untuk update avatar
+        if (isAvatarChanged) {
+            const formData = new FormData();
+            let localUri = newAvatarFile.uri;
+            let filename = localUri.split('/').pop();
+            let match = /\.(\w+)$/.exec(filename);
+            let type = match ? `image/${match[1]}` : `image`;
+            formData.append('avatar', { uri: localUri, name: filename, type });
+
+            updatePromises.push(dispatch(updateUserAvatar({ formData })));
+        }
+
+        // Jalankan semua promise secara bersamaan
+        try {
+            const results = await Promise.all(updatePromises);
+
+            // Cek apakah ada yang gagal
+            const hasFailed = results.some(result => result.meta.requestStatus === 'rejected');
+
+            if (hasFailed) {
+                // Error sudah ditangani oleh useEffect, tidak perlu alert lagi di sini
+                console.log("Salah satu atau lebih update gagal.");
+            } else {
+                Alert.alert("Sukses", "Profil berhasil diperbarui.");
+                navigation.goBack();
+            }
+        } catch (e) {
+            // Ini untuk menangkap error yang tidak terduga
+            console.error("Error saat menjalankan Promise.all:", e);
+            Alert.alert("Error", "Terjadi kesalahan tak terduga.");
+        }
     };
 
     // Fungsi untuk meminta izin dan membuka kamera
@@ -51,7 +108,8 @@ const EditProfileScreen = ({ navigation }) => {
         });
 
         if (!result.canceled) {
-            setAvatar(result.assets[0].uri); // Simpan URI gambar yang diambil
+            setNewAvatarFile(result.assets[0]); // Simpan seluruh objek aset
+            setAvatarUri(result.assets[0].uri);   // Perbarui preview gambar
         }
 
         setIsModalVisible(false);
@@ -73,12 +131,14 @@ const EditProfileScreen = ({ navigation }) => {
         });
 
         if (!result.canceled) {
-            setAvatar(result.assets[0].uri); // Simpan URI gambar yang dipilih
+            setNewAvatarFile(result.assets[0]); // Simpan seluruh objek aset
+            setAvatarUri(result.assets[0].uri);   // Perbarui preview gambar
         }
 
         setIsModalVisible(false);
     }
 
+    const avatarSource = avatarUri ? { uri: avatarUri } : require('../../assets/images/g1.png');
 
     return (
         <View style={styles.screenContainer}>
@@ -93,19 +153,14 @@ const EditProfileScreen = ({ navigation }) => {
                     <Ionicons name="arrow-back" size={24} color={COLORS.text} />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Edit Profile</Text>
-                <TouchableOpacity onPress={handleSaveChanges} style={styles.headerButton}>
-                    <Text style={styles.saveText}>Save</Text>
+                <TouchableOpacity onPress={handleSaveChanges} style={styles.headerButton} disabled={isLoading}>
+                    {isLoading ? <ActivityIndicator color={COLORS.primary} /> : <Text style={styles.saveText}>Save</Text>}
                 </TouchableOpacity>
             </View>
 
             <View style={styles.container}>
-                {/* Avatar dan Tombol Ganti Foto */}
                 <View style={styles.avatarContainer}>
-                    {/* Menyesuaikan source gambar secara dinamis */}
-                    <Image
-                        source={typeof avatar === 'string' ? { uri: avatar } : avatar}
-                        style={styles.avatar}
-                    />
+                    <Image source={avatarSource} style={styles.avatar} />
                     <TouchableOpacity onPress={handleChangePhoto}>
                         <Text style={styles.changePhotoText}>Change Photo</Text>
                     </TouchableOpacity>
@@ -176,6 +231,8 @@ const styles = StyleSheet.create({
     },
     headerButton: {
         padding: 5,
+        minWidth: 50, // Beri lebar minimum agar layout stabil
+        alignItems: 'flex-end',
     },
     headerTitle: {
         fontSize: 20,
