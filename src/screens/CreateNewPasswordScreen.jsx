@@ -6,10 +6,9 @@ import CustomTextInput from '../components/CustomTextInput';
 import CustomButton from '../components/CustomButton';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
-import { pixelSizeVertical } from '../../helper';
+import { fontPixel, pixelSizeHorizontal, pixelSizeVertical } from '../../helper';
 import api from '../../api/axiosConfig';
 
-// Komponen kecil(chekbox) untuk menampilkan kriteria validasi
 const ValidationCriteria = ({ isValid, text }) => (
     <View style={styles.criteriaContainer}>
         <Ionicons
@@ -25,7 +24,7 @@ const ValidationCriteria = ({ isValid, text }) => (
 
 const CreateNewPasswordScreen = ({ navigation, route }) => {
     // ini dummy doang Di aplikasi real, token dan email akan didapat dari deep link
-    const { email, token } = route.params || { email: "hadi@mail.com", token: "dummy-token" };
+    const { email, token } = route.params || {};
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -33,6 +32,16 @@ const CreateNewPasswordScreen = ({ navigation, route }) => {
     const [errors, setErrors] = useState({});
     const [isLengthValid, setIsLengthValid] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+        if (!email || !token) {
+            Alert.alert(
+                "Error",
+                "Informasi reset tidak ditemukan. Silakan coba lagi dari awal.",
+                [{ text: "OK", onPress: () => navigation.navigate('Login') }]
+            );
+        }
+    }, [email, token]);
 
     // Memeriksa panjang kata sandi setiap kali berubah
     useEffect(() => {
@@ -64,6 +73,7 @@ const CreateNewPasswordScreen = ({ navigation, route }) => {
                     email: email,
                     token: token, // Token dari link email
                     newPassword: password,
+                    confirmPassword: confirmPassword,
                 };
 
                 // Panggil endpoint backend Anda
@@ -84,6 +94,20 @@ const CreateNewPasswordScreen = ({ navigation, route }) => {
             }
         }
     };
+
+    const handleModalOkPress = () => {
+        setIsSuccessModalVisible(false);
+        navigation.navigate('Login');
+    };
+
+    // Tampilkan loading atau pesan error jika email tidak ada
+    if (!email) {
+        return (
+            <View style={styles.screenContainer}>
+                <Text>Invalid navigation state.</Text>
+            </View>
+        );
+    }
 
     return (
         <View style={styles.screenContainer}>
@@ -138,6 +162,31 @@ const CreateNewPasswordScreen = ({ navigation, route }) => {
                     />
                 </View>
             </View>
+
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={isSuccessModalVisible}
+                onRequestClose={() => setIsSuccessModalVisible(false)}
+            >
+                <Pressable style={styles.modalOverlay} onPress={handleModalOkPress}>
+                    <Pressable>
+                        <View style={styles.successModalContent}>
+                            <View style={styles.successIconContainer}>
+                                <Ionicons name="checkmark" size={fontPixel(40)} color={COLORS.white} />
+                            </View>
+                            <Text style={styles.successTitle}>Berhasil!</Text>
+                            <Text style={styles.successSubtitle}>
+                                Kata sandi Anda telah berhasil diubah. Silakan masuk dengan kata sandi baru Anda.
+                            </Text>
+                            <TouchableOpacity style={styles.successButton} onPress={handleModalOkPress}>
+                                <Text style={styles.successButtonText}>Kembali ke Login</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </Pressable>
+                </Pressable>
+            </Modal>
+
         </View>
     );
 };
@@ -179,6 +228,54 @@ const styles = StyleSheet.create({
     },
     buttonContainer: {
         paddingBottom: 10,
+    },
+
+    modalOverlay: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+    },
+    successModalContent: {
+        width: '85%',
+        backgroundColor: 'white',
+        borderRadius: 15,
+        padding: pixelSizeHorizontal(20),
+        alignItems: 'center',
+    },
+    successIconContainer: {
+        width: pixelSizeHorizontal(70),
+        height: pixelSizeHorizontal(70),
+        borderRadius: pixelSizeHorizontal(35),
+        backgroundColor: '#28a745',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: pixelSizeVertical(20),
+    },
+    successTitle: {
+        fontSize: fontPixel(22),
+        fontWeight: 'bold',
+        marginBottom: pixelSizeVertical(10),
+    },
+    successSubtitle: {
+        fontSize: fontPixel(16),
+        textAlign: 'center',
+        color: COLORS.gray,
+        marginBottom: pixelSizeVertical(25),
+        lineHeight: fontPixel(24),
+    },
+    successButton: {
+        backgroundColor: COLORS.primary,
+        paddingVertical: pixelSizeVertical(12),
+        paddingHorizontal: pixelSizeHorizontal(30),
+        borderRadius: 8,
+        width: '100%',
+        alignItems: 'center',
+    },
+    successButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
+        fontSize: fontPixel(16),
     },
 });
 
