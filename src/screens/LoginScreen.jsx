@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, StatusBar, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-// PENAMBAHAN 1: Impor hook dari react-redux dan action dari authSlice
 import { useDispatch, useSelector } from 'react-redux';
 import { loginUser } from '../store/authSlice';
 

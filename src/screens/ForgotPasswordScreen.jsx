@@ -31,20 +31,33 @@ const ForgotPasswordScreen = ({ navigation }) => {
         if (validateEmail()) {
             setIsLoading(true);
             try {
-                // Panggil endpoint backend
+                // const response = await api.post(`/api/v1/auth/forgot-password?email=${email}`);
                 const response = await api.post('/api/v1/auth/forgot-password', { email });
 
-                // Jika berhasil, tampilkan pesan sukses dan navigasi
                 Alert.alert("Permintaan Terkirim", response.data.message || 'Jika email terdaftar, link reset telah dikirim.');
                 navigation.navigate('ResetLinkSent', { email: email });
 
             } catch (err) {
-                // Tangani error dari backend atau jaringan
-                console.error("Forgot Password Error:", err.response ? err.response.data : err.message);
-                const errorMessage = err.response?.data?.message || 'Gagal mengirim permintaan. Silakan coba lagi.';
+                console.error("Forgot Password Error:", err);
+                let errorMessage = 'Gagal mengirim permintaan. Silakan coba lagi.';
+
+                if (err.response) {
+                    // Jika ada respons dari server (meskipun error)
+                    console.error("Error Data:", err.response.data);
+                    // Cek jika ada pesan error spesifik dari backend
+                    if (err.response.data && err.response.data.message) {
+                        errorMessage = err.response.data.message;
+                    } else {
+                        // Jika tidak ada pesan spesifik, berikan pesan umum berdasarkan status code
+                        errorMessage = `Terjadi kesalahan pada server (Status: ${err.response.status}).`;
+                    }
+                } else {
+                    // Jika tidak ada respons sama sekali (masalah jaringan)
+                    errorMessage = 'Tidak dapat terhubung ke server. Pastikan koneksi internet dan alamat IP server sudah benar.';
+                }
+
                 Alert.alert('Error', errorMessage);
             } finally {
-                // Hentikan loading
                 setIsLoading(false);
             }
         }

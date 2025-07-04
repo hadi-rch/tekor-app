@@ -3,7 +3,9 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import * as SecureStore from 'expo-secure-store';
 // Menggunakan helper untuk menyimpan dan menghapus token
 import { saveTokens, deleteTokens } from '../../utils/authStorage';
-import api from '../../api/axiosConfig'; // Menggunakan instance axios kita
+import api from '../../api/axiosConfig';
+import { use } from 'react';
+
 
 // --- Async Thunk untuk Login ---
 // Ini adalah fungsi yang menangani logika async (panggilan API)
@@ -12,44 +14,96 @@ export const loginUser = createAsyncThunk(
     'auth/login',
     async (credentials, { rejectWithValue }) => {
         try {
-            // Panggil endpoint login backend
-            const response = await api.post('/api/v1/auth/login', credentials);
+            // --- Langkah 1: Lakukan login untuk mendapatkan token ---
+            console.log('Mencoba login dengan:', credentials);
+            const loginResponse = await api.post('/api/v1/auth/login', credentials);
 
-            // Tampilkan response di konsol untuk debugging jika perlu
-            console.log('Backend Login Response:', JSON.stringify(response.data, null, 2));
+            const loginData = loginResponse.data.data;
+            const { accessToken, refreshToken } = loginData.token;
 
-            // Ambil objek 'data' dari respons
-            const responseData = response.data.data;
-
-            // Destructuring sesuai dengan struktur JSON dari backend
-            const { user, token } = responseData;
-            const { accessToken, refreshToken } = token;
-
-            // Validasi: Pastikan kedua token ada sebelum melanjutkan
             if (!accessToken || !refreshToken) {
                 return rejectWithValue({ message: 'Respons token tidak lengkap dari server.' });
             }
 
-            // Simpan kedua token dengan aman menggunakan helper
+            // Simpan token terlebih dahulu agar bisa digunakan oleh interceptor
             await saveTokens(accessToken, refreshToken);
+            console.log('Token berhasil disimpan.');
 
-            // Kembalikan accessToken sebagai token utama dan data user ke state global
-            return { token: accessToken, user };
+            // --- Langkah 2: Ambil profil lengkap dengan token baru ---
+            try {
+                console.log('Mencoba mengambil profil pengguna...');
+                // Axios interceptor akan secara otomatis menambahkan token ke header request ini.
+                // Pastikan endpoint '/api/v1/users/profile' ada di backend Anda.
+                const profileResponse = await api.get('/api/v1/users');
 
-        } catch (error) {
-            // Jika login gagal, kirim pesan error dari backend
-            if (error.response) {
-                console.error('Login Error Response:', error.response.data);
-                // Kirim pesan error yang lebih spesifik jika ada
-                return rejectWithValue(error.response.data.message || 'Username atau password salah.');
+                const userProfile = profileResponse.data;
+                console.log("userProfile:", userProfile);
+                console.log("profileResponse.data:", profileResponse.data);
+                console.log("profileResponse.data.data:", profileResponse.data.data);
+                console.log('Profil berhasil diambil:', userProfile);
+
+                // Kembalikan token dan data profil yang LENGKAP
+                return { token: accessToken, user: userProfile };
+
+            } catch (profileError) {
+                // Tangani error JIKA HANYA pengambilan profil yang gagal
+                console.error('--- PROFILE FETCH ERROR ---');
+                if (profileError.response) {
+                    console.error('STATUS:', profileError.response.status);
+                    console.error('DATA:', JSON.stringify(profileError.response.data, null, 2));
+                } else {
+                    console.error('MESSAGE:', profileError.message);
+                }
+                console.error('---------------------------');
+
+                // Logout untuk membersihkan token yang mungkin salah
+                await deleteTokens();
+                return rejectWithValue({ message: 'Login berhasil, tetapi gagal mengambil data profil.' });
             }
-            // Error jaringan atau server tidak aktif
-            console.error('Network/Server Error:', error.message);
-            return rejectWithValue({ message: 'Tidak dapat terhubung ke server.' });
+
+        } catch (loginError) {
+            // Tangani error JIKA login awal gagal
+            console.error('--- INITIAL LOGIN ERROR ---');
+            if (loginError.response) {
+                console.error('STATUS:', loginError.response.status);
+                console.error('DATA:', JSON.stringify(loginError.response.data, null, 2));
+            } else {
+                console.error('MESSAGE:', loginError.message);
+            }
+            console.error('---------------------------');
+
+            return rejectWithValue(loginError.response?.data || { message: 'Tidak dapat terhubung ke server.' });
         }
     }
 );
 
+export const updateUserName = createAsyncThunk(
+    'users/updateName',
+    async ({ fullName }, { rejectWithValue }) => {
+        try {
+            const response = await api.patch('/api/v1/users', { fullName });
+            return response.data.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data || { message: 'Gagal memperbarui nama.' });
+        }
+    }
+);
+
+export const updateUserAvatar = createAsyncThunk(
+    'users/updateAvatar',
+    async ({ formData }, { rejectWithValue }) => {
+        try {
+            const response = await api.post('/api/v1/users/avatar', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            return response.data.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data || { message: 'Gagal mengunggah avatar.' });
+        }
+    }
+);
 // --- Slice (Irisan State) untuk Autentikasi ---
 const authSlice = createSlice({
     name: 'auth',
@@ -90,6 +144,38 @@ const authSlice = createSlice({
             })
             // Saat login gagal
             .addCase(loginUser.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.payload;
+            })
+
+            // --- KASUS UNTUK UPDATE NAMA ---
+            .addCase(updateUserName.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(updateUserName.fulfilled, (state, action) => {
+                state.isLoading = false;
+                // Perbarui data user di state
+                state.user = action.payload;
+            })
+            .addCase(updateUserName.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.payload;
+            })
+
+            // --- KASUS UNTUK UPDATE AVATAR ---
+            .addCase(updateUserAvatar.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(updateUserAvatar.fulfilled, (state, action) => {
+                state.isLoading = false;
+                // Perbarui hanya field imageUrl pada user state yang ada
+                if (state.user) {
+                    state.user.imageUrl = action.payload.imageUrl;
+                }
+            })
+            .addCase(updateUserAvatar.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.payload;
             });
