@@ -11,6 +11,7 @@ import {
     StatusBar,
     Modal,
     Pressable,
+    ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
@@ -69,7 +70,11 @@ const ProfileScreen = ({ navigation }) => {
         : require('../../assets/images/g1.png');
 
     if (!user) {
-        return null;
+        return (
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color={COLORS.primary} />
+            </View>
+        );
     }
 
     return (
@@ -88,7 +93,7 @@ const ProfileScreen = ({ navigation }) => {
                 {/* Info Pengguna */}
                 <View style={styles.profileInfoContainer}>
                     <Image source={avatarSource} style={styles.avatar} />
-                    <Text style={styles.userName}>{user.name}</Text>
+                    <Text style={styles.userName}>{user.fullName}</Text>
                     <Text style={styles.userEmail}>{user.email}</Text>
                 </View>
 
@@ -177,7 +182,7 @@ const styles = StyleSheet.create({
     },
     profileInfoContainer: {
         alignItems: 'center',
-        paddingVertical: 30,
+        paddingTop: 30,
     },
     avatar: {
         width: 100,
