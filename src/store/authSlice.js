@@ -1,21 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-// Menggunakan alias 'SecureStore' untuk konsistensi
-import * as SecureStore from 'expo-secure-store';
-// Menggunakan helper untuk menyimpan dan menghapus token
 import { saveTokens, deleteTokens } from '../../utils/authStorage';
 import api from '../../api/axiosConfig';
-import { use } from 'react';
 
 
-// --- Async Thunk untuk Login ---
-// Ini adalah fungsi yang menangani logika async (panggilan API)
-// dan secara otomatis mengelola state loading/error.
 export const loginUser = createAsyncThunk(
     'auth/login',
     async (credentials, { rejectWithValue }) => {
         try {
-            // --- Langkah 1: Lakukan login untuk mendapatkan token ---
-            console.log('Mencoba login dengan:', credentials);
             const loginResponse = await api.post('/api/v1/auth/login', credentials);
 
             const loginData = loginResponse.data.data;
@@ -25,36 +16,24 @@ export const loginUser = createAsyncThunk(
                 return rejectWithValue({ message: 'Respons token tidak lengkap dari server.' });
             }
 
-            // Simpan token terlebih dahulu agar bisa digunakan oleh interceptor
             await saveTokens(accessToken, refreshToken);
             console.log('Token berhasil disimpan.');
 
-            // --- Langkah 2: Ambil profil lengkap dengan token baru ---
             try {
-                console.log('Mencoba mengambil profil pengguna...');
-                // Axios interceptor akan secara otomatis menambahkan token ke header request ini.
-                // Pastikan endpoint '/api/v1/users/profile' ada di backend Anda.
                 const profileResponse = await api.get('/api/v1/users');
-
                 const userProfile = profileResponse.data;
-                console.log("userProfile:", userProfile);
-                console.log("profileResponse.data:", profileResponse.data);
-                console.log("profileResponse.data.data:", profileResponse.data.data);
-                console.log('Profil berhasil diambil:', userProfile);
-
-                // Kembalikan token dan data profil yang LENGKAP
                 return { token: accessToken, user: userProfile };
 
             } catch (profileError) {
-                // Tangani error JIKA HANYA pengambilan profil yang gagal
-                console.error('--- PROFILE FETCH ERROR ---');
-                if (profileError.response) {
-                    console.error('STATUS:', profileError.response.status);
-                    console.error('DATA:', JSON.stringify(profileError.response.data, null, 2));
-                } else {
-                    console.error('MESSAGE:', profileError.message);
+                // Log error hanya di development
+                if (__DEV__) {
+                    console.log('Profile fetch error:', {
+                        status: profileError.response?.status,
+                        data: profileError.response?.data,
+                        message: profileError.message
+                    });
                 }
-                console.error('---------------------------');
+
 
                 // Logout untuk membersihkan token yang mungkin salah
                 await deleteTokens();
@@ -62,17 +41,21 @@ export const loginUser = createAsyncThunk(
             }
 
         } catch (loginError) {
-            // Tangani error JIKA login awal gagal
-            console.error('--- INITIAL LOGIN ERROR ---');
-            if (loginError.response) {
-                console.error('STATUS:', loginError.response.status);
-                console.error('DATA:', JSON.stringify(loginError.response.data, null, 2));
-            } else {
-                console.error('MESSAGE:', loginError.message);
+            if (__DEV__) {
+                console.log('Login error:', {
+                    status: loginError.response?.status,
+                    data: loginError.response?.data,
+                    message: loginError.message
+                });
             }
-            console.error('---------------------------');
 
-            return rejectWithValue(loginError.response?.data || { message: 'Tidak dapat terhubung ke server.' });
+            // Return error yang lebih terstruktur
+            const errorResponse = loginError.response?.data || {
+                message: 'Tidak dapat terhubung ke server.',
+                code: 'NETWORK_ERROR'
+            };
+
+            return rejectWithValue(errorResponse);
         }
     }
 );
