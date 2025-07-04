@@ -12,6 +12,7 @@ import {
     Platform,
     StatusBar,
     ActivityIndicator,
+    Clipboard,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -19,7 +20,22 @@ import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateUserName, updateUserAvatar, clearAuthError } from '../store/authSlice';
+import { fontPixel, pixelSizeVertical } from '../../helper';
 
+// --- Komponen baru untuk menampilkan baris informasi read-only ---
+const InfoRow = ({ label, value, iconName, onIconPress }) => (
+    <View style={styles.infoRowContainer}>
+        <Text style={styles.infoLabel}>{label}</Text>
+        <View style={styles.infoValueContainer}>
+            <Text style={styles.infoValue}>{value}</Text>
+            {iconName && (
+                <TouchableOpacity onPress={onIconPress} style={styles.infoIcon}>
+                    <Ionicons name={iconName} size={fontPixel(20)} color={COLORS.gray} />
+                </TouchableOpacity>
+            )}
+        </View>
+    </View>
+);
 
 // --- Komponen Utama EditProfileScreen ---
 const EditProfileScreen = ({ navigation }) => {
@@ -83,8 +99,13 @@ const EditProfileScreen = ({ navigation }) => {
                 // Error sudah ditangani oleh useEffect, tidak perlu alert lagi di sini
                 console.log("Salah satu atau lebih update gagal.");
             } else {
-                Alert.alert("Sukses", "Profil berhasil diperbarui.");
-                navigation.goBack();
+                Alert.alert(
+                    "Sukses",
+                    "Profil berhasil diperbarui.",
+                    [
+                        { text: "OK", onPress: () => navigation.goBack() }
+                    ]
+                );
             }
         } catch (e) {
             // Ini untuk menangkap error yang tidak terduga
@@ -138,6 +159,21 @@ const EditProfileScreen = ({ navigation }) => {
         setIsModalVisible(false);
     }
 
+    const copyToClipboard = (text) => {
+        Clipboard.setString(text);
+        Alert.alert("Disalin!", `${text} telah disalin ke clipboard.`);
+    };
+
+    const formatDate = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('id-ID', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    };
+
     const avatarSource = avatarUri ? { uri: avatarUri } : require('../../assets/images/g1.png');
 
     return (
@@ -166,14 +202,37 @@ const EditProfileScreen = ({ navigation }) => {
                     </TouchableOpacity>
                 </View>
 
-                {/* Form Input */}
-                <View style={styles.formContainer}>
+
+
+                {/* --- Bagian Informasi yang Dapat Diubah --- */}
+                <View style={styles.sectionContainer}>
+                    <Text style={styles.sectionTitle}>Informasi yang Dapat Diubah</Text>
                     <Text style={styles.label}>Full Name</Text>
                     <TextInput
                         style={styles.input}
                         value={fullName}
                         onChangeText={setFullName}
-                        placeholder="Mauskan nama lengkap Anda"
+                        placeholder="Masukkan nama lengkap Anda"
+                    />
+                </View>
+
+                {/* --- Bagian Informasi Akun --- */}
+                <View style={styles.sectionContainer}>
+                    <Text style={styles.sectionTitle}>Informasi Akun</Text>
+                    <InfoRow
+                        label="Username"
+                        value={`@${user?.username || ''}`}
+                    />
+                    <InfoRow
+                        label="Email"
+                        value={user?.email || ''}
+                        iconName="copy-outline"
+                        onIconPress={() => copyToClipboard(user?.email)}
+                    />
+                    <InfoRow
+                        label="Terdaftar sejak"
+                        value={formatDate(user?.createdAt)}
+                        iconName="calendar-outline"
                     />
                 </View>
             </View>
@@ -231,7 +290,7 @@ const styles = StyleSheet.create({
     },
     headerButton: {
         padding: 5,
-        minWidth: 50, // Beri lebar minimum agar layout stabil
+        // minWidth: 50, // Beri lebar minimum agar layout stabil
         alignItems: 'flex-end',
     },
     headerTitle: {
@@ -277,7 +336,38 @@ const styles = StyleSheet.create({
         padding: 15,
         fontSize: 16,
     },
-    // Style untuk Modal
+    sectionContainer: {
+        marginBottom: pixelSizeVertical(25),
+    },
+    sectionTitle: {
+        fontSize: fontPixel(18),
+        fontWeight: 'bold',
+        color: COLORS.text,
+        marginBottom: pixelSizeVertical(15),
+    },
+    // Styles untuk InfoRow
+    infoRowContainer: {
+        marginBottom: pixelSizeVertical(15),
+    },
+    infoLabel: {
+        fontSize: fontPixel(14),
+        color: COLORS.gray,
+        marginBottom: 4,
+    },
+    infoValueContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    infoValue: {
+        fontSize: fontPixel(16),
+        color: COLORS.text,
+        fontWeight: '500',
+    },
+    infoIcon: {
+        padding: 5,
+    },
+    // Styles untuk Modal
     modalOverlay: {
         flex: 1,
         justifyContent: 'flex-end',
@@ -288,7 +378,7 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
         paddingVertical: 20,
-        paddingTop: 40, // Memberi ruang untuk tombol close
+        paddingTop: 40,
     },
     modalButton: {
         padding: 20,
@@ -297,7 +387,7 @@ const styles = StyleSheet.create({
         borderColor: '#eee',
     },
     modalButtonText: {
-        fontSize: 18,
+        fontSize: fontPixel(18),
         color: COLORS.primary,
     },
     closeButton: {
