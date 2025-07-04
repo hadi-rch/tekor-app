@@ -8,82 +8,66 @@ import {
     StatusBar,
     Alert,
     ScrollView,
+    Keyboard,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import api from '../../api/axiosConfig';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 import CustomTextInput from '../components/CustomTextInput';
 import CustomButton from '../components/CustomButton';
 import { fontPixel, heightPixel, pixelSizeVertical, pixelSizeHorizontal } from '../../helper';
 
-// --- Komponen untuk Indikator Kekuatan Kata Sandi ---
-const PasswordStrengthIndicator = ({ strength }) => {
-    const getStrengthInfo = () => {
-        switch (strength) {
-            case 1:
-                return { text: 'Lemah', color: '#dc3545', width: '25%' };
-            case 2:
-                return { text: 'Sedang', color: '#ffc107', width: '50%' };
-            case 3:
-                return { text: 'Kuat', color: '#28a745', width: '100%' };
-            default:
-                return { text: 'Lemah', color: '#6c757d', width: '0%' };
-        }
-    };
-
-    const { text, color, width } = getStrengthInfo();
-
-    return (
-        <View style={styles.strengthContainer}>
-            <Text style={styles.strengthLabel}>Kekuatan Kata Sandi: <Text style={{ color, fontWeight: 'bold' }}>{text}</Text></Text>
-            <View style={styles.strengthBarBackground}>
-                <View style={[styles.strengthBar, { width, backgroundColor: color }]} />
-            </View>
-        </View>
-    );
-};
-
 
 // --- Komponen Utama ChangePasswordScreen ---
 const ChangePasswordScreen = ({ navigation }) => {
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-
+    const [confirmNewPassword, setconfirmNewPassword] = useState('');
     const [showCurrent, setShowCurrent] = useState(false);
     const [showNew, setShowNew] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
-    const [passwordStrength, setPasswordStrength] = useState(0);
-
-    // Cek kekuatan kata sandi setiap kali diubah
-    useEffect(() => {
-        let strength = 0;
-        if (newPassword.length >= 8) strength++;
-        if (newPassword.match(/[A-Z]/) && newPassword.match(/[a-z]/)) strength++;
-        if (newPassword.match(/[0-9]/) && newPassword.match(/[^A-Za-z0-9]/)) strength++;
-        setPasswordStrength(strength > 3 ? 3 : strength);
-    }, [newPassword]);
-
-
-    const handleSaveChanges = () => {
-        if (!currentPassword || !newPassword || !confirmPassword) {
+    const handleSaveChanges = async () => {
+        Keyboard.dismiss();
+        if (!currentPassword || !newPassword || !confirmNewPassword) {
             Alert.alert("Error", "Semua kolom harus diisi.");
             return;
         }
-        if (newPassword !== confirmPassword) {
+        if (newPassword !== confirmNewPassword) {
             Alert.alert("Error", "Kata sandi baru dan konfirmasi tidak cocok.");
             return;
         }
-        if (passwordStrength < 2) {
-            Alert.alert("Error", "Kata sandi baru terlalu lemah.");
+        if (newPassword.length < 8 && confirmNewPassword.length < 8) {
+            Alert.alert("Error", "Kata sandi baru minimal 8 karakter.");
             return;
         }
+        console.log("diluar try catch")
 
-        console.log("Menyimpan kata sandi baru...");
-        Alert.alert("Berhasil", "Kata sandi Anda telah berhasil diubah.", [
-            { text: 'OK', onPress: () => navigation.goBack() }
-        ]);
+        setIsLoading(true);
+        try {
+            const requestBody = {
+                currentPassword: currentPassword,
+                newPassword: newPassword,
+                confirmNewPassword: confirmNewPassword,
+            };
+            
+            console.log("first: ")
+            const response = await api.post('/api/v1/users/change-password', requestBody);
+            console.log("second: ")
+
+            Alert.alert("Berhasil", response.data.message || "Kata sandi Anda telah berhasil diubah.", [
+                { text: 'OK', onPress: () => navigation.goBack() }
+            ]);
+
+        } catch (err) {
+            console.error("Change Password Error:", err.response ? err.response.data : err.message);
+            const errorMessage = err.response?.data?.message || 'Gagal mengubah kata sandi. Silakan coba lagi.';
+            Alert.alert('Error', errorMessage);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -102,7 +86,10 @@ const ChangePasswordScreen = ({ navigation }) => {
                 <View style={{ width: fontPixel(24) }} />
             </View>
 
-            <ScrollView contentContainerStyle={styles.scrollContainer}>
+            <ScrollView
+                contentContainerStyle={styles.scrollContainer}
+                keyboardShouldPersistTaps="handled"
+            >
                 <View>
                     <CustomTextInput
                         label="Kata Sandi Saat Ini"
@@ -128,8 +115,8 @@ const ChangePasswordScreen = ({ navigation }) => {
                     />
                     <CustomTextInput
                         label="Konfirmasi Kata Sandi Baru"
-                        value={confirmPassword}
-                        onChangeText={setConfirmPassword}
+                        value={confirmNewPassword}
+                        onChangeText={setconfirmNewPassword}
                         secureTextEntry={!showConfirm}
                         rightIcon={
                             <TouchableOpacity onPress={() => setShowConfirm(!showConfirm)}>
@@ -137,13 +124,13 @@ const ChangePasswordScreen = ({ navigation }) => {
                             </TouchableOpacity>
                         }
                     />
-                    <PasswordStrengthIndicator strength={passwordStrength} />
                 </View>
 
                 <CustomButton
-                    title="Simpan Perubahan"
+                    title={isLoading ? "Menyimpan..." : "Simpan Perubahan"}
                     onPress={handleSaveChanges}
-                    style={{ backgroundColor: COLORS.primary, marginTop: pixelSizeVertical(40), marginBottom: pixelSizeVertical(50), }}
+                    disabled={isLoading}
+                    style={{ backgroundColor: COLORS.primary, marginTop: pixelSizeVertical(40) }}
                 />
             </ScrollView>
         </View>
