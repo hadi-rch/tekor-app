@@ -50,27 +50,32 @@ const LoginScreen = ({ navigation }) => {
 
     const handleInputChange = (name, value) => {
         setFormData(prevState => ({ ...prevState, [name]: value }));
+        // Saat pengguna mulai mengetik, hapus pesan error untuk field tersebut
         if (errors[name]) {
             setErrors(prevErrors => ({ ...prevErrors, [name]: null }));
         }
     };
 
-    const validateForm = () => {
-        let newErrors = {};
-        if (!formData.username) newErrors.username = 'Username tidak boleh kosong';
-        if (!formData.password) newErrors.password = 'Kata sandi tidak boleh kosong';
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
-
-    //handleLogin sekarang mengirim action ke Redux
     const handleLogin = () => {
-        if (validateForm()) {
-            // Kirim data login ke async thunk
-            dispatch(loginUser({
-                username: formData.username,
-                password: formData.password
-            }));
+        const { username, password } = formData;
+        const newErrors = {};
+
+        if (!username.trim()) {
+            newErrors.username = 'Username tidak boleh kosong';
+        } else if (username.length < 4) {
+            newErrors.username = 'Username minimal 4 karakter';
+        }
+
+        if (!password.trim()) {
+            newErrors.password = 'Kata sandi tidak boleh kosong';
+        } else if (password.length < 8) {
+            newErrors.password = 'Password minimal 8 karakter';
+        }
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+        } else {
+            dispatch(loginUser({ username, password }));
         }
     };
 
