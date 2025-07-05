@@ -8,29 +8,14 @@ import {
     StatusBar,
     FlatList,
     Animated,
+    ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
-import { fontPixel, pixelSizeVertical, pixelSizeHorizontal, widthPixel, heightPixel } from '../../helper';
+import { fontPixel, pixelSizeVertical, pixelSizeHorizontal, heightPixel } from '../../helper';
+import api from '../../api/axiosConfig';
 
-// --- Data Dummy Kosakata (dengan Romanization) ---
-const VOCABULARY_DATA = [
-    { id: 1, korean: '사과', romanization: 'sagwa', indonesian: 'Apel' },
-    { id: 2, korean: '바나나', romanization: 'banana', indonesian: 'Pisang' },
-    { id: 3, korean: '물', romanization: 'mul', indonesian: 'Air' },
-    { id: 4, korean: '집', romanization: 'jip', indonesian: 'Rumah' },
-    { id: 5, korean: '학교', romanization: 'hakgyo', indonesian: 'Sekolah' },
-    { id: 6, korean: '친구', romanization: 'chingu', indonesian: 'Teman' },
-    { id: 7, korean: '사랑', romanization: 'sarang', indonesian: 'Cinta' },
-    { id: 8, korean: '행복', romanization: 'haengbok', indonesian: 'Kebahagiaan' },
-    { id: 9, korean: '시간', romanization: 'sigan', indonesian: 'Waktu' },
-    { id: 10, korean: '사람', romanization: 'saram', indonesian: 'Orang' },
-    { id: 11, korean: '책', romanization: 'chaek', indonesian: 'Buku' },
-    { id: 12, korean: '음악', romanization: 'eumak', indonesian: 'Musik' },
-];
-
-// --- Komponen untuk satu kartu ---
 const MemoryCard = ({ item, isFlipped, onPress }) => {
     const animatedValue = useRef(new Animated.Value(0)).current;
 
@@ -52,7 +37,6 @@ const MemoryCard = ({ item, isFlipped, onPress }) => {
     return (
         <TouchableOpacity onPress={onPress} style={styles.cardContainer}>
             <Animated.View style={[styles.card, styles.cardFront, frontAnimatedStyle]}>
-                {/* Menampilkan Korean dan Romanization */}
                 <View>
                     <Text style={styles.cardTextKorean}>{item.korean}</Text>
                     <Text style={styles.cardTextRomanization}>{item.romanization}</Text>
@@ -67,18 +51,47 @@ const MemoryCard = ({ item, isFlipped, onPress }) => {
 
 
 // --- Komponen Utama Game ---
-const MemoryCardGameScreen = ({ navigation }) => {
+const MemoryCardGameScreen = ({ navigation, route }) => {
+    // 3. Ambil kategori dari parameter navigasi
+    const { category } = route.params;
+
     const [cards, setCards] = useState([]);
+    const [originalCards, setOriginalCards] = useState([]);
     const [flippedCardIds, setFlippedCardIds] = useState(new Set());
+    const [isLoading, setIsLoading] = useState(true);
 
-    const shuffleCards = () => {
-        const shuffled = [...VOCABULARY_DATA].sort(() => Math.random() - 0.5);
-        setCards(shuffled);
-    };
-
+    // 4. useEffect untuk mengambil data dari backend
     useEffect(() => {
-        shuffleCards();
-    }, []);
+        const fetchVocabularies = async () => {
+            if (!category) {
+                Alert.alert("Error", "Kategori tidak ditemukan.");
+                setIsLoading(false);
+                return;
+            }
+            try {
+                const response = await api.get(`/api/v1/vocabularies?category=${category}`);
+                const backendData = response.data.data;
+
+                // Transformasi data dari backend ke format yang dibutuhkan frontend
+                const formattedData = backendData.map(item => ({
+                    id: item.id,
+                    korean: item.koreanWord,
+                    indonesian: item.translation,
+                    romanization: item.romanization,
+                }));
+
+                setOriginalCards(formattedData);
+                setCards([...formattedData].sort(() => Math.random() - 0.5));
+            } catch (error) {
+                console.error("Gagal mengambil kosakata:", error);
+                Alert.alert("Error", "Tidak dapat memuat data permainan untuk kategori ini.");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchVocabularies();
+    }, [category]);
 
     const handleCardFlip = (cardId) => {
         const newFlipped = new Set(flippedCardIds);
@@ -96,12 +109,11 @@ const MemoryCardGameScreen = ({ navigation }) => {
 
     const handleShuffle = () => {
         handleReset();
-        shuffleCards();
+        setCards([...originalCards].sort(() => Math.random() - 0.5));
     };
 
     const progress = cards.length > 0 ? (flippedCardIds.size / cards.length) * 100 : 0;
 
-    // Komponen Header untuk FlatList
     const renderListHeader = () => (
         <>
             <View style={styles.statsContainer}>
@@ -122,6 +134,15 @@ const MemoryCardGameScreen = ({ navigation }) => {
             </View>
         </>
     );
+
+    if (isLoading) {
+        return (
+            <View style={[styles.screenContainer, styles.centerContainer]}>
+                <ActivityIndicator size="large" color={COLORS.primary} />
+                <Text style={{ marginTop: 10 }}>Memuat kartu...</Text>
+            </View>
+        );
+    }
 
     return (
         <View style={styles.screenContainer}>
@@ -168,6 +189,10 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#F7F8FA',
         paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+    },
+    centerContainer: {
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     header: {
         flexDirection: 'row',
@@ -257,12 +282,11 @@ const styles = StyleSheet.create({
         backgroundColor: '#E9F5FF',
     },
     cardTextKorean: {
-        fontSize: fontPixel(26), // Sedikit dikecilkan untuk memberi ruang
+        fontSize: fontPixel(26),
         fontWeight: 'bold',
         textAlign: 'center',
         marginBottom: pixelSizeVertical(4),
     },
-    // Style baru untuk romanization
     cardTextRomanization: {
         fontSize: fontPixel(16),
         textAlign: 'center',

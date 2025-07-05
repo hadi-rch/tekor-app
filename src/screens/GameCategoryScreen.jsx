@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     View,
     Text,
@@ -8,22 +8,23 @@ import {
     StatusBar,
     FlatList,
     Image,
+    ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors';
-// import { fontPixel, pixelSizeVertical, pixelSizeHorizontal, widthPixel } from '../constants/dimensions';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
-import {  fontPixel, pixelSizeVertical, pixelSizeHorizontal, widthPixel  } from '../../helper';
+import { fontPixel, pixelSizeVertical, pixelSizeHorizontal, widthPixel } from '../../helper';
+import api from '../../api/axiosConfig';
 
-// --- Data Mockup untuk Kategori Game ---
-const gameCategories = [
-    { id: '1', title: 'Buah-buahan', image: require('../../assets/images/g1.png') }, // Ganti dengan path gambar Anda
-    { id: '2', title: 'Hewan', image: require('../../assets/images/g2.png') },
-    { id: '3', title: 'Warna', image: require('../../assets/images/g3.png') },
-    { id: '4', title: 'Angka', image: require('../../assets/images/g4.png') },
-    { id: '5', title: 'Kata Kerja', image: require('../../assets/images/g2.png') },
-    { id: '6', title: 'Kata Sifat', image: require('../../assets/images/g1.png') },
-];
+const categoryDisplayMap = {
+    "VERB": { title: 'Kata Kerja', image: require('../../assets/images/kerja.jpg') },
+    "ADJECTIVE": { title: 'Kata Sifat', image: require('../../assets/images/dingin.jpg') },
+    "NOUN": { title: 'Kata Benda', image: require('../../assets/images/hanbok.png') },
+    "PLACE": { title: 'Tempat', image: require('../../assets/images/gyeongbok.jpeg') },
+    "TRANSPORTATION": { title: 'Transportasi', image: require('../../assets/images/kereta.jpeg') },
+    // Tambahkan kategori lain jika ada
+};
+
 
 // --- Komponen untuk setiap kartu kategori ---
 const CategoryCard = ({ item, onPress }) => (
@@ -36,13 +37,48 @@ const CategoryCard = ({ item, onPress }) => (
 
 // --- Komponen Utama GameCategoryScreen ---
 const GameCategoryScreen = ({ navigation }) => {
+    const [categories, setCategories] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await api.get('/api/v1/vocabularies/categories');
+                const backendCategories = response.data.data; // Array of strings ["VERB", "NOUN", ...]
+
+                // Transformasi data dari backend ke format yang bisa ditampilkan
+                const formattedCategories = backendCategories.map(categoryKey => ({
+                    id: categoryKey, // Gunakan key dari backend sebagai ID unik
+                    backendKey: categoryKey, // Simpan key asli untuk dikirim ke layar game
+                    ...categoryDisplayMap[categoryKey] // Ambil title dan image dari map
+                }));
+
+                setCategories(formattedCategories);
+            } catch (error) {
+                console.error("Gagal mengambil kategori:", error);
+                Alert.alert("Error", "Tidak dapat memuat kategori permainan.");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchCategories();
+    }, []); // Array dependensi kosong agar hanya berjalan sekali
 
     const handleCategoryPress = (category) => {
-        console.log("Selected Category:", category.title);
-        // Navigasi ke layar game, bisa sambil mengirim data kategori
-        // Untuk sekarang, kita arahkan ke game yang sudah ada
-        navigation.navigate('MemoryCardGame', { category: category.title });
+        console.log("Selected Category:", category.backendKey);
+        // Kirim key asli dari backend ke layar game
+        navigation.navigate('MemoryCardGame', { category: category.backendKey });
     };
+
+    // Tampilkan loading indicator saat data diambil
+    if (isLoading) {
+        return (
+            <View style={[styles.screenContainer, styles.centerContainer]}>
+                <ActivityIndicator size="large" color={COLORS.primary} />
+            </View>
+        );
+    }
 
     return (
         <View style={styles.screenContainer}>
@@ -57,7 +93,7 @@ const GameCategoryScreen = ({ navigation }) => {
             </View>
 
             <FlatList
-                data={gameCategories}
+                data={categories}
                 keyExtractor={(item) => item.id}
                 numColumns={2}
                 contentContainerStyle={styles.listContainer}
@@ -124,6 +160,10 @@ const styles = StyleSheet.create({
         fontSize: fontPixel(16),
         fontWeight: '500',
         marginTop: pixelSizeVertical(8),
+    },
+     centerContainer: { // Style untuk loading
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });
 
