@@ -15,6 +15,7 @@ import {
     Clipboard,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import Toast from 'react-native-toast-message';
 import * as ImagePicker from 'expo-image-picker';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
@@ -52,7 +53,11 @@ const EditProfileScreen = ({ navigation }) => {
     // useeffect menangani error dari Redux
     useEffect(() => {
         if (authError) {
-            Alert.alert('Update Gagal', authError.message || 'Terjadi kesalahan.');
+            Toast.show({
+                type: 'error',
+                text1: 'Update Gagal',
+                text2: authError.message || 'Terjadi kesalahan.',
+            });
             dispatch(clearAuthError());
         }
     }, [authError, dispatch]);
@@ -66,7 +71,11 @@ const EditProfileScreen = ({ navigation }) => {
         const isAvatarChanged = newAvatarFile !== null;
 
         if (!isNameChanged && !isAvatarChanged) {
-            Alert.alert("Tidak Ada Perubahan", "Anda belum mengubah nama atau foto profil.");
+            Toast.show({
+                type: 'info',
+                text1: 'Tidak Ada Perubahan',
+                text2: 'Anda belum mengubah nama atau foto profil.',
+            });
             return;
         }// Buat array untuk menampung semua promise API call
         const updatePromises = [];
@@ -99,18 +108,21 @@ const EditProfileScreen = ({ navigation }) => {
                 // Error sudah ditangani oleh useEffect, tidak perlu alert lagi di sini
                 console.log("Salah satu atau lebih update gagal.");
             } else {
-                Alert.alert(
-                    "Sukses",
-                    "Profil berhasil diperbarui.",
-                    [
-                        { text: "OK", onPress: () => navigation.goBack() }
-                    ]
-                );
+                Toast.show({
+                    type: 'success',
+                    text1: 'Sukses',
+                    text2: 'Profil berhasil diperbarui.',
+                    onHide: () => navigation.goBack(),
+                });
             }
         } catch (e) {
             // Ini untuk menangkap error yang tidak terduga
             console.error("Error saat menjalankan Promise.all:", e);
-            Alert.alert("Error", "Terjadi kesalahan tak terduga.");
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Terjadi kesalahan tak terduga.',
+            });
         }
     };
 
@@ -118,7 +130,11 @@ const EditProfileScreen = ({ navigation }) => {
     const takePhotoFromCamera = async () => {
         const { status } = await ImagePicker.requestCameraPermissionsAsync();
         if (status !== 'granted') {
-            Alert.alert('Izin Diperlukan', 'Maaf, kami memerlukan izin kamera untuk melanjutkan.');
+            Toast.show({
+                type: 'error',
+                text1: 'Izin Diperlukan',
+                text2: 'Maaf, kami memerlukan izin kamera untuk melanjutkan.',
+            });
             return;
         }
 
@@ -140,7 +156,11 @@ const EditProfileScreen = ({ navigation }) => {
     const choosePhotoFromGallery = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== 'granted') {
-            Alert.alert('Izin Diperlukan', 'Maaf, kami memerlukan izin galeri untuk melanjutkan.');
+            Toast.show({
+                type: 'error',
+                text1: 'Izin Diperlukan',
+                text2: 'Maaf, kami memerlukan izin galeri untuk melanjutkan.',
+            });
             return;
         }
 
@@ -161,7 +181,11 @@ const EditProfileScreen = ({ navigation }) => {
 
     const copyToClipboard = (text) => {
         Clipboard.setString(text);
-        Alert.alert("Disalin!", `${text} telah disalin ke clipboard.`);
+        Toast.show({
+            type: 'info',
+            text1: 'Disalin!',
+            text2: `${text} telah disalin ke clipboard.`,
+        });
     };
 
     const formatDate = (dateString) => {
