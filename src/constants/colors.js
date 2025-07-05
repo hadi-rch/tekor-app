@@ -7,4 +7,6 @@ export const COLORS = {
     lightGray: '#F0F0F0',
     text: '#333333',
     borderColor: '#E0E0E0',
+    success: '#28a745', // Green for success
+    danger: '#dc3545',   // Red for danger/errors
 };

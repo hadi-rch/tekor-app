@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Platform, StatusBar, Alert } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Platform, StatusBar } from 'react-native';
+import Toast from 'react-native-toast-message';
 import { Ionicons } from '@expo/vector-icons';
 
 import CustomTextInput from '../components/CustomTextInput';
@@ -7,6 +8,7 @@ import CustomButton from '../components/CustomButton';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 import api from '../../api/axiosConfig';
+import { fontPixel } from '../../helper';
 
 const RegisterScreen = ({ navigation }) => {
     const [fullname, setFullname] = useState('');
@@ -17,8 +19,6 @@ const RegisterScreen = ({ navigation }) => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-
-    // State untuk error messages
     const [errors, setErrors] = useState({});
     const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -82,41 +82,16 @@ const RegisterScreen = ({ navigation }) => {
 
     // Handle input change with real-time validation
     const handleInputChange = (field, value) => {
+        if (errors[field]) {
+            setErrors(prev => ({ ...prev, [field]: null }));
+        }
+
         switch (field) {
-            case 'fullname':
-                setFullname(value);
-                if (isSubmitted) {
-                    setErrors(prev => ({ ...prev, fullname: validateFullname(value) }));
-                }
-                break;
-            case 'username':
-                setUsername(value);
-                if (isSubmitted) {
-                    setErrors(prev => ({ ...prev, username: validateUsername(value) }));
-                }
-                break;
-            case 'email':
-                setEmail(value);
-                if (isSubmitted) {
-                    setErrors(prev => ({ ...prev, email: validateEmail(value) }));
-                }
-                break;
-            case 'password':
-                setPassword(value);
-                if (isSubmitted) {
-                    setErrors(prev => ({
-                        ...prev,
-                        password: validatePassword(value),
-                        confirmPassword: validateConfirmPassword(confirmPassword, value)
-                    }));
-                }
-                break;
-            case 'confirmPassword':
-                setConfirmPassword(value);
-                if (isSubmitted) {
-                    setErrors(prev => ({ ...prev, confirmPassword: validateConfirmPassword(value, password) }));
-                }
-                break;
+            case 'fullname': setFullname(value); break;
+            case 'username': setUsername(value); break;
+            case 'email': setEmail(value); break;
+            case 'password': setPassword(value); break;
+            case 'confirmPassword': setConfirmPassword(value); break;
         }
     };
 
@@ -130,7 +105,6 @@ const RegisterScreen = ({ navigation }) => {
         setIsLoading(true); // Mulai loading
 
         try {
-            // Body request disesuaikan dengan backend Anda
             const requestBody = {
                 fullName: fullname,
                 username: username,
@@ -138,24 +112,30 @@ const RegisterScreen = ({ navigation }) => {
                 password: password,
             };
 
-            // Panggil backend menggunakan axios
-            const response = await api.post('/api/v1/auth/register', requestBody); // Ganti '/auth/register' dengan endpoint Anda
+            const response = await api.post('/api/v1/auth/register', requestBody);
 
-            // Jika request berhasil (status code 2xx)
             console.log('Response data:', response.data);
-            Alert.alert('Sukses', 'Registrasi berhasil! Silakan login.');
+            Toast.show({
+                type: 'success',
+                text1: 'Sukses',
+                text2: 'Registrasi berhasil! Silakan login.',
+            });
             navigation.navigate('Login');
 
         } catch (error) {
             // Axios secara otomatis melempar error untuk status code non-2xx
-            console.error("Error saat registrasi:", error.response ? error.response.data : error.message);
-
-            if (error.response) {
-                // Ada response dari server (misalnya: email sudah ada, validasi gagal)
-                Alert.alert('Registrasi Gagal', error.response.data.message || 'Terjadi kesalahan pada server.');
+            if (error.response && error.response.status === 409) {
+                const errorMessage = error.response.data.message || "Data sudah terdaftar.";
+                if (errorMessage.toLowerCase().includes('username')) {
+                    setErrors(prev => ({ ...prev, username: errorMessage }));
+                } else if (errorMessage.toLowerCase().includes('email')) {
+                    setErrors(prev => ({ ...prev, email: errorMessage }));
+                } else {
+                    setErrors(prev => ({ ...prev, form: errorMessage }));
+                }
             } else {
-                // Tidak ada response (misalnya: masalah jaringan, server tidak jalan)
-                Alert.alert('Error', 'Tidak dapat terhubung ke server. Periksa koneksi Anda.');
+                const errorMessage = error.response?.data?.message || 'Tidak dapat terhubung ke server.';
+                setErrors(prev => ({ ...prev, form: errorMessage }));
             }
         } finally {
             setIsLoading(false); // Hentikan loading, baik berhasil maupun gagal
@@ -189,7 +169,6 @@ const RegisterScreen = ({ navigation }) => {
                         onChangeText={(value) => handleInputChange('fullname', value)}
                         placeholder="Masukkan fullname Anda"
                         error={errors.fullname}
-                        hasError={!!errors.fullname}
                     />
                     <CustomTextInput
                         label="Username"
@@ -197,7 +176,6 @@ const RegisterScreen = ({ navigation }) => {
                         onChangeText={(value) => handleInputChange('username', value)}
                         placeholder="Masukkan username Anda"
                         error={errors.username}
-                        hasError={!!errors.username}
                     />
                     <CustomTextInput
                         label="Email"
@@ -206,7 +184,6 @@ const RegisterScreen = ({ navigation }) => {
                         placeholder="contoh@email.com"
                         keyboardType="email-address"
                         error={errors.email}
-                        hasError={!!errors.email}
                     />
                     <CustomTextInput
                         label="Kata Sandi"
@@ -215,7 +192,6 @@ const RegisterScreen = ({ navigation }) => {
                         placeholder="Masukkan kata sandi"
                         secureTextEntry={!showPassword}
                         error={errors.password}
-                        hasError={!!errors.password}
                         rightIcon={
                             <TouchableOpacity onPress={togglePasswordVisibility} style={styles.eyeIcon}>
                                 <Ionicons
@@ -233,7 +209,6 @@ const RegisterScreen = ({ navigation }) => {
                         placeholder="Masukkan ulang kata sandi"
                         secureTextEntry={!showConfirmPassword}
                         error={errors.confirmPassword}
-                        hasError={!!errors.confirmPassword}
                         rightIcon={
                             <TouchableOpacity onPress={toggleConfirmPasswordVisibility} style={styles.eyeIcon}>
                                 <Ionicons
@@ -245,6 +220,8 @@ const RegisterScreen = ({ navigation }) => {
                         }
                     />
                 </View>
+
+                {errors.form && <Text style={styles.formErrorText}>{errors.form}</Text>}
 
                 <Text style={styles.termsText}>
                     Dengan mendaftar, Anda menyetujui <Text style={styles.linkText}>Ketentuan Layanan</Text> dan <Text style={styles.linkText}>Kebijakan Privasi</Text> kami.
@@ -359,6 +336,23 @@ const styles = StyleSheet.create({
     footerText: {
         fontSize: 14,
         color: COLORS.text,
+    },
+    formErrorText: {
+        color: 'red',
+        textAlign: 'center',
+        marginBottom: 16,
+        fontSize: fontPixel(14),
+    },
+    termsText: {
+        fontSize: 12,
+        color: COLORS.gray,
+        textAlign: 'center',
+        marginBottom: 24,
+        marginHorizontal: 20,
+    },
+    linkText: {
+        color: COLORS.primary,
+        fontWeight: 'bold',
     },
 });
 

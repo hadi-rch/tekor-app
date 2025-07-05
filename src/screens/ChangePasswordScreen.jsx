@@ -11,6 +11,7 @@ import {
     Keyboard,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import Toast from 'react-native-toast-message';
 import api from '../../api/axiosConfig';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
@@ -28,22 +29,57 @@ const ChangePasswordScreen = ({ navigation }) => {
     const [showNew, setShowNew] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [errors, setErrors] = useState({});
+
+    const validateCurrentPassword = (password) => {
+        if (!password) return 'Kata sandi saat ini tidak boleh kosong';
+        return '';
+    };
+
+    const validateNewPassword = (password) => {
+        if (!password) return 'Kata sandi baru tidak boleh kosong';
+        if (password.length < 8) return 'Kata sandi baru minimal 8 karakter';
+        return '';
+    };
+
+    const validateConfirmNewPassword = (confirmPassword, password) => {
+        if (!confirmPassword) return 'Konfirmasi kata sandi baru tidak boleh kosong';
+        if (confirmPassword !== password) return 'Kata sandi tidak cocok';
+        return '';
+    };
+
+    const validateForm = () => {
+        const newErrors = {};
+        newErrors.currentPassword = validateCurrentPassword(currentPassword);
+        newErrors.newPassword = validateNewPassword(newPassword);
+        newErrors.confirmNewPassword = validateConfirmNewPassword(confirmNewPassword, newPassword);
+
+        const filteredErrors = Object.keys(newErrors).reduce((acc, key) => {
+            if (newErrors[key]) acc[key] = newErrors[key];
+            return acc;
+        }, {});
+
+        setErrors(filteredErrors);
+        return Object.keys(filteredErrors).length === 0;
+    };
+
+    const handleInputChange = (field, value) => {
+        if (errors[field]) {
+            setErrors(prev => ({ ...prev, [field]: null }));
+        }
+
+        switch (field) {
+            case 'currentPassword': setCurrentPassword(value); break;
+            case 'newPassword': setNewPassword(value); break;
+            case 'confirmNewPassword': setconfirmNewPassword(value); break;
+        }
+    };
 
     const handleSaveChanges = async () => {
         Keyboard.dismiss();
-        if (!currentPassword || !newPassword || !confirmNewPassword) {
-            Alert.alert("Error", "Semua kolom harus diisi.");
+        if (!validateForm()) {
             return;
         }
-        if (newPassword !== confirmNewPassword) {
-            Alert.alert("Error", "Kata sandi baru dan konfirmasi tidak cocok.");
-            return;
-        }
-        if (newPassword.length < 8 && confirmNewPassword.length < 8) {
-            Alert.alert("Error", "Kata sandi baru minimal 8 karakter.");
-            return;
-        }
-        console.log("diluar try catch")
 
         setIsLoading(true);
         try {
@@ -52,19 +88,24 @@ const ChangePasswordScreen = ({ navigation }) => {
                 newPassword: newPassword,
                 confirmNewPassword: confirmNewPassword,
             };
-            
-            console.log("first: ")
-            const response = await api.post('/api/v1/users/change-password', requestBody);
-            console.log("second: ")
 
-            Alert.alert("Berhasil", response.data.message || "Kata sandi Anda telah berhasil diubah.", [
-                { text: 'OK', onPress: () => navigation.goBack() }
-            ]);
+            const response = await api.post('/api/v1/users/change-password', requestBody);
+
+            Toast.show({
+                type: 'success',
+                text1: 'Berhasil',
+                text2: response.data.message || "Kata sandi Anda telah berhasil diubah.",
+                onHide: () => navigation.goBack(),
+            });
 
         } catch (err) {
-            console.error("Change Password Error:", err.response ? err.response.data : err.message);
+            // console.error("Change Password Error:", err.response ? err.response.data : err.message);
             const errorMessage = err.response?.data?.message || 'Gagal mengubah kata sandi. Silakan coba lagi.';
-            Alert.alert('Error', errorMessage);
+            if (err.response && err.response.status === 400) {
+                setErrors(prev => ({ ...prev, currentPassword: errorMessage }));
+            } else {
+                setErrors(prev => ({ ...prev, form: errorMessage }));
+            }
         } finally {
             setIsLoading(false);
         }
@@ -94,8 +135,9 @@ const ChangePasswordScreen = ({ navigation }) => {
                     <CustomTextInput
                         label="Kata Sandi Saat Ini"
                         value={currentPassword}
-                        onChangeText={setCurrentPassword}
+                        onChangeText={(value) => handleInputChange('currentPassword', value)}
                         secureTextEntry={!showCurrent}
+                        error={errors.currentPassword}
                         rightIcon={
                             <TouchableOpacity onPress={() => setShowCurrent(!showCurrent)}>
                                 <Ionicons name={showCurrent ? 'eye-off' : 'eye'} size={fontPixel(22)} color={COLORS.gray} style={styles.eyeIcon} />
@@ -105,8 +147,9 @@ const ChangePasswordScreen = ({ navigation }) => {
                     <CustomTextInput
                         label="Kata Sandi Baru"
                         value={newPassword}
-                        onChangeText={setNewPassword}
+                        onChangeText={(value) => handleInputChange('newPassword', value)}
                         secureTextEntry={!showNew}
+                        error={errors.newPassword}
                         rightIcon={
                             <TouchableOpacity onPress={() => setShowNew(!showNew)}>
                                 <Ionicons name={showNew ? 'eye-off' : 'eye'} size={fontPixel(22)} color={COLORS.gray} style={styles.eyeIcon} />
@@ -116,21 +159,23 @@ const ChangePasswordScreen = ({ navigation }) => {
                     <CustomTextInput
                         label="Konfirmasi Kata Sandi Baru"
                         value={confirmNewPassword}
-                        onChangeText={setconfirmNewPassword}
+                        onChangeText={(value) => handleInputChange('confirmNewPassword', value)}
                         secureTextEntry={!showConfirm}
+                        error={errors.confirmNewPassword}
                         rightIcon={
                             <TouchableOpacity onPress={() => setShowConfirm(!showConfirm)}>
                                 <Ionicons name={showConfirm ? 'eye-off' : 'eye'} size={fontPixel(22)} color={COLORS.gray} style={styles.eyeIcon} />
                             </TouchableOpacity>
                         }
                     />
+                    {errors.form && <Text style={styles.formErrorText}>{errors.form}</Text>}
                 </View>
 
                 <CustomButton
                     title={isLoading ? "Menyimpan..." : "Simpan Perubahan"}
                     onPress={handleSaveChanges}
                     disabled={isLoading}
-                    style={{ backgroundColor: COLORS.primary, marginTop: pixelSizeVertical(40) }}
+                    style={{ backgroundColor: COLORS.primary, marginBottom: pixelSizeVertical(40) }}
                 />
             </ScrollView>
         </View>
@@ -183,6 +228,12 @@ const styles = StyleSheet.create({
     strengthBar: {
         height: '100%',
         borderRadius: heightPixel(4),
+    },
+    formErrorText: {
+        color: 'red',
+        textAlign: 'center',
+        marginBottom: 16,
+        fontSize: fontPixel(14),
     },
 });
 

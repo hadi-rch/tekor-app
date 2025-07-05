@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, StatusBar, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, StatusBar } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
-import { loginUser } from '../store/authSlice';
+import Toast from 'react-native-toast-message';
 
+import { loginUser, clearAuthError } from '../store/authSlice';
 import CustomTextInput from '../components/CustomTextInput';
 import CustomButton from '../components/CustomButton';
 import { COLORS } from '../constants/colors';
@@ -33,33 +34,48 @@ const LoginScreen = ({ navigation }) => {
     //Efek untuk menampilkan error dari Redux
     useEffect(() => {
         if (authError) {
-            Alert.alert('Login Gagal', authError.message || 'Terjadi kesalahan.');
+            Toast.show({
+                type: 'error',
+                text1: 'Login Gagal',
+                text2: authError.message || 'Terjadi kesalahan.',
+                visibilityTime: 5000
+            });
         }
-    }, [authError]);
+
+        // Fungsi cleanup untuk membersihkan error saat komponen unmount
+        return () => {
+            dispatch(clearAuthError());
+        };
+    }, [authError, dispatch]);
 
     const handleInputChange = (name, value) => {
         setFormData(prevState => ({ ...prevState, [name]: value }));
+        // Saat pengguna mulai mengetik, hapus pesan error untuk field tersebut
         if (errors[name]) {
             setErrors(prevErrors => ({ ...prevErrors, [name]: null }));
         }
     };
 
-    const validateForm = () => {
-        let newErrors = {};
-        if (!formData.username) newErrors.username = 'Username tidak boleh kosong';
-        if (!formData.password) newErrors.password = 'Kata sandi tidak boleh kosong';
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
-
-    //handleLogin sekarang mengirim action ke Redux
     const handleLogin = () => {
-        if (validateForm()) {
-            // Kirim data login ke async thunk
-            dispatch(loginUser({
-                username: formData.username,
-                password: formData.password
-            }));
+        const { username, password } = formData;
+        const newErrors = {};
+
+        if (!username.trim()) {
+            newErrors.username = 'Username tidak boleh kosong';
+        } else if (username.length < 4) {
+            newErrors.username = 'Username minimal 4 karakter';
+        }
+
+        if (!password.trim()) {
+            newErrors.password = 'Kata sandi tidak boleh kosong';
+        } else if (password.length < 8) {
+            newErrors.password = 'Password minimal 8 karakter';
+        }
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+        } else {
+            dispatch(loginUser({ username, password }));
         }
     };
 
