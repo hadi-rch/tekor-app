@@ -31,7 +31,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
         title: 'Korean Language Learning Course',
         price: 'Rp 150.000',
         description: 'Learn Korean with our comprehensive course. Features include:',
-        image: require('../../assets/images/g3.png'), // Ganti dengan path gambar Anda
+        image: require('../../assets/images/no-image.jpg'), // Ganti dengan path gambar Anda
         tags: ['Beginner', 'Intermediate', 'Advanced'],
     };
 

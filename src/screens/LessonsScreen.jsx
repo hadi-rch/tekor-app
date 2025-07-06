@@ -22,14 +22,14 @@ const lessonsData = [
         category: 'Kumpulan 5 set soal',
         title: 'EPS-TOPIK',
         description: 'Kumpulan 5 set soal eps-topik',
-        image: require('../../assets/images/g1.png'),
+        image: require('../../assets/images/no-image.jpg'),
     },
     {
         id: '2',
         category: 'Kumpulan 10 set soal',
         title: 'EPS-TOPIK',
         description: 'Kumpulan 10 set soal eps-topik',
-        image: require('../../assets/images/g2.png'),
+        image: require('../../assets/images/no-image.jpg'),
 
     },
     {
@@ -37,21 +37,21 @@ const lessonsData = [
         category: 'Kumpulan 10 set soal',
         title: 'EPS-TOPIK',
         description: 'Kumpulan 10 set soal eps-topik',
-        image: require('../../assets/images/g3.png'),
+        image: require('../../assets/images/no-image.jpg'),
     },
     {
         id: '4',
         category: 'Kumpulan 10 set soal',
         title: 'EPS-TOPIK',
         description: 'Kumpulan 10 set soal eps-topik',
-        image: require('../../assets/images/g4.png'),
+        image: require('../../assets/images/no-image.jpg'),
     },
     {
         id: '5',
         category: 'Kumpulan 10 set soal',
         title: 'EPS-TOPIK',
         description: 'Kumpulan 10 set soal eps-topik',
-        image: require('../../assets/images/g2.png'),
+        image: require('../../assets/images/no-image.jpg'),
     },
 ]
 

@@ -6,9 +6,9 @@ import CustomButton from '../components/CustomButton';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 
 const featuredProducts = [
-    { id: '1', title: 'Tes Level Bahasa Korea', description: 'Uji level bahasa Koreamu dengan tes komprehensif.', image: require('../../assets/images/g1.png') },
-    { id: '2', title: 'Tes Topik', description: 'Persiapkan diri untuk ujian TOPIK dengan simulasi tes.', image: require('../../assets/images/g2.png') },
-    { id: '3', title: 'Materi Belajar', description: 'Akses ribuan materi belajar interaktif.', image: require('../../assets/images/g3.png') },
+    { id: '1', title: 'Tes Level Bahasa Korea', description: 'Uji level bahasa Koreamu dengan tes komprehensif.', image: require('../../assets/images/no-image.jpg') },
+    { id: '2', title: 'Tes Topik', description: 'Persiapkan diri untuk ujian TOPIK dengan simulasi tes.', image: require('../../assets/images/no-image.jpg') },
+    { id: '3', title: 'Materi Belajar', description: 'Akses ribuan materi belajar interaktif.', image: require('../../assets/images/no-image.jpg') },
 ];
 
 const whyUsFeatures = [
@@ -74,7 +74,7 @@ const HomeScreen = ({ navigation }) => {
                             </TouchableOpacity>
                         </View>
                         <Image
-                            source={require('../../assets/images/penawaran.png')}
+                            source={require('../../assets/images/no-image.jpg')}
                             style={styles.specialOfferImage}
                         />
                     </View>

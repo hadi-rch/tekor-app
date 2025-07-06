@@ -67,7 +67,7 @@ const ProfileScreen = ({ navigation }) => {
 
     const avatarSource = (user && user.imageUrl)
         ? { uri: user.imageUrl }
-        : require('../../assets/images/g1.png');
+        : require('../../assets/images/no-image.jpg');
 
     if (!user) {
         return (

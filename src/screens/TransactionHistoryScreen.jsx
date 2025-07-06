@@ -21,7 +21,7 @@ const allTransactions = [
         title: 'Korean Language Course',
         price: '$49.99',
         date: '05/15/2024',
-        image: require('../../assets/images/g2.png')
+        image: require('../../assets/images/no-image.jpg')
     },
     {
         id: '2',
@@ -29,7 +29,7 @@ const allTransactions = [
         title: 'Korean Culture Workshop',
         price: '$29.99',
         date: '05/10/2024',
-        image: require('../../assets/images/g1.png')
+        image: require('../../assets/images/no-image.jpg')
     },
     {
         id: '3',
@@ -37,7 +37,7 @@ const allTransactions = [
         title: 'Korean Language Course',
         price: '$49.99',
         date: '04/20/2024',
-        image: require('../../assets/images/g3.png')
+        image: require('../../assets/images/no-image.jpg')
     },
     {
         id: '4',
@@ -45,7 +45,7 @@ const allTransactions = [
         title: 'Korean Language Course',
         price: '$49.99',
         date: '03/15/2024',
-        image: require('../../assets/images/g4.png')
+        image: require('../../assets/images/no-image.jpg')
     },
     {
         id: '5',
@@ -53,7 +53,7 @@ const allTransactions = [
         title: 'Korean Language Course',
         price: '$49.99',
         date: '02/15/2024',
-        image: require('../../assets/images/g1.png')
+        image: require('../../assets/images/no-image.jpg')
     },
 ];
 

@@ -31,7 +31,7 @@ const dummyQuestions = Array.from({ length: 40 }, (_, i) => {
         id: questionNumber,
         type: isReading ? 'reading' : 'listening',
         question: `Ini adalah pertanyaan nomor ${questionNumber}. Pilih jawaban yang paling tepat.`,
-        image: isReading && i < 5 ? require('../../assets/images/g3.png') : null,
+        image: isReading && i < 5 ? require('../../assets/images/no-image.jpg') : null,
         audio: !isReading ? 'https://res.cloudinary.com/dtxx1gcip/video/upload/v1751277302/azwiimofq22elme9rda1.mp3' : null,
         options: ['Jawaban A', 'Jawaban B', 'Jawaban C', 'Jawaban D'],
         correctAnswer: i % 4,

@@ -198,7 +198,7 @@ const EditProfileScreen = ({ navigation }) => {
         });
     };
 
-    const avatarSource = avatarUri ? { uri: avatarUri } : require('../../assets/images/g1.png');
+    const avatarSource = avatarUri ? { uri: avatarUri } : require('../../assets/images/no-image.jpg');
 
     return (
         <View style={styles.screenContainer}>
