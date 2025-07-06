@@ -15,6 +15,7 @@ import { COLORS } from '../constants/colors'
 import { Ionicons } from '@expo/vector-icons'
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar'
 import { fontPixel } from '../../helper'
+import { LinearGradient } from 'expo-linear-gradient'
 
 const lessonsData = [
     {
@@ -150,7 +151,10 @@ const LessonsScreen = ({ navigation }) => {
     }
 
     return (
-        <View style={styles.screenContainer}>
+        <LinearGradient
+            colors={['#FDEAEB', '#E6ECF5']}
+            style={styles.screenContainer}
+        >
             <FocusAwareStatusBar
                 barStyle="dark-content"
                 backgroundColor="transparent"
@@ -224,14 +228,14 @@ const LessonsScreen = ({ navigation }) => {
                 </Pressable>
             </Modal>
 
-        </View>
+        </LinearGradient>
     )
 }
 
 const styles = StyleSheet.create({
     screenContainer: {
         flex: 1,
-        backgroundColor: COLORS.white,
+        // backgroundColor: COLORS.white,
         paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
     },
     header: {

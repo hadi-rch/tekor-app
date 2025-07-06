@@ -11,11 +11,12 @@ import {
     StatusBar,
     ActivityIndicator,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 import api from '../../api/axiosConfig';
-import { fontPixel} from '../../helper'; 
+import { fontPixel } from '../../helper';
 
 const ProductCard = ({ item, navigation }) => {
     // Fungsi untuk memformat harga
@@ -23,8 +24,8 @@ const ProductCard = ({ item, navigation }) => {
         return `Rp ${new Intl.NumberFormat('id-ID').format(price)}`;
     };
 
-    const imageSource = item.imageUrl 
-        ? { uri: item.imageUrl } 
+    const imageSource = item.imageUrl
+        ? { uri: item.imageUrl }
         : require('../../assets/images/no-image.jpg');
 
     return (
@@ -83,7 +84,10 @@ const ProductsScreen = ({ navigation }) => {
     }, []); // Dependensi kosong agar hanya berjalan sekali saat mount
 
     return (
-        <View style={styles.screenContainer}>
+        <LinearGradient
+            colors={['#E6ECF5', '#FDEAEB']}
+            style={styles.screenContainer}
+        >
             <FocusAwareStatusBar
                 barStyle="dark-content"
                 backgroundColor="transparent"
@@ -126,7 +130,7 @@ const ProductsScreen = ({ navigation }) => {
                     </View>
                 </ScrollView>
             )}
-        </View>
+        </LinearGradient>
     );
 };
 

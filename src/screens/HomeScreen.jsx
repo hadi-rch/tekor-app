@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors';
 import CustomButton from '../components/CustomButton';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const featuredProducts = [
     { id: '1', title: 'Tes Level Bahasa Korea', description: 'Uji level bahasa Koreamu dengan tes komprehensif.', image: require('../../assets/images/no-image.jpg') },
@@ -40,7 +41,10 @@ const FeatureCard = ({ item }) => (
 // --- Komponen Utama HomeScreen ---
 const HomeScreen = ({ navigation }) => {
     return (
-        <View style={styles.screenContainer}>
+        <LinearGradient
+            colors={['#FDEAEB', '#E6ECF5']}
+            style={styles.screenContainer}
+        >
             <FocusAwareStatusBar
                 barStyle="dark-content"
                 backgroundColor="transparent"
@@ -106,7 +110,8 @@ const HomeScreen = ({ navigation }) => {
                 </View>
 
             </ScrollView>
-        </View>
+
+        </LinearGradient>
     );
 };
 

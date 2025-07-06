@@ -20,6 +20,7 @@ import { logout } from '../store/authSlice';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 import { fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical } from '../../helper';
+import { LinearGradient } from 'expo-linear-gradient';
 
 // --- Komponen kecil yang dapat digunakan kembali untuk setiap item menu ---
 const ProfileMenuItem = ({ icon, label, onPress, isLogout = false }) => (
@@ -78,7 +79,10 @@ const ProfileScreen = ({ navigation }) => {
     }
 
     return (
-        <View style={styles.screenContainer}>
+        <LinearGradient
+            colors={['#E6ECF5', '#FDEAEB']}
+            style={styles.screenContainer}
+        >
             <FocusAwareStatusBar
                 barStyle="dark-content"
                 backgroundColor="transparent"
@@ -156,14 +160,14 @@ const ProfileScreen = ({ navigation }) => {
                     </Pressable>
                 </Pressable>
             </Modal>
-        </View>
+        </LinearGradient>
     );
 };
 
 const styles = StyleSheet.create({
     screenContainer: {
         flex: 1,
-        backgroundColor: COLORS.white,
+        // backgroundColor: COLORS.white,
         paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
     },
     header: {

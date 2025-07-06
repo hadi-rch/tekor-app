@@ -13,6 +13,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const allTransactions = [
     {
@@ -90,7 +91,10 @@ const TransactionHistoryScreen = ({ navigation }) => {
     }, [activeTab]);
 
     return (
-        <View style={styles.screenContainer}>
+        <LinearGradient
+            colors={['#FDEAEB', '#E6ECF5']}
+            style={styles.screenContainer}
+        >
             <FocusAwareStatusBar
                 barStyle="dark-content"
                 backgroundColor="transparent"
@@ -132,7 +136,7 @@ const TransactionHistoryScreen = ({ navigation }) => {
                     </View>
                 }
             />
-        </View>
+        </LinearGradient>
     );
 };
 
