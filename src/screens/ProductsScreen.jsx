@@ -34,7 +34,7 @@ const ProductCard = ({ item, navigation }) => {
             style={styles.cardContainer}
             onPress={() => {
                 if (item.type === 'package') {
-                    navigation.navigate('ProductDetail', { product: item });
+                    navigation.navigate('ProductDetail', { productId: item.id });
                 }
             }}
         >
