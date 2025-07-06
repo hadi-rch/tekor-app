@@ -63,28 +63,25 @@ export const loginUser = createAsyncThunk(
 export const restoreUserSession = createAsyncThunk(
     'auth/restoreSession',
     async (_, { rejectWithValue }) => {
-        try {
-            const accessToken = await getAccessToken();
-            if (!accessToken) {
-                return rejectWithValue('No token found');
-            }
+        const accessToken = await getAccessToken();
+        if (!accessToken) {
+            return rejectWithValue('No token found');
+        }
 
-            // We have a token, let's get the user profile
+        try {
+            // Biarkan interceptor menangani refresh token jika diperlukan
             const profileResponse = await api.get('/api/v1/users');
             const userProfile = profileResponse.data;
-            return { token: accessToken, user: userProfile };
-
+            // Setelah berhasil (mungkin setelah refresh), kita perlu token terbaru
+            const newAccessToken = await getAccessToken();
+            return { token: newAccessToken, user: userProfile };
         } catch (error) {
-            // This can happen if the token is expired or invalid
+            // Jika interceptor gagal me-refresh dan error tetap terjadi,
+            // maka sesi tidak dapat dipulihkan.
             if (__DEV__) {
-                console.log('Restore session error:', {
-                    status: error.response?.status,
-                    data: error.response?.data,
-                    message: error.message
-                });
+                console.log('Failed to restore session even after interceptor.', error.response?.data);
             }
-            // Clean up invalid tokens
-            await deleteTokens();
+            await deleteTokens(); // Pastikan token lama dibersihkan
             return rejectWithValue('Failed to restore session.');
         }
     }
