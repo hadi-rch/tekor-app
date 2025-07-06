@@ -12,17 +12,22 @@ import {
     Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as WebBrowser from 'expo-web-browser';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS } from '../constants/colors';
 import { fontPixel, heightPixel, pixelSizeVertical, pixelSizeHorizontal } from '../../helper';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 import CustomButton from '../components/CustomButton';
 import api from '../../api/axiosConfig';
 
+// --- Komponen Utama ProductDetailScreen ---
 const ProductDetailScreen = ({ navigation, route }) => {
     const { productId } = route.params;
+    const insets = useSafeAreaInsets(); // Untuk padding bawah yang aman
 
     const [product, setProduct] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [isBuying, setIsBuying] = useState(false);
 
     useEffect(() => {
         if (!productId) {
@@ -45,6 +50,35 @@ const ProductDetailScreen = ({ navigation, route }) => {
 
         fetchProductDetail();
     }, [productId]);
+
+    // Fungsi untuk menangani pembelian
+    const handleBuyPress = async () => {
+        setIsBuying(true);
+        try {
+            const requestBody = {
+                testPackageId: productId,
+                quantity: 1,
+            };
+
+            const response = await api.post('/api/v1/transactions/create', requestBody);
+            const redirectUrl = response.data.data?.redirectUrl;
+
+            if (redirectUrl) {
+                // Buka halaman pembayaran Midtrans di dalam aplikasi
+                await WebBrowser.openBrowserAsync(redirectUrl);
+                // Setelah browser ditutup, arahkan pengguna ke riwayat transaksi
+                navigation.navigate('TransactionHistory');
+            } else {
+                Alert.alert("Error", "Gagal mendapatkan link pembayaran.");
+            }
+
+        } catch (error) {
+            console.error("Gagal membuat transaksi:", error.response?.data || error.message);
+            Alert.alert("Error", error.response?.data?.message || "Gagal memulai transaksi. Silakan coba lagi.");
+        } finally {
+            setIsBuying(false);
+        }
+    };
 
     const formatPrice = (price) => {
         if (typeof price !== 'number') return 'Rp 0';
@@ -89,7 +123,6 @@ const ProductDetailScreen = ({ navigation, route }) => {
 
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <Image source={imageSource} style={styles.productImage} />
-
                 <View style={styles.detailsContainer}>
                     <Text style={styles.productTitle}>{product.name}</Text>
                     <Text style={styles.productPrice}>{formatPrice(product.price)}</Text>
@@ -100,10 +133,12 @@ const ProductDetailScreen = ({ navigation, route }) => {
                 </View>
             </ScrollView>
 
-            <View style={styles.footer}>
+            {/* 4. Perbarui tombol Beli */}
+            <View style={[styles.footer, { paddingBottom: insets.bottom > 0 ? insets.bottom : pixelSizeVertical(20) }]}>
                 <CustomButton
-                    title="Beli"
-                    onPress={() => { /* Logika untuk membeli */ }}
+                    title={isBuying ? "Memproses..." : "Beli"}
+                    onPress={handleBuyPress}
+                    disabled={isBuying}
                     style={{ backgroundColor: COLORS.primary }}
                 />
             </View>
@@ -178,7 +213,6 @@ const styles = StyleSheet.create({
     footer: {
         paddingHorizontal: pixelSizeHorizontal(20),
         paddingTop: pixelSizeVertical(10),
-        paddingBottom: pixelSizeVertical(30),
         borderTopWidth: 1,
         borderTopColor: COLORS.borderColor,
         backgroundColor: COLORS.white,
