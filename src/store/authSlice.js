@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { saveTokens, deleteTokens } from '../../utils/authStorage';
+import { saveTokens, deleteTokens, getAccessToken } from '../../utils/authStorage';
 import api from '../../api/axiosConfig';
 
 
@@ -60,6 +60,36 @@ export const loginUser = createAsyncThunk(
     }
 );
 
+export const restoreUserSession = createAsyncThunk(
+    'auth/restoreSession',
+    async (_, { rejectWithValue }) => {
+        try {
+            const accessToken = await getAccessToken();
+            if (!accessToken) {
+                return rejectWithValue('No token found');
+            }
+
+            // We have a token, let's get the user profile
+            const profileResponse = await api.get('/api/v1/users');
+            const userProfile = profileResponse.data;
+            return { token: accessToken, user: userProfile };
+
+        } catch (error) {
+            // This can happen if the token is expired or invalid
+            if (__DEV__) {
+                console.log('Restore session error:', {
+                    status: error.response?.status,
+                    data: error.response?.data,
+                    message: error.message
+                });
+            }
+            // Clean up invalid tokens
+            await deleteTokens();
+            return rejectWithValue('Failed to restore session.');
+        }
+    }
+);
+
 export const updateUserName = createAsyncThunk(
     'users/updateName',
     async ({ fullName }, { rejectWithValue }) => {
@@ -94,7 +124,7 @@ const authSlice = createSlice({
         user: null,
         token: null, // Ini akan menyimpan accessToken
         isAuthenticated: false,
-        isLoading: false,
+        isLoading: true,
         error: null,
     },
     // Reducers untuk aksi sinkron (langsung)
@@ -161,6 +191,23 @@ const authSlice = createSlice({
             .addCase(updateUserAvatar.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.payload;
+            })
+            
+            // --- KASUS UNTUK RESTORE SESSION ---
+            .addCase(restoreUserSession.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(restoreUserSession.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.isAuthenticated = true;
+                state.user = action.payload.user;
+                state.token = action.payload.token;
+            })
+            .addCase(restoreUserSession.rejected, (state) => {
+                state.isLoading = false;
+                state.isAuthenticated = false;
+                state.user = null;
+                state.token = null;
             });
     },
 });
