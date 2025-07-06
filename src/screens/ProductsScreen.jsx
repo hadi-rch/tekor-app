@@ -17,6 +17,7 @@ import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 import api from '../../api/axiosConfig';
 import { fontPixel } from '../../helper';
+import StyledText from '../components/StyledText';
 
 const ProductCard = ({ item, navigation }) => {
     // Fungsi untuk memformat harga
@@ -38,15 +39,15 @@ const ProductCard = ({ item, navigation }) => {
             }}
         >
             <View style={styles.cardTextContainer}>
-                <Text style={styles.cardTitle}>{item.name}</Text>
-                <Text style={styles.cardDescription}>{item.description}</Text>
+                <StyledText style={styles.cardTitle}>{item.name}</StyledText>
+                <StyledText style={styles.cardDescription}>{item.description}</StyledText>
                 {item.type === 'package' ? (
                     <View style={styles.priceTag}>
-                        <Text style={styles.priceText}>{formatPrice(item.price)}</Text>
+                        <StyledText style={styles.priceText}>{formatPrice(item.price)}</StyledText>
                     </View>
                 ) : (
                     <View style={styles.playButton}>
-                        <Text style={styles.playButtonText}>Play</Text>
+                        <StyledText style={styles.playButtonText}>Play</StyledText>
                     </View>
                 )}
             </View>
@@ -94,7 +95,7 @@ const ProductsScreen = ({ navigation }) => {
                 translucent={true}
             />
             <View style={styles.header}>
-                <Text style={styles.headerTitle}>Products</Text>
+                <StyledText style={styles.headerTitle}>Products</StyledText>
             </View>
 
             {isLoading ? (
@@ -118,7 +119,7 @@ const ProductsScreen = ({ navigation }) => {
                                 <Ionicons name="chevron-down" size={16} color={COLORS.gray} />
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.filterButton}>
-                                <Text>Filter</Text>
+                                <StyledText>Filter</StyledText>
                                 <Ionicons name="options" size={16} color={COLORS.gray} />
                             </TouchableOpacity>
                         </View>

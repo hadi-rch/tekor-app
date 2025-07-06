@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons'
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar'
 import { fontPixel } from '../../helper'
 import { LinearGradient } from 'expo-linear-gradient'
+import StyledText from '../components/StyledText'
 
 const lessonsData = [
     {
@@ -67,9 +68,9 @@ const historyData = [
 const LessonItem = ({ item, onPress }) => (
     <TouchableOpacity style={styles.itemContainer} onPress={onPress}>
         <View style={styles.itemTextContainer}>
-            <Text style={styles.itemCategory}>{item.category}</Text>
-            <Text style={styles.itemTitle}>{item.title}</Text>
-            <Text style={styles.itemDescription}>{item.description}</Text>
+            <StyledText style={styles.itemCategory}>{item.category}</StyledText>
+            <StyledText style={styles.itemTitle}>{item.title}</StyledText>
+            <StyledText style={styles.itemDescription}>{item.description}</StyledText>
         </View>
         <Image source={item.image} style={styles.itemImage} />
     </TouchableOpacity>
@@ -80,33 +81,33 @@ const HistoryItem = ({ item }) => (
     <View style={styles.historyItemContainer}>
         <View style={styles.historyHeader}>
             <View>
-                <Text style={styles.historyTitle}>{item.title}</Text>
-                <Text style={styles.historyDate}>{item.date}</Text>
+                <StyledText style={styles.historyTitle}>{item.title}</StyledText>
+                <StyledText style={styles.historyDate}>{item.date}</StyledText>
             </View>
             <TouchableOpacity style={styles.discussionButton}>
-                <Text style={styles.discussionText}>Lihat Pembahasan</Text>
+                <StyledText style={styles.discussion}>Lihat Pembahasan</StyledText>
                 <Ionicons name="arrow-forward" size={16} color={COLORS.primary} />
             </TouchableOpacity>
         </View>
         <View style={styles.scoreRow}>
-            <Text style={styles.scoreLabel}>Skor</Text>
-            <Text style={styles.scoreValue}>{item.score}</Text>
+            <StyledText style={styles.scoreLabel}>Skor</StyledText>
+            <StyledText style={styles.scoreValue}>{item.score}</StyledText>
         </View>
         <View style={styles.scoreRow}>
-            <Text style={styles.scoreLabel}>Benar</Text>
-            <Text style={styles.scoreValue}>{item.correct}</Text>
+            <StyledText style={styles.scoreLabel}>Benar</StyledText>
+            <StyledText style={styles.scoreValue}>{item.correct}</StyledText>
         </View>
         <View style={styles.scoreRow}>
-            <Text style={styles.scoreLabel}>Salah</Text>
-            <Text style={styles.scoreValue}>{item.wrong}</Text>
+            <StyledText style={styles.scoreLabel}>Salah</StyledText>
+            <StyledText style={styles.scoreValue}>{item.wrong}</StyledText>
         </View>
     </View>
 );
 
 const WarningItem = ({ icon, text }) => (
     <View style={styles.warningItem}>
-        <Text style={styles.warningIcon}>{icon}</Text>
-        <Text style={styles.warningText}>{text}</Text>
+        <StyledText style={styles.warningIcon}>{icon}</StyledText>
+        <StyledText style={styles.warningText}>{text}</StyledText>
     </View>
 );
 
@@ -162,7 +163,7 @@ const LessonsScreen = ({ navigation }) => {
             />
             {/* Header */}
             <View style={styles.header}>
-                <Text style={styles.headerTitle}>Materi Belajar</Text>
+                <StyledText style={styles.headerTitle}>Materi Belajar</StyledText>
             </View>
 
             {/* Tab Switcher */}
@@ -171,27 +172,27 @@ const LessonsScreen = ({ navigation }) => {
                     style={[styles.tab, activeTab === 'Produk' && styles.activeTab]}
                     onPress={() => setActiveTab('Produk')}
                 >
-                    <Text
+                    <StyledText
                         style={[
                             styles.tabText,
                             activeTab === 'Produk' && styles.activeTabText,
                         ]}
                     >
                         Produk
-                    </Text>
+                    </StyledText>
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={[styles.tab, activeTab === 'History' && styles.activeTab]}
                     onPress={() => setActiveTab('History')}
                 >
-                    <Text
+                    <StyledText
                         style={[
                             styles.tabText,
                             activeTab === 'History' && styles.activeTabText,
                         ]}
                     >
                         History Jawaban
-                    </Text>
+                    </StyledText>
                 </TouchableOpacity>
             </View>
 
@@ -208,7 +209,7 @@ const LessonsScreen = ({ navigation }) => {
                 <Pressable style={styles.modalOverlay} onPress={() => setIsModalVisible(false)}>
                     <Pressable style={styles.confirmModalContent}>
                         <View style={styles.dragHandle} />
-                        <Text style={styles.modalTitle}>Anda Yakin Ingin Mengerjakan?</Text>
+                        <StyledText style={styles.modalTitle}>Anda Yakin Ingin Mengerjakan?</StyledText>
 
                         <View style={styles.warningsContainer}>
                             <WarningItem icon="⚠️" text="Ujian ini hanya bisa dikerjakan 1 (satu) kali. Progres tidak dapat diulang atau dibatalkan setelah dimulai." />
@@ -218,10 +219,10 @@ const LessonsScreen = ({ navigation }) => {
 
                         <View style={styles.modalButtonContainer}>
                             <TouchableOpacity style={[styles.modalButton, styles.cancelButton]} onPress={() => setIsModalVisible(false)}>
-                                <Text style={styles.cancelButtonText}>Nanti saja</Text>
+                                <StyledText style={styles.cancelButtonText}>Nanti saja</StyledText>
                             </TouchableOpacity>
                             <TouchableOpacity style={[styles.modalButton, styles.startButton]} onPress={handleStartTest}>
-                                <Text style={styles.startButtonText}>Mulai Sekarang</Text>
+                                <StyledText style={styles.startButtonText}>Mulai Sekarang</StyledText>
                             </TouchableOpacity>
                         </View>
                     </Pressable>
@@ -338,7 +339,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
     },
-    discussionText: {
+    discussion: {
         color: COLORS.primary,
         fontWeight: 'bold',
         marginRight: 4,

@@ -5,6 +5,7 @@ import { COLORS } from '../constants/colors';
 import CustomButton from '../components/CustomButton';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 import { LinearGradient } from 'expo-linear-gradient';
+import StyledText from '../components/StyledText';
 
 const featuredProducts = [
     { id: '1', title: 'Tes Level Bahasa Korea', description: 'Uji level bahasa Koreamu dengan tes komprehensif.', image: require('../../assets/images/no-image.jpg') },
@@ -22,8 +23,8 @@ const whyUsFeatures = [
 const ProductCard = ({ item }) => (
     <View style={styles.productCard}>
         <Image source={item.image} style={styles.productImage} />
-        <Text style={styles.productTitle}>{item.title}</Text>
-        <Text style={styles.productDescription}>{item.description}</Text>
+        <StyledText style={styles.productTitle}>{item.title}</StyledText>
+        <StyledText style={styles.productDescription}>{item.description}</StyledText>
     </View>
 );
 
@@ -57,7 +58,7 @@ const HomeScreen = ({ navigation }) => {
                         source={require('../../assets/images/logo.png')}
                         style={styles.heroLogo}
                     />
-                    {/* <Text style={styles.heroTitle}>TE-KOR</Text> */}
+                    
                     <Text style={styles.heroSubtitle}>Ukur kemampuan bahasa Koreamu dengan tes terstandarisasi.</Text>
                     <CustomButton
                         title="Mulai Tes Sekarang!"
@@ -71,8 +72,8 @@ const HomeScreen = ({ navigation }) => {
                     <Text style={styles.sectionTitle}>Penawaran Spesial</Text>
                     <View style={styles.specialOfferCard}>
                         <View style={styles.specialOfferText}>
-                            <Text style={styles.specialOfferTitle}>Paket Tes Lengkap</Text>
-                            <Text style={styles.specialOfferDesc}>Dapatkan akses ke semua tes dengan harga khusus.</Text>
+                            <StyledText style={styles.specialOfferTitle}>Paket Tes Lengkap</StyledText>
+                            <StyledText fontType="montserrat" style={styles.specialOfferDesc}>Dapatkan akses ke semua tes dengan harga khusus.</StyledText>
                             <TouchableOpacity style={styles.buyNowButton}>
                                 <Text style={styles.buyNowText}>Beli Sekarang</Text>
                             </TouchableOpacity>
