@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { saveTokens, deleteTokens, getAccessToken } from '../../utils/authStorage';
 import api from '../../api/axiosConfig';
+import { use } from 'react';
 
 
 export const loginUser = createAsyncThunk(
@@ -21,7 +22,9 @@ export const loginUser = createAsyncThunk(
 
             try {
                 const profileResponse = await api.get('/api/v1/users');
-                const userProfile = profileResponse.data;
+                const userProfile = profileResponse.data?.data;
+                console.log("userProfile:", userProfile);
+
                 return { token: accessToken, user: userProfile };
 
             } catch (profileError) {
@@ -71,7 +74,8 @@ export const restoreUserSession = createAsyncThunk(
         try {
             // Biarkan interceptor menangani refresh token jika diperlukan
             const profileResponse = await api.get('/api/v1/users');
-            const userProfile = profileResponse.data;
+            const userProfile = profileResponse.data?.data;
+            console.log("userProfile:", userProfile);
             // Setelah berhasil (mungkin setelah refresh), kita perlu token terbaru
             const newAccessToken = await getAccessToken();
             return { token: newAccessToken, user: userProfile };
@@ -189,7 +193,7 @@ const authSlice = createSlice({
                 state.isLoading = false;
                 state.error = action.payload;
             })
-            
+
             // --- KASUS UNTUK RESTORE SESSION ---
             .addCase(restoreUserSession.pending, (state) => {
                 state.isLoading = true;
