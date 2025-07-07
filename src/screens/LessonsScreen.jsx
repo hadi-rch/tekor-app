@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
     View,
     Text,
@@ -9,52 +9,16 @@ import {
     StatusBar,
     Platform,
     Modal,
+    ActivityIndicator,
     Pressable,
 } from 'react-native'
 import { COLORS } from '../constants/colors'
 import { Ionicons } from '@expo/vector-icons'
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar'
 import { fontPixel } from '../../helper'
-
-const lessonsData = [
-    {
-        id: '1',
-        category: 'Kumpulan 5 set soal',
-        title: 'EPS-TOPIK',
-        description: 'Kumpulan 5 set soal eps-topik',
-        image: require('../../assets/images/g1.png'),
-    },
-    {
-        id: '2',
-        category: 'Kumpulan 10 set soal',
-        title: 'EPS-TOPIK',
-        description: 'Kumpulan 10 set soal eps-topik',
-        image: require('../../assets/images/g2.png'),
-
-    },
-    {
-        id: '3',
-        category: 'Kumpulan 10 set soal',
-        title: 'EPS-TOPIK',
-        description: 'Kumpulan 10 set soal eps-topik',
-        image: require('../../assets/images/g3.png'),
-    },
-    {
-        id: '4',
-        category: 'Kumpulan 10 set soal',
-        title: 'EPS-TOPIK',
-        description: 'Kumpulan 10 set soal eps-topik',
-        image: require('../../assets/images/g4.png'),
-    },
-    {
-        id: '5',
-        category: 'Kumpulan 10 set soal',
-        title: 'EPS-TOPIK',
-        description: 'Kumpulan 10 set soal eps-topik',
-        image: require('../../assets/images/g2.png'),
-    },
-]
-
+import { LinearGradient } from 'expo-linear-gradient'
+import api from '../../api/axiosConfig';
+import StyledText from '../components/StyledText'
 
 const historyData = [
     { id: 'h1', title: 'eps-topik soal 1', date: 'Selesai pada 12 Mei 2024', score: '80/100', correct: 32, wrong: 8 },
@@ -62,59 +26,92 @@ const historyData = [
     { id: 'h3', title: 'eps-topik soal 1', date: 'Selesai pada 12 Mei 2024', score: '80/100', correct: 32, wrong: 8 },
 ];
 
-// --- Komponen untuk setiap item dalam daftar Produk ---
-const LessonItem = ({ item, onPress }) => (
+// --- Komponen untuk setiap item dalam daftar Test ---
+const LessonItem = ({ item, onPress }) => {
+    const imageSource = item.image
+        ? { uri: item.image }
+        : require('../../assets/images/no-image.jpg');
+    return (
     <TouchableOpacity style={styles.itemContainer} onPress={onPress}>
         <View style={styles.itemTextContainer}>
-            <Text style={styles.itemCategory}>{item.category}</Text>
-            <Text style={styles.itemTitle}>{item.title}</Text>
-            <Text style={styles.itemDescription}>{item.description}</Text>
+            <StyledText style={styles.itemTitle}>{item.title}</StyledText>
+            <StyledText style={styles.itemDescription}>{item.description}</StyledText>
         </View>
-        <Image source={item.image} style={styles.itemImage} />
+        <Image source={imageSource} style={styles.itemImage} />
     </TouchableOpacity>
-);
+)};
 
 // --- Komponen untuk setiap item dalam daftar History ---
 const HistoryItem = ({ item }) => (
     <View style={styles.historyItemContainer}>
         <View style={styles.historyHeader}>
             <View>
-                <Text style={styles.historyTitle}>{item.title}</Text>
-                <Text style={styles.historyDate}>{item.date}</Text>
+                <StyledText style={styles.historyTitle}>{item.title}</StyledText>
+                <StyledText style={styles.historyDate}>{item.date}</StyledText>
             </View>
             <TouchableOpacity style={styles.discussionButton}>
-                <Text style={styles.discussionText}>Lihat Pembahasan</Text>
+                <StyledText style={styles.discussion}>Lihat Pembahasan</StyledText>
                 <Ionicons name="arrow-forward" size={16} color={COLORS.primary} />
             </TouchableOpacity>
         </View>
         <View style={styles.scoreRow}>
-            <Text style={styles.scoreLabel}>Skor</Text>
-            <Text style={styles.scoreValue}>{item.score}</Text>
+            <StyledText style={styles.scoreLabel}>Skor</StyledText>
+            <StyledText style={styles.scoreValue}>{item.score}</StyledText>
         </View>
         <View style={styles.scoreRow}>
-            <Text style={styles.scoreLabel}>Benar</Text>
-            <Text style={styles.scoreValue}>{item.correct}</Text>
+            <StyledText style={styles.scoreLabel}>Benar</StyledText>
+            <StyledText style={styles.scoreValue}>{item.correct}</StyledText>
         </View>
         <View style={styles.scoreRow}>
-            <Text style={styles.scoreLabel}>Salah</Text>
-            <Text style={styles.scoreValue}>{item.wrong}</Text>
+            <StyledText style={styles.scoreLabel}>Salah</StyledText>
+            <StyledText style={styles.scoreValue}>{item.wrong}</StyledText>
         </View>
     </View>
 );
 
 const WarningItem = ({ icon, text }) => (
     <View style={styles.warningItem}>
-        <Text style={styles.warningIcon}>{icon}</Text>
-        <Text style={styles.warningText}>{text}</Text>
+        <StyledText style={styles.warningIcon}>{icon}</StyledText>
+        <StyledText style={styles.warningText}>{text}</StyledText>
     </View>
 );
 
 
 // --- Komponen Utama LessonsScreen ---
 const LessonsScreen = ({ navigation }) => {
-    const [activeTab, setActiveTab] = useState('Produk') //Produk atau History
+    const [activeTab, setActiveTab] = useState('Test') //Test atau History
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedLesson, setSelectedLesson] = useState(null);
+    const [myTests, setMyTests] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchMyTests = async () => {
+            try {
+                const response = await api.get('/api/v1/test-attempts/my-tests');
+                const readyToStartTests = response.data.data.readyToStart;
+
+                const formattedTests = readyToStartTests.map(item => ({
+                    id: item.testPackage.id,
+                    title: item.testPackage.name,
+                    description: item.testPackage.description,
+                    image: item.testPackage.imageUrl,
+                    transactionId: item.transactionId,
+                }));
+
+                setMyTests(formattedTests);
+            } catch (error) {
+                console.error("Gagal mengambil data tes:", error.response?.data || error.message);
+                Alert.alert("Error", "Tidak dapat memuat daftar tes Anda.");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        if (activeTab === 'Test') {
+            fetchMyTests();
+        }
+    }, [activeTab]);
 
     const handleLessonPress = (item) => {
         setSelectedLesson(item);
@@ -123,18 +120,23 @@ const LessonsScreen = ({ navigation }) => {
 
     const handleStartTest = () => {
         console.log("Mulai mengerjakan:", selectedLesson.title);
+        console.log("id:", selectedLesson.id);
+        if (!selectedLesson) return;
         setIsModalVisible(false);
-        navigation.navigate('Test', { lesson: selectedLesson });
+        navigation.navigate('Test', { packageId: selectedLesson.id });
     };
 
+    // console.log("myTests:", myTests)
+
     const renderContent = () => {
-        if (activeTab === 'Produk') {
+        if (activeTab === 'Test') {
             return (
                 <FlatList
-                    data={lessonsData}
+                    data={myTests}
                     renderItem={({ item }) => <LessonItem item={item} onPress={() => handleLessonPress(item)} />}
                     keyExtractor={(item) => item.id}
                     contentContainerStyle={styles.listContainer}
+                    ListEmptyComponent={<View style={styles.emptyContainer}><Text>Anda belum memiliki paket tes.</Text></View>}
                 />
             )
         } else if (activeTab === 'History') {
@@ -150,7 +152,10 @@ const LessonsScreen = ({ navigation }) => {
     }
 
     return (
-        <View style={styles.screenContainer}>
+        <LinearGradient
+            colors={['#FDEAEB', '#E6ECF5']}
+            style={styles.screenContainer}
+        >
             <FocusAwareStatusBar
                 barStyle="dark-content"
                 backgroundColor="transparent"
@@ -158,36 +163,36 @@ const LessonsScreen = ({ navigation }) => {
             />
             {/* Header */}
             <View style={styles.header}>
-                <Text style={styles.headerTitle}>Materi Belajar</Text>
+                <StyledText style={styles.headerTitle}>Materi Belajar</StyledText>
             </View>
 
             {/* Tab Switcher */}
             <View style={styles.tabContainer}>
                 <TouchableOpacity
-                    style={[styles.tab, activeTab === 'Produk' && styles.activeTab]}
-                    onPress={() => setActiveTab('Produk')}
+                    style={[styles.tab, activeTab === 'Test' && styles.activeTab]}
+                    onPress={() => setActiveTab('Test')}
                 >
-                    <Text
+                    <StyledText
                         style={[
                             styles.tabText,
-                            activeTab === 'Produk' && styles.activeTabText,
+                            activeTab === 'Test' && styles.activeTabText,
                         ]}
                     >
-                        Produk
-                    </Text>
+                        Test
+                    </StyledText>
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={[styles.tab, activeTab === 'History' && styles.activeTab]}
                     onPress={() => setActiveTab('History')}
                 >
-                    <Text
+                    <StyledText
                         style={[
                             styles.tabText,
                             activeTab === 'History' && styles.activeTabText,
                         ]}
                     >
                         History Jawaban
-                    </Text>
+                    </StyledText>
                 </TouchableOpacity>
             </View>
 
@@ -204,7 +209,7 @@ const LessonsScreen = ({ navigation }) => {
                 <Pressable style={styles.modalOverlay} onPress={() => setIsModalVisible(false)}>
                     <Pressable style={styles.confirmModalContent}>
                         <View style={styles.dragHandle} />
-                        <Text style={styles.modalTitle}>Anda Yakin Ingin Mengerjakan?</Text>
+                        <StyledText style={styles.modalTitle}>Anda Yakin Ingin Mengerjakan?</StyledText>
 
                         <View style={styles.warningsContainer}>
                             <WarningItem icon="⚠️" text="Ujian ini hanya bisa dikerjakan 1 (satu) kali. Progres tidak dapat diulang atau dibatalkan setelah dimulai." />
@@ -214,24 +219,24 @@ const LessonsScreen = ({ navigation }) => {
 
                         <View style={styles.modalButtonContainer}>
                             <TouchableOpacity style={[styles.modalButton, styles.cancelButton]} onPress={() => setIsModalVisible(false)}>
-                                <Text style={styles.cancelButtonText}>Nanti saja</Text>
+                                <StyledText style={styles.cancelButtonText}>Nanti saja</StyledText>
                             </TouchableOpacity>
                             <TouchableOpacity style={[styles.modalButton, styles.startButton]} onPress={handleStartTest}>
-                                <Text style={styles.startButtonText}>Mulai Sekarang</Text>
+                                <StyledText style={styles.startButtonText}>Mulai Sekarang</StyledText>
                             </TouchableOpacity>
                         </View>
                     </Pressable>
                 </Pressable>
             </Modal>
 
-        </View>
+        </LinearGradient>
     )
 }
 
 const styles = StyleSheet.create({
     screenContainer: {
         flex: 1,
-        backgroundColor: COLORS.white,
+        // backgroundColor: COLORS.white,
         paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
     },
     header: {
@@ -273,8 +278,12 @@ const styles = StyleSheet.create({
     listContainer: {
         paddingVertical: 10,
     },
-    // Styles untuk Produk
+    // Styles untuk Test
     itemContainer: {
+        backgroundColor: COLORS.white,
+        marginHorizontal: 15,
+        borderRadius: 12,
+        marginBottom: 12,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -303,8 +312,8 @@ const styles = StyleSheet.create({
         color: COLORS.text,
     },
     itemImage: {
-        width: 80,
-        height: 80,
+        width: 90,
+        height: 90,
         borderRadius: 8,
     },
     // Styles untuk History
@@ -334,7 +343,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
     },
-    discussionText: {
+    discussion: {
         color: COLORS.primary,
         fontWeight: 'bold',
         marginRight: 4,

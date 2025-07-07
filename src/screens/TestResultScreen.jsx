@@ -70,7 +70,7 @@ const TestResultScreen = ({ navigation, route }) => {
                     </View>
 
                     <Image
-                        source={require('../../assets/images/g1.png')} // Ganti dengan gambar Anda
+                        source={require('../../assets/images/no-image.jpg')} // Ganti dengan gambar Anda
                         style={styles.promoImage}
                     />
                 </View>

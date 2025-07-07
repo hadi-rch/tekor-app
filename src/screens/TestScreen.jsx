@@ -17,26 +17,10 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import NetInfo from '@react-native-community/netinfo';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 import { fontPixel, heightPixel, pixelSizeVertical, pixelSizeHorizontal } from '../../helper';
-
-// --- Data Dummy Soal ---
-const dummyQuestions = Array.from({ length: 40 }, (_, i) => {
-    const isReading = i < 20;
-    const questionNumber = i + 1;
-    return {
-        id: questionNumber,
-        type: isReading ? 'reading' : 'listening',
-        question: `Ini adalah pertanyaan nomor ${questionNumber}. Pilih jawaban yang paling tepat.`,
-        image: isReading && i < 5 ? require('../../assets/images/g3.png') : null,
-        audio: !isReading ? 'https://res.cloudinary.com/dtxx1gcip/video/upload/v1751277302/azwiimofq22elme9rda1.mp3' : null,
-        options: ['Jawaban A', 'Jawaban B', 'Jawaban C', 'Jawaban D'],
-        correctAnswer: i % 4,
-    };
-});
+import { startTestAttempt, getTestAttemptDetails, submitAnswer } from '../../services/testService';
 
 // --- Komponen-komponen Kecil ---
 const Timer = ({ timeLeft }) => {
@@ -110,15 +94,18 @@ const AudioPlayer = ({ uri, questionId, playedAudios, setPlayedAudios }) => {
 };
 
 // --- Komponen Utama TestScreen ---
-const TestScreen = ({ navigation }) => {
+const TestScreen = ({ route, navigation }) => {
+    const { packageId } = route.params;
+    // console.log("packageId received in TestScreen:", packageId);
+    const [questions, setQuestions] = useState([]);
+    const [attemptId, setAttemptId] = useState(null);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [timeLeft, setTimeLeft] = useState(50 * 60);
     const [userAnswers, setUserAnswers] = useState({});
     const [isNavModalVisible, setIsNavModalVisible] = useState(false);
     const [isExitModalVisible, setIsExitModalVisible] = useState(false);
     const [isSubmitModalVisible, setIsSubmitModalVisible] = useState(false);
-
-    // State untuk tracking audio yang sudah diputar
+    const [isLoading, setIsLoading] = useState(true);
     const [playedAudios, setPlayedAudios] = useState([]);
 
     // --- State untuk Deteksi Kecurangan ---
@@ -130,52 +117,29 @@ const TestScreen = ({ navigation }) => {
     const timerRef = useRef(null);
 
     useEffect(() => {
-        const loadProgress = async () => {
+        const initializeTest = async () => {
             try {
-                const savedProgress = await AsyncStorage.getItem('exam_progress');
-                if (savedProgress !== null) {
-                    Alert.alert(
-                        "Ujian Ditemukan",
-                        "Kami menemukan progres ujian yang belum selesai. Ingin melanjutkannya?",
-                        [
-                            { text: "Mulai Baru", onPress: () => AsyncStorage.removeItem('exam_progress'), style: "cancel" },
-                            {
-                                text: "Lanjutkan",
-                                onPress: () => {
-                                    const { userAnswers, currentQuestionIndex, timeLeft, playedAudios } = JSON.parse(savedProgress);
-                                    setUserAnswers(userAnswers || {});
-                                    setCurrentQuestionIndex(currentQuestionIndex || 0);
-                                    setTimeLeft(timeLeft || (50 * 60));
-                                    setPlayedAudios(playedAudios || []);
-                                }
-                            }
-                        ]
-                    );
-                }
-            } catch (e) {
-                console.error("Gagal memuat progres:", e);
-            }
-        };
-        loadProgress();
-    }, []);
+                console.log("hadi")
+                console.log("packageId", packageId)
+                const startResponse = await startTestAttempt(packageId);
+                console.log("lossssss")
+                const newAttemptId = startResponse.data.id;
+                setAttemptId(newAttemptId);
 
-    useEffect(() => {
-        const saveProgress = async () => {
-            try {
-                const progress = JSON.stringify({
-                    userAnswers,
-                    currentQuestionIndex,
-                    timeLeft,
-                    playedAudios,
-                });
-                await AsyncStorage.setItem('exam_progress', progress);
-            } catch (e) {
-                console.error("Gagal menyimpan progres:", e);
+                const detailsResponse = await getTestAttemptDetails(newAttemptId);
+                setQuestions(detailsResponse.data.questions);
+                setIsLoading(false);
+            } catch (error) {
+                console.error("Failed to initialize test:", error);
+                // Handle error, e.g., show an alert and navigate back
+                Alert.alert("Error", "Gagal memulai tes. Silakan coba lagi.", [
+                    { text: "OK", onPress: () => navigation.goBack() },
+                ]);
             }
         };
-        // Simpan setiap ada perubahan state penting
-        saveProgress();
-    }, [userAnswers, currentQuestionIndex, timeLeft, playedAudios]);
+
+        initializeTest();
+    }, [packageId]);
 
 
 
@@ -243,19 +207,31 @@ const TestScreen = ({ navigation }) => {
         return () => clearInterval(timerRef.current);
     }, []);
 
-    const handleSelectAnswer = (optionIndex) => {
-        setUserAnswers(prev => ({ ...prev, [currentQuestionIndex]: optionIndex }));
+    const handleSelectAnswer = async (optionId) => {
+        const currentQuestion = questions[currentQuestionIndex];
+        setUserAnswers(prev => ({ ...prev, [currentQuestion.id]: optionId }));
+
+        try {
+            const response = await submitAnswer(attemptId, currentQuestion.id, optionId, timeLeft);
+            // You might want to update the timeLeft based on the response
+        } catch (error) {
+            console.error("Failed to submit answer:", error);
+            // Handle error, maybe show a toast or an alert
+            Alert.alert("Error", "Gagal mengirim jawaban. Silakan periksa koneksi Anda.");
+        }
+    };
+
+    const isImageUrl = (text) => {
+        return typeof text === 'string' && (text.startsWith('http') && (text.endsWith('.png') || text.endsWith('.jpg') || text.endsWith('.jpeg')));
     };
 
     const handleExit = () => {
         clearInterval(timerRef.current);
-
-        AsyncStorage.removeItem('exam_progress');
         navigation.goBack();
     };
 
     const handleNext = () => {
-        if (currentQuestionIndex < dummyQuestions.length - 1) {
+        if (currentQuestionIndex < questions.length - 1) {
             setCurrentQuestionIndex(prev => prev + 1);
         }
     };
@@ -272,7 +248,6 @@ const TestScreen = ({ navigation }) => {
     };
 
     const handleSubmit = () => {
-        clearInterval(timerRef.current);
         setIsSubmitModalVisible(true);
     };
 
@@ -280,42 +255,23 @@ const TestScreen = ({ navigation }) => {
         if (!isForced) setIsSubmitModalVisible(false);
         clearInterval(timerRef.current);
 
-        const netState = await NetInfo.fetch();
-        if (!netState.isConnected) {
-            Alert.alert("Tidak Ada Koneksi", "Jawaban Anda telah disimpan. Ujian akan dikumpulkan secara otomatis saat koneksi kembali stabil.");
-            // Di sini Anda bisa menyimpan hasil ke 'pending_submission' jika perlu
-            navigation.popToTop();
-            return;
-        }
-
-        let correctCount = 0;
-        dummyQuestions.forEach((question, index) => {
-            if (userAnswers[index] === question.correctAnswer) {
-                correctCount++;
-            }
-        });
-
-        const totalQuestions = dummyQuestions.length;
-        const score = Math.round((correctCount / totalQuestions) * 100);
-        const wrongCount = totalQuestions - correctCount;
-        const timeSpentInSeconds = (50 * 60) - timeLeft;
-        const timeTaken = `${Math.floor(timeSpentInSeconds / 60)} menit`;
-
-        // Hapus progres setelah berhasil dihitung
-        await AsyncStorage.removeItem('exam_progress');
-
-        // Navigasi ke layar hasil dengan membawa data
+        // Since answers are submitted on the fly, we just need to navigate to the result screen.
+        // The final score calculation will be done on the backend or on the result screen based on the final state.
         navigation.replace('TestResult', {
-            score: score,
-            correctAnswers: correctCount,
-            wrongAnswers: wrongCount,
-            timeTaken: timeTaken,
-            userAnswers: userAnswers,
+            attemptId: attemptId,
         });
     };
 
-    const currentQuestion = dummyQuestions[currentQuestionIndex];
-    const progress = ((currentQuestionIndex + 1) / dummyQuestions.length) * 100;
+    const currentQuestion = questions[currentQuestionIndex];
+    const progress = isLoading ? 0 : ((currentQuestionIndex + 1) / questions.length) * 100;
+
+    if (isLoading) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <Text>Loading...</Text>
+            </View>
+        );
+    }
 
     return (
         <View style={styles.screenContainer}>
@@ -338,20 +294,20 @@ const TestScreen = ({ navigation }) => {
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <View style={styles.topSection}>
                     <Timer timeLeft={timeLeft} />
-                    <Text style={styles.progressText}>Pertanyaan {currentQuestionIndex + 1}/{dummyQuestions.length}</Text>
+                    <Text style={styles.progressText}>Pertanyaan {currentQuestionIndex + 1}/{questions.length}</Text>
                     <View style={styles.progressBarBackground}>
                         <View style={[styles.progressBar, { width: `${progress}%` }]} />
                     </View>
                 </View>
 
                 <View style={styles.questionContainer}>
-                    <Text style={styles.questionText}>{currentQuestion.question}</Text>
-                    {currentQuestion.type === 'reading' && currentQuestion.image && (
-                        <Image source={currentQuestion.image} style={styles.questionImage} />
+                    <Text style={styles.questionText}>{currentQuestion.questionText}</Text>
+                    {currentQuestion.imageUrl && (
+                        <Image source={{ uri: currentQuestion.imageUrl }} style={styles.questionImage} />
                     )}
-                    {currentQuestion.type === 'listening' && currentQuestion.audio && (
+                    {currentQuestion.audioUrl && (
                         <AudioPlayer
-                            uri={currentQuestion.audio}
+                            uri={currentQuestion.audioUrl}
                             questionId={currentQuestion.id}
                             playedAudios={playedAudios}
                             setPlayedAudios={setPlayedAudios}
@@ -360,18 +316,25 @@ const TestScreen = ({ navigation }) => {
                 </View>
 
                 <View style={styles.optionsContainer}>
-                    {currentQuestion.options.map((option, index) => {
-                        const isSelected = userAnswers[currentQuestionIndex] === index;
+                    {currentQuestion.options.map((option) => {
+                        const isSelected = userAnswers[currentQuestion.id] === option.id;
+                        const isOptionImage = isImageUrl(option.optionText);
+
                         return (
                             <TouchableOpacity
-                                key={index}
-                                style={[styles.optionButton, isSelected && styles.selectedOption]}
-                                onPress={() => handleSelectAnswer(index)}
+                                key={option.id}
+                                style={[styles.optionButton, isSelected && styles.selectedOption, isOptionImage && styles.imageOptionButton]}
+                                onPress={() => handleSelectAnswer(option.id)}
                             >
                                 <View style={[styles.radioCircle, isSelected && styles.selectedRadio]}>
                                     {isSelected && <View style={styles.radioInnerCircle} />}
                                 </View>
-                                <Text style={styles.optionText}>{option}</Text>
+                                
+                                {isOptionImage ? (
+                                    <Image source={{ uri: option.optionText }} style={styles.optionImage} />
+                                ) : (
+                                    <Text style={styles.optionText}>{option.optionText}</Text>
+                                )}
                             </TouchableOpacity>
                         );
                     })}
@@ -384,7 +347,7 @@ const TestScreen = ({ navigation }) => {
                         <Text style={styles.prevButtonText}>Sebelumnya</Text>
                     </TouchableOpacity>
                 )}
-                {currentQuestionIndex < dummyQuestions.length - 1 ? (
+                {currentQuestionIndex < questions.length - 1 ? (
                     <TouchableOpacity style={[styles.footerButton, styles.nextButton]} onPress={handleNext}>
                         <Text style={styles.nextButtonText}>Berikutnya</Text>
                     </TouchableOpacity>
@@ -410,12 +373,12 @@ const TestScreen = ({ navigation }) => {
                             </TouchableOpacity>
                         </View>
                         <FlatList
-                            data={dummyQuestions}
+                            data={questions}
                             keyExtractor={item => item.id.toString()}
                             numColumns={5}
                             renderItem={({ item, index }) => {
                                 const isCurrent = index === currentQuestionIndex;
-                                const isAnswered = userAnswers[index] !== undefined;
+                                const isAnswered = userAnswers[item.id] !== undefined;
                                 return (
                                     <TouchableOpacity
                                         style={[
@@ -429,7 +392,7 @@ const TestScreen = ({ navigation }) => {
                                             styles.navGridText,
                                             isCurrent && styles.navGridTextCurrent,
                                             !isCurrent && isAnswered && styles.navGridTextAnswered,
-                                        ]}>{item.id}</Text>
+                                        ]}>{index + 1}</Text>
                                     </TouchableOpacity>
                                 );
                             }}
@@ -543,7 +506,7 @@ const styles = StyleSheet.create({
     progressBarBackground: { width: '100%', height: heightPixel(8), backgroundColor: '#e9ecef', borderRadius: 4, },
     progressBar: { height: '100%', backgroundColor: COLORS.primary, borderRadius: 4, },
     questionContainer: { backgroundColor: COLORS.white, borderRadius: 12, padding: pixelSizeHorizontal(15), marginBottom: pixelSizeVertical(15), },
-    questionText: { fontSize: fontPixel(16), color: COLORS.text, lineHeight: fontPixel(24), marginBottom: pixelSizeVertical(15), },
+    questionText: { fontSize: fontPixel(18), color: COLORS.text, lineHeight: fontPixel(24), marginBottom: pixelSizeVertical(15), },
     questionImage: { width: '100%', height: heightPixel(180), borderRadius: 8, resizeMode: 'contain' },
     audioPlayer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f5f5f5', borderRadius: 8, padding: pixelSizeHorizontal(10), },
     audioPlayerPlayed: { backgroundColor: '#e0e0e0', },
@@ -613,6 +576,15 @@ const styles = StyleSheet.create({
         color: 'white',
         fontWeight: 'bold',
         fontSize: fontPixel(16),
+    },
+    imageOptionButton: {
+        paddingVertical: pixelSizeVertical(10),
+    },
+    optionImage: {
+        flex: 1,
+        height: heightPixel(80),
+        resizeMode: 'contain',
+        borderRadius: 8,
     },
 });
 

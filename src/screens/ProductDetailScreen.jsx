@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -8,32 +8,102 @@ import {
     Platform,
     StatusBar,
     ScrollView,
+    ActivityIndicator,
+    Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as WebBrowser from 'expo-web-browser';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS } from '../constants/colors';
-import { fontPixel, heightPixel, pixelSizeVertical, pixelSizeHorizontal, widthPixel } from '../../helper';
+import { fontPixel, heightPixel, pixelSizeVertical, pixelSizeHorizontal } from '../../helper';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 import CustomButton from '../components/CustomButton';
-
-// --- Komponen untuk Tag Level ---
-const LevelTag = ({ label }) => (
-    <View style={styles.tagContainer}>
-        <Text style={styles.tagText}>{label}</Text>
-    </View>
-);
-
+import api from '../../api/axiosConfig';
 
 // --- Komponen Utama ProductDetailScreen ---
 const ProductDetailScreen = ({ navigation, route }) => {
-    // Di aplikasi nyata, data ini akan didapat dari route.params
-    // Untuk sekarang, kita gunakan data mockup
-    const product = route.params?.product || {
-        title: 'Korean Language Learning Course',
-        price: 'Rp 150.000',
-        description: 'Learn Korean with our comprehensive course. Features include:',
-        image: require('../../assets/images/g3.png'), // Ganti dengan path gambar Anda
-        tags: ['Beginner', 'Intermediate', 'Advanced'],
+    const { productId } = route.params;
+    const insets = useSafeAreaInsets(); // Untuk padding bawah yang aman
+
+    const [product, setProduct] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isBuying, setIsBuying] = useState(false);
+
+    useEffect(() => {
+        if (!productId) {
+            Alert.alert("Error", "ID Produk tidak ditemukan.");
+            navigation.goBack();
+            return;
+        }
+
+        const fetchProductDetail = async () => {
+            try {
+                const response = await api.get(`/api/v1/test-packages/${productId}`);
+                setProduct(response.data.data);
+            } catch (error) {
+                console.error("Gagal mengambil detail produk:", error);
+                Alert.alert("Error", "Tidak dapat memuat detail produk.");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchProductDetail();
+    }, [productId]);
+
+    // Fungsi untuk menangani pembelian
+    const handleBuyPress = async () => {
+        setIsBuying(true);
+        try {
+            const requestBody = {
+                testPackageId: productId,
+                quantity: 1,
+            };
+
+            const response = await api.post('/api/v1/transactions/create', requestBody);
+            const redirectUrl = response.data.data?.redirectUrl;
+
+            if (redirectUrl) {
+                // Buka halaman pembayaran Midtrans di dalam aplikasi
+                await WebBrowser.openBrowserAsync(redirectUrl);
+                // Setelah browser ditutup, arahkan pengguna ke riwayat transaksi
+                navigation.navigate('TransactionHistory');
+            } else {
+                Alert.alert("Error", "Gagal mendapatkan link pembayaran.");
+            }
+
+        } catch (error) {
+            console.error("Gagal membuat transaksi:", error.response?.data || error.message);
+            Alert.alert("Error", error.response?.data?.message || "Gagal memulai transaksi. Silakan coba lagi.");
+        } finally {
+            setIsBuying(false);
+        }
     };
+
+    const formatPrice = (price) => {
+        if (typeof price !== 'number') return 'Rp 0';
+        return `Rp ${new Intl.NumberFormat('id-ID').format(price)}`;
+    };
+
+    if (isLoading) {
+        return (
+            <View style={styles.loaderContainer}>
+                <ActivityIndicator size="large" color={COLORS.primary} />
+            </View>
+        );
+    }
+
+    if (!product) {
+        return (
+            <View style={styles.loaderContainer}>
+                <Text>Produk tidak ditemukan.</Text>
+            </View>
+        );
+    }
+
+    const imageSource = product.imageUrl 
+        ? { uri: product.imageUrl } 
+        : require('../../assets/images/no-image.jpg');
 
     return (
         <View style={styles.screenContainer}>
@@ -43,7 +113,6 @@ const ProductDetailScreen = ({ navigation, route }) => {
                 translucent={true}
             />
 
-            {/* Header Kustom */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerButton}>
                     <Ionicons name="arrow-back" size={fontPixel(24)} color={COLORS.text} />
@@ -52,21 +121,11 @@ const ProductDetailScreen = ({ navigation, route }) => {
                 <View style={{ width: fontPixel(24) }} />
             </View>
 
-            <ScrollView style={styles.scrollContainer}>
-                <Image source={product.image} style={styles.productImage} />
-
+            <ScrollView contentContainerStyle={styles.scrollContainer}>
+                <Image source={imageSource} style={styles.productImage} />
                 <View style={styles.detailsContainer}>
-                    <Text style={styles.productTitle}>{product.title}</Text>
-                    <Text style={styles.productPrice}>{product.price}</Text>
-
-                    {product.tags && (
-                        <View style={styles.tagsRow}>
-                            {product.tags.map((tag, index) => (
-                                <LevelTag key={index} label={tag} />
-                            ))}
-                        </View>
-                    )}
-
+                    <Text style={styles.productTitle}>{product.name}</Text>
+                    <Text style={styles.productPrice}>{formatPrice(product.price)}</Text>
                     <View style={styles.descriptionSection}>
                         <Text style={styles.sectionTitle}>Product Description</Text>
                         <Text style={styles.descriptionText}>{product.description}</Text>
@@ -74,11 +133,12 @@ const ProductDetailScreen = ({ navigation, route }) => {
                 </View>
             </ScrollView>
 
-            {/* Tombol Beli di Bawah */}
-            <View style={styles.footer}>
+            {/* 4. Perbarui tombol Beli */}
+            <View style={[styles.footer, { paddingBottom: insets.bottom > 0 ? insets.bottom : pixelSizeVertical(20) }]}>
                 <CustomButton
-                    title="Beli"
-                    onPress={() => { /* Logika untuk membeli */ }}
+                    title={isBuying ? "Memproses..." : "Beli"}
+                    onPress={handleBuyPress}
+                    disabled={isBuying}
                     style={{ backgroundColor: COLORS.primary }}
                 />
             </View>
@@ -91,6 +151,11 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: COLORS.white,
         paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+    },
+    loaderContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     header: {
         flexDirection: 'row',
@@ -109,12 +174,13 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     scrollContainer: {
-        paddingBottom: heightPixel(120), // Memberi ruang agar tidak tertutup footer
+        paddingBottom: heightPixel(120),
     },
     productImage: {
         width: '100%',
         height: heightPixel(300),
         resizeMode: 'cover',
+        backgroundColor: '#f0f0f0',
     },
     detailsContainer: {
         padding: pixelSizeHorizontal(20),
@@ -130,24 +196,9 @@ const styles = StyleSheet.create({
         color: COLORS.text,
         marginBottom: pixelSizeVertical(20),
     },
-    tagsRow: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        marginBottom: pixelSizeVertical(25),
+    descriptionSection: {
+        marginTop: pixelSizeVertical(10),
     },
-    tagContainer: {
-        backgroundColor: '#f5f5f5',
-        borderRadius: widthPixel(20),
-        paddingVertical: pixelSizeVertical(8),
-        paddingHorizontal: pixelSizeHorizontal(15),
-        marginRight: pixelSizeHorizontal(10),
-        marginBottom: pixelSizeVertical(10),
-    },
-    tagText: {
-        fontSize: fontPixel(14),
-        color: COLORS.gray,
-    },
-    descriptionSection: {},
     sectionTitle: {
         fontSize: fontPixel(18),
         fontWeight: 'bold',
@@ -162,7 +213,6 @@ const styles = StyleSheet.create({
     footer: {
         paddingHorizontal: pixelSizeHorizontal(20),
         paddingTop: pixelSizeVertical(10),
-        paddingBottom: pixelSizeVertical(50), // Ruang aman dari navigasi sistem
         borderTopWidth: 1,
         borderTopColor: COLORS.borderColor,
         backgroundColor: COLORS.white,

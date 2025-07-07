@@ -81,7 +81,10 @@ const GameCategoryScreen = ({ navigation }) => {
     }
 
     return (
-        <View style={styles.screenContainer}>
+        <LinearGradient
+            colors={['#E6ECF5', '#FDEAEB']}
+            style={styles.screenContainer}
+        >
             <FocusAwareStatusBar barStyle="dark-content" backgroundColor="transparent" translucent={true} />
 
             <View style={styles.header}>
@@ -109,7 +112,7 @@ const GameCategoryScreen = ({ navigation }) => {
                     />
                 )}
             />
-        </View>
+        </LinearGradient>
     );
 };
 
@@ -161,7 +164,7 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         marginTop: pixelSizeVertical(8),
     },
-     centerContainer: { // Style untuk loading
+    centerContainer: { // Style untuk loading
         justifyContent: 'center',
         alignItems: 'center',
     },

@@ -22,6 +22,7 @@ import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateUserName, updateUserAvatar, clearAuthError } from '../store/authSlice';
 import { fontPixel, pixelSizeVertical } from '../../helper';
+import { LinearGradient } from 'expo-linear-gradient';
 
 // --- Komponen baru untuk menampilkan baris informasi read-only ---
 const InfoRow = ({ label, value, iconName, onIconPress }) => (
@@ -198,10 +199,13 @@ const EditProfileScreen = ({ navigation }) => {
         });
     };
 
-    const avatarSource = avatarUri ? { uri: avatarUri } : require('../../assets/images/g1.png');
+    const avatarSource = avatarUri ? { uri: avatarUri } : require('../../assets/images/no-image.jpg');
 
     return (
-        <View style={styles.screenContainer}>
+        <LinearGradient
+            colors={['#FDEAEB', '#E6ECF5']}
+            style={styles.screenContainer}
+        >
             <FocusAwareStatusBar
                 barStyle="dark-content"
                 backgroundColor="transparent"
@@ -293,7 +297,7 @@ const EditProfileScreen = ({ navigation }) => {
                 </Pressable>
             </Modal>
 
-        </View>
+        </LinearGradient>
     );
 };
 

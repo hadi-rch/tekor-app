@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { saveTokens, deleteTokens } from '../../utils/authStorage';
+import { saveTokens, deleteTokens, getAccessToken } from '../../utils/authStorage';
 import api from '../../api/axiosConfig';
+import { use } from 'react';
 
 
 export const loginUser = createAsyncThunk(
@@ -21,7 +22,9 @@ export const loginUser = createAsyncThunk(
 
             try {
                 const profileResponse = await api.get('/api/v1/users');
-                const userProfile = profileResponse.data;
+                const userProfile = profileResponse.data?.data;
+                console.log("userProfile:", userProfile);
+
                 return { token: accessToken, user: userProfile };
 
             } catch (profileError) {
@@ -60,6 +63,34 @@ export const loginUser = createAsyncThunk(
     }
 );
 
+export const restoreUserSession = createAsyncThunk(
+    'auth/restoreSession',
+    async (_, { rejectWithValue }) => {
+        const accessToken = await getAccessToken();
+        if (!accessToken) {
+            return rejectWithValue('No token found');
+        }
+
+        try {
+            // Biarkan interceptor menangani refresh token jika diperlukan
+            const profileResponse = await api.get('/api/v1/users');
+            const userProfile = profileResponse.data?.data;
+            console.log("userProfile:", userProfile);
+            // Setelah berhasil (mungkin setelah refresh), kita perlu token terbaru
+            const newAccessToken = await getAccessToken();
+            return { token: newAccessToken, user: userProfile };
+        } catch (error) {
+            // Jika interceptor gagal me-refresh dan error tetap terjadi,
+            // maka sesi tidak dapat dipulihkan.
+            if (__DEV__) {
+                console.log('Failed to restore session even after interceptor.', error.response?.data);
+            }
+            await deleteTokens(); // Pastikan token lama dibersihkan
+            return rejectWithValue('Failed to restore session.');
+        }
+    }
+);
+
 export const updateUserName = createAsyncThunk(
     'users/updateName',
     async ({ fullName }, { rejectWithValue }) => {
@@ -94,7 +125,7 @@ const authSlice = createSlice({
         user: null,
         token: null, // Ini akan menyimpan accessToken
         isAuthenticated: false,
-        isLoading: false,
+        isLoading: true,
         error: null,
     },
     // Reducers untuk aksi sinkron (langsung)
@@ -161,6 +192,23 @@ const authSlice = createSlice({
             .addCase(updateUserAvatar.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.payload;
+            })
+
+            // --- KASUS UNTUK RESTORE SESSION ---
+            .addCase(restoreUserSession.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(restoreUserSession.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.isAuthenticated = true;
+                state.user = action.payload.user;
+                state.token = action.payload.token;
+            })
+            .addCase(restoreUserSession.rejected, (state) => {
+                state.isLoading = false;
+                state.isAuthenticated = false;
+                state.user = null;
+                state.token = null;
             });
     },
 });

@@ -19,7 +19,7 @@ const dummyQuestions = Array.from({ length: 40 }, (_, i) => ({
     id: i + 1,
     type: i < 20 ? 'reading' : 'listening',
     question: `Ini adalah pertanyaan nomor ${i + 1}. Pilih jawaban yang paling tepat.`,
-    image: i < 5 ? require('../../assets/images/g1.png') : null,
+    image: i < 5 ? require('../../assets/images/no-image.jpg') : null,
     audio: i >= 20 ? 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' : null,
     options: ['Jawaban A', 'Jawaban B', 'Jawaban C', 'Jawaban D'],
     correctAnswer: i % 4,

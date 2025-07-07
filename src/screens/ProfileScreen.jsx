@@ -20,6 +20,8 @@ import { logout } from '../store/authSlice';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 import { fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical } from '../../helper';
+import { LinearGradient } from 'expo-linear-gradient';
+import StyledText from '../components/StyledText';
 
 // --- Komponen kecil yang dapat digunakan kembali untuk setiap item menu ---
 const ProfileMenuItem = ({ icon, label, onPress, isLogout = false }) => (
@@ -67,7 +69,7 @@ const ProfileScreen = ({ navigation }) => {
 
     const avatarSource = (user && user.imageUrl)
         ? { uri: user.imageUrl }
-        : require('../../assets/images/g1.png');
+        : require('../../assets/images/no-image.jpg');
 
     if (!user) {
         return (
@@ -78,7 +80,10 @@ const ProfileScreen = ({ navigation }) => {
     }
 
     return (
-        <View style={styles.screenContainer}>
+        <LinearGradient
+            colors={['#E6ECF5', '#FDEAEB']}
+            style={styles.screenContainer}
+        >
             <FocusAwareStatusBar
                 barStyle="dark-content"
                 backgroundColor="transparent"
@@ -86,20 +91,20 @@ const ProfileScreen = ({ navigation }) => {
             />
             {/* Header */}
             <View style={styles.header}>
-                <Text style={styles.headerTitle}>Profil</Text>
+                <StyledText style={styles.headerTitle}>Profil</StyledText>
             </View>
 
             <View style={styles.container}>
                 {/* Info Pengguna */}
                 <View style={styles.profileInfoContainer}>
                     <Image source={avatarSource} style={styles.avatar} />
-                    <Text style={styles.userName}>{user.fullName}</Text>
-                    <Text style={styles.userEmail}>{user.email}</Text>
+                    <StyledText style={styles.userName}>{user.fullName}</StyledText>
+                    <StyledText style={styles.userEmail}>{user.email}</StyledText>
                 </View>
 
                 {/* Menu Pengaturan */}
                 <View style={styles.settingsContainer}>
-                    <Text style={styles.sectionTitle}>Pengaturan</Text>
+                    <StyledText style={styles.sectionTitle}>Pengaturan</StyledText>
                     <ProfileMenuItem
                         icon="receipt-outline"
                         label="Riwayat transaksi"
@@ -135,35 +140,35 @@ const ProfileScreen = ({ navigation }) => {
                 >
                     <Pressable style={styles.logoutModalContent}>
                         <View style={styles.dragHandle} />
-                        <Text style={styles.modalTitle}>Anda Yakin Ingin Keluar</Text>
-                        <Text style={styles.modalSubtitle}>
+                        <StyledText style={styles.modalTitle}>Anda Yakin Ingin Keluar</StyledText>
+                        <StyledText style={styles.modalSubtitle}>
                             Anda perlu masuk kembali untuk mengakses progres dan kelas anda
-                        </Text>
+                        </StyledText>
                         <View style={styles.modalButtonContainer}>
                             <TouchableOpacity
                                 style={[styles.modalButton, styles.cancelButton]}
                                 onPress={() => setIsLogoutModalVisible(false)}
                             >
-                                <Text style={styles.cancelButtonText}>Batal</Text>
+                                <StyledText style={styles.cancelButtonText}>Batal</StyledText>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={[styles.modalButton, styles.logoutButton]}
                                 onPress={handleConfirmLogout}
                             >
-                                <Text style={styles.logoutButtonText}>Ya Keluar</Text>
+                                <StyledText style={styles.logoutButtonText}>Ya Keluar</StyledText>
                             </TouchableOpacity>
                         </View>
                     </Pressable>
                 </Pressable>
             </Modal>
-        </View>
+        </LinearGradient>
     );
 };
 
 const styles = StyleSheet.create({
     screenContainer: {
         flex: 1,
-        backgroundColor: COLORS.white,
+        // backgroundColor: COLORS.white,
         paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
     },
     header: {
