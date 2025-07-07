@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
     View,
     Text,
@@ -9,62 +9,35 @@ import {
     TouchableOpacity,
     Platform,
     StatusBar,
+    ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 import { LinearGradient } from 'expo-linear-gradient';
+import api from '../../api/axiosConfig';
+import { fontPixel, pixelSizeHorizontal, pixelSizeVertical } from '../../helper';
 
-const allTransactions = [
-    {
-        id: '1',
-        status: 'success',
-        title: 'Korean Language Course',
-        price: '$49.99',
-        date: '05/15/2024',
-        image: require('../../assets/images/no-image.jpg')
-    },
-    {
-        id: '2',
-        status: 'pending',
-        title: 'Korean Culture Workshop',
-        price: '$29.99',
-        date: '05/10/2024',
-        image: require('../../assets/images/no-image.jpg')
-    },
-    {
-        id: '3',
-        status: 'success',
-        title: 'Korean Language Course',
-        price: '$49.99',
-        date: '04/20/2024',
-        image: require('../../assets/images/no-image.jpg')
-    },
-    {
-        id: '4',
-        status: 'success',
-        title: 'Korean Language Course',
-        price: '$49.99',
-        date: '03/15/2024',
-        image: require('../../assets/images/no-image.jpg')
-    },
-    {
-        id: '5',
-        status: 'success',
-        title: 'Korean Language Course',
-        price: '$49.99',
-        date: '02/15/2024',
-        image: require('../../assets/images/no-image.jpg')
-    },
-];
+const TransactionItem = ({ item, navigation }) => {
+    const getStatusStyle = (status) => {
+        switch (status.toLowerCase()) {
+            case 'success':
+            case 'settlement':
+                return { color: '#28a745' }; 
+            case 'pending':
+                return { color: '#ffc107' };
+            case 'failure':
+            case 'expire':
+                return { color: '#dc3545' }; 
+            default:
+                return { color: COLORS.gray };
+        }
+    };
 
-// --- Komponen untuk setiap item dalam daftar ---
-const TransactionItem = ({ item }) => {
-    const isSuccess = item.status === 'success';
     return (
-        <TouchableOpacity style={styles.itemContainer}>
+        <TouchableOpacity style={styles.itemContainer} onPress={() => navigation.navigate('TransactionDetail', { orderId: item.id })}>
             <View style={styles.itemDetails}>
-                <Text style={[styles.itemStatus, { color: isSuccess ? '#28a745' : '#ffc107' }]}>
+                <Text style={[styles.itemStatus, getStatusStyle(item.status)]}>
                     {item.status}
                 </Text>
                 <Text style={styles.itemTitle}>{item.title}</Text>
@@ -77,22 +50,55 @@ const TransactionItem = ({ item }) => {
 
 // --- Komponen Utama TransactionHistoryScreen ---
 const TransactionHistoryScreen = ({ navigation }) => {
-    const [activeTab, setActiveTab] = useState('All'); // All, Completed, Pending
+    const [activeTab, setActiveTab] = useState('All');
+    const [transactions, setTransactions] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    // 4. useEffect untuk mengambil data dari backend
+    useEffect(() => {
+        const fetchHistory = async () => {
+            try {
+                const response = await api.get('/api/v1/transactions/history');
+                const backendData = response.data.data;
+
+                // Transformasi data dari backend ke format yang dibutuhkan UI
+                const formattedData = backendData.map(tx => ({
+                    id: tx.orderId,
+                    status: tx.transactionStatus.toLowerCase(),
+                    title: tx.packageName || tx.bundleName || 'Produk Tidak Dikenal',
+                    price: `Rp ${new Intl.NumberFormat('id-ID').format(tx.amount)}`,
+                    date: new Date(tx.createdAt).toLocaleDateString('id-ID', {
+                        day: '2-digit', month: 'long', year: 'numeric'
+                    }),
+                    image: require('../../assets/images/no-image.jpg')
+                }));
+
+                setTransactions(formattedData);
+            } catch (error) {
+                console.error("Gagal mengambil riwayat transaksi:", error);
+                Alert.alert("Error", "Tidak dapat memuat riwayat transaksi.");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchHistory();
+    }, []);
 
     // Memfilter transaksi berdasarkan tab yang aktif
     const filteredTransactions = useMemo(() => {
         if (activeTab === 'Completed') {
-            return allTransactions.filter(item => item.status === 'success');
+            return transactions.filter(item => item.status === 'success' || item.status === 'settlement');
         }
         if (activeTab === 'Pending') {
-            return allTransactions.filter(item => item.status === 'pending');
+            return transactions.filter(item => item.status === 'pending');
         }
-        return allTransactions;
-    }, [activeTab]);
+        return transactions;
+    }, [activeTab, transactions]);
 
     return (
         <LinearGradient
-            colors={['#FDEAEB', '#E6ECF5']}
+            colors={['#FFFFFF', '#F7F8FA']}
             style={styles.screenContainer}
         >
             <FocusAwareStatusBar
@@ -100,16 +106,14 @@ const TransactionHistoryScreen = ({ navigation }) => {
                 backgroundColor="transparent"
                 translucent={true}
             />
-            {/* Header Kustom */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+                    <Ionicons name="arrow-back" size={fontPixel(24)} color={COLORS.text} />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Riwayat Transaksi</Text>
-                <View style={{ width: 24 }} />
+                <View style={{ width: fontPixel(24) }} />
             </View>
 
-            {/* Tab Switcher */}
             <View style={styles.tabContainer}>
                 {['All', 'Completed', 'Pending'].map((tabName) => (
                     <TouchableOpacity
@@ -124,18 +128,23 @@ const TransactionHistoryScreen = ({ navigation }) => {
                 ))}
             </View>
 
-            {/* Daftar Transaksi */}
-            <FlatList
-                data={filteredTransactions}
-                renderItem={({ item }) => <TransactionItem item={item} />}
-                keyExtractor={(item) => item.id}
-                contentContainerStyle={styles.listContainer}
-                ListEmptyComponent={
-                    <View style={styles.emptyContainer}>
-                        <Text>Tidak ada transaksi.</Text>
-                    </View>
-                }
-            />
+            {isLoading ? (
+                <View style={styles.loaderContainer}>
+                    <ActivityIndicator size="large" color={COLORS.primary} />
+                </View>
+            ) : (
+                <FlatList
+                    data={filteredTransactions}
+                    renderItem={({ item }) => <TransactionItem item={item} navigation={navigation}/>}
+                    keyExtractor={(item) => item.id}
+                    contentContainerStyle={styles.listContainer}
+                    ListEmptyComponent={
+                        <View style={styles.emptyContainer}>
+                            <Text>Tidak ada transaksi pada kategori ini.</Text>
+                        </View>
+                    }
+                />
+            )}
         </LinearGradient>
     );
 };
@@ -143,23 +152,28 @@ const TransactionHistoryScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     screenContainer: {
         flex: 1,
-        backgroundColor: COLORS.white,
         paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+    },
+    loaderContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingVertical: 15,
-        paddingHorizontal: 20,
+        paddingVertical: pixelSizeVertical(15),
+        paddingHorizontal: pixelSizeHorizontal(20),
         borderBottomWidth: 1,
         borderBottomColor: COLORS.borderColor,
+        backgroundColor: COLORS.white,
     },
     backButton: {
         padding: 5,
     },
     headerTitle: {
-        fontSize: 20,
+        fontSize: fontPixel(20),
         fontWeight: 'bold',
     },
     tabContainer: {
@@ -167,6 +181,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-around',
         borderBottomWidth: 1,
         borderBottomColor: COLORS.borderColor,
+        backgroundColor: COLORS.white,
     },
     tab: {
         flex: 1,
@@ -176,14 +191,14 @@ const styles = StyleSheet.create({
         borderBottomColor: 'transparent',
     },
     activeTab: {
-        borderBottomColor: COLORS.text,
+        borderBottomColor: COLORS.primary,
     },
     tabText: {
-        fontSize: 16,
+        fontSize: fontPixel(16),
         color: COLORS.gray,
     },
     activeTabText: {
-        color: COLORS.text,
+        color: COLORS.primary,
         fontWeight: 'bold',
     },
     listContainer: {
@@ -195,33 +210,41 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: 20,
         paddingVertical: 15,
-        borderBottomWidth: 1,
-        borderBottomColor: COLORS.borderColor,
+        backgroundColor: COLORS.white,
+        marginHorizontal: 15,
+        borderRadius: 12,
+        marginBottom: 12,
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
     },
     itemDetails: {
         flex: 1,
         marginRight: 15,
     },
     itemStatus: {
-        fontSize: 12,
+        fontSize: fontPixel(12),
         fontWeight: 'bold',
         textTransform: 'uppercase',
         marginBottom: 4,
     },
     itemTitle: {
-        fontSize: 18,
+        fontSize: fontPixel(16),
         fontWeight: 'bold',
         color: COLORS.text,
         marginBottom: 4,
     },
     itemMeta: {
-        fontSize: 14,
+        fontSize: fontPixel(14),
         color: COLORS.gray,
     },
     itemImage: {
-        width: 80,
-        height: 80,
+        width: 60,
+        height: 60,
         borderRadius: 8,
+        backgroundColor: '#f0f0f0',
     },
     emptyContainer: {
         flex: 1,
