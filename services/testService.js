@@ -33,3 +33,13 @@ export const submitAnswer = async (attemptId, questionId, optionId, remainingTim
     throw error;
   }
 };
+
+export const submitTestAttempt = async (attemptId) => {
+  try {
+    const response = await api.post(`/api/v1/test-attempts/${attemptId}/submit`);
+    return response.data;
+  } catch (error) {
+    console.error('Error submitting test attempt:', error);
+    throw error;
+  }
+};

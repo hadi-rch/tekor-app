@@ -20,7 +20,7 @@ import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 import { fontPixel, heightPixel, pixelSizeVertical, pixelSizeHorizontal } from '../../helper';
-import { startTestAttempt, getTestAttemptDetails, submitAnswer } from '../../services/testService';
+import { startTestAttempt, getTestAttemptDetails, submitAnswer, submitTestAttempt } from '../../services/testService';
 
 // --- Komponen-komponen Kecil ---
 const Timer = ({ timeLeft }) => {
@@ -255,11 +255,17 @@ const TestScreen = ({ route, navigation }) => {
         if (!isForced) setIsSubmitModalVisible(false);
         clearInterval(timerRef.current);
 
-        // Since answers are submitted on the fly, we just need to navigate to the result screen.
-        // The final score calculation will be done on the backend or on the result screen based on the final state.
-        navigation.replace('TestResult', {
-            attemptId: attemptId,
-        });
+        try {
+            await submitTestAttempt(attemptId);
+            navigation.replace('TestResult', {
+                attemptId: attemptId,
+            });
+        } catch (error) {
+            console.error("Failed to submit test:", error);
+            Alert.alert("Error", "Gagal mengirimkan hasil tes. Silakan coba lagi.", [
+                { text: "OK", onPress: () => setIsSubmitModalVisible(true) }, // Re-open modal on failure
+            ]);
+        }
     };
 
     const currentQuestion = questions[currentQuestionIndex];
