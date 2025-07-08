@@ -7,6 +7,8 @@ import {
     StatusBar,
     ScrollView,
     Image,
+    ActivityIndicator,
+    Alert
 } from 'react-native';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
@@ -25,13 +27,29 @@ const StatBox = ({ label, value, fullWidth = false }) => (
 // --- Komponen Utama TestResultScreen ---
 const TestResultScreen = ({ navigation, route }) => {
     // Menerima data dari TestScreen melalui route.params
-    const { score, correctAnswers, wrongAnswers, timeTaken, userAnswers } = route.params || {
-        // Data default jika dibuka langsung
-        score: 85,
-        correctAnswers: 34,
-        wrongAnswers: 6,
-        timeTaken: '25 menit',
-        userAnswers: {}
+    const { testResult, attemptId } = route.params || {};
+
+    // Fallback jika data tidak ada
+    if (!testResult) {
+        return (
+            <View style={styles.centerContainer}>
+                <Text style={styles.errorText}>Tidak ada data hasil tes untuk ditampilkan.</Text>
+                <CustomButton
+                    title="Kembali"
+                    onPress={() => navigation.goBack()}
+                    style={{ marginTop: 20 }}
+                />
+            </View>
+        );
+    }
+
+    const { score, totalCorrect, totalIncorrect, completionTime } = testResult;
+
+    const formatTime = (seconds) => {
+        if (seconds === null || seconds === undefined) return 'N/A';
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return `${m} menit ${s} detik`;
     };
 
     const scorePercentage = (score / 100) * 100;
@@ -63,10 +81,10 @@ const TestResultScreen = ({ navigation, route }) => {
                     <View style={styles.summarySection}>
                         <Text style={styles.sectionTitle}>Ringkasan</Text>
                         <View style={styles.statsRow}>
-                            <StatBox label="Jawaban Benar" value={correctAnswers} />
-                            <StatBox label="Jawaban Salah" value={wrongAnswers} />
+                            <StatBox label="Jawaban Benar" value={totalCorrect} />
+                            <StatBox label="Jawaban Salah" value={totalIncorrect} />
                         </View>
-                        <StatBox label="Waktu Selesai" value={timeTaken} fullWidth={true} />
+                        <StatBox label="Waktu Selesai" value={formatTime(completionTime)} fullWidth={true} />
                     </View>
 
                     <Image
@@ -80,7 +98,7 @@ const TestResultScreen = ({ navigation, route }) => {
             <View style={styles.footer}>
                 <CustomButton
                     title="Lihat Pembahasan"
-                    onPress={() => navigation.navigate('Review', { userAnswers: userAnswers })}
+                    onPress={() => navigation.navigate('Review', { attemptId: attemptId })}
                     style={{ backgroundColor: COLORS.primary, marginBottom: pixelSizeVertical(50) }}
                 />
             </View>
@@ -93,6 +111,22 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#F7F8FA',
         paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+    },
+    centerContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: pixelSizeHorizontal(20),
+    },
+    loadingText: {
+        marginTop: pixelSizeVertical(10),
+        fontSize: fontPixel(16),
+        color: COLORS.gray,
+    },
+    errorText: {
+        fontSize: fontPixel(16),
+        color: 'red',
+        textAlign: 'center',
     },
     header: {
         paddingVertical: pixelSizeVertical(15),
