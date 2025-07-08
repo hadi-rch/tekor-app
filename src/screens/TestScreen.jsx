@@ -95,10 +95,9 @@ const AudioPlayer = ({ uri, questionId, playedAudios, setPlayedAudios }) => {
 
 // --- Komponen Utama TestScreen ---
 const TestScreen = ({ route, navigation }) => {
-    const { packageId } = route.params;
-    // console.log("packageId received in TestScreen:", packageId);
+    const { packageId, attemptId: existingAttemptId, testData } = route.params || {};
     const [questions, setQuestions] = useState([]);
-    const [attemptId, setAttemptId] = useState(null);
+    const [attemptId, setAttemptId] = useState(existingAttemptId || null);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [timeLeft, setTimeLeft] = useState(50 * 60);
     const [userAnswers, setUserAnswers] = useState({});
@@ -108,40 +107,73 @@ const TestScreen = ({ route, navigation }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [playedAudios, setPlayedAudios] = useState([]);
 
+
     // --- State untuk Deteksi Kecurangan ---
     const [leaveAttempts, setLeaveAttempts] = useState(3);
     const [isWarningModalVisible, setIsWarningModalVisible] = useState(false);
     const [warningMessage, setWarningMessage] = useState('');
     const appState = useRef(AppState.currentState);
 
+    console.log("packageId : ", packageId)
+    console.log("existingAttemptId : ", existingAttemptId)
+    console.log("attemptId :", attemptId)
+    console.log("testData :", testData)
+
+
     const timerRef = useRef(null);
 
     useEffect(() => {
         const initializeTest = async () => {
+            // setIsLoading(true);
             try {
-                console.log("hadi")
-                console.log("packageId", packageId)
-                const startResponse = await startTestAttempt(packageId);
-                console.log("lossssss")
-                const newAttemptId = startResponse.data.id;
-                setAttemptId(newAttemptId);
+                let currentAttemptId = attemptId;
+                // Jika ini adalah tes yang dilanjutkan, kita perlu mengambil detailnya
+                if (existingAttemptId) {
+                    console.log("hadiiiii")
+                    const detailsResponse = await getTestAttemptDetails(existingAttemptId);
+                    console.log("detailsResponse: ", detailsResponse)
+                    const data = detailsResponse.data;
+                    setQuestions(data.questions);
+                    setTimeLeft(data.remainingDuration);
 
-                const detailsResponse = await getTestAttemptDetails(newAttemptId);
-                setQuestions(detailsResponse.data.questions);
-                setIsLoading(false);
+                    // Mengisi jawaban yang sudah ada
+                    const answers = {};
+                    data.userAnswers.forEach(answer => {
+                        answers[answer.questionId] = answer.selectedOptionId;
+                    });
+                    setUserAnswers(answers);
+
+                } else if (testData) {
+                    // Jika ini adalah tes baru yang datanya sudah dilewatkan
+                    setAttemptId(testData.id);
+                    setQuestions(testData.questions);
+                    setTimeLeft(testData.remainingDuration);
+                    setUserAnswers({}); // Tes baru, jawaban kosong
+                } else if (packageId) {
+                    // Fallback jika hanya packageId yang diberikan (skenario lama)
+                    const startResponse = await startTestAttempt(packageId);
+                    const newAttemptId = startResponse.data.id;
+                    setAttemptId(newAttemptId);
+                    currentAttemptId = newAttemptId;
+
+                    const detailsResponse = await getTestAttemptDetails(newAttemptId);
+                    setQuestions(detailsResponse.data.questions);
+                    setTimeLeft(detailsResponse.data.remainingDuration || 50 * 60);
+                    setUserAnswers({});
+                }
+
             } catch (error) {
-                console.error("Failed to initialize test:", error);
-                // Handle error, e.g., show an alert and navigate back
-                Alert.alert("Error", "Gagal memulai tes. Silakan coba lagi.", [
+                console.error("Failed to initialize test:", error.response?.data || error.message);
+                Alert.alert("Error", "Gagal memuat tes. Silakan coba lagi.", [
                     { text: "OK", onPress: () => navigation.goBack() },
                 ]);
+            } finally {
+                setIsLoading(false);
             }
         };
 
         initializeTest();
-    }, [packageId]);
-
-
+    }, [packageId, existingAttemptId, testData]);
 
     // --- Logika untuk AppState ---
     useEffect(() => {
@@ -200,6 +232,10 @@ const TestScreen = ({ route, navigation }) => {
         }, 3000);
     };
 
+
+
+
+
     useEffect(() => {
         timerRef.current = setInterval(() => {
             setTimeLeft(prev => (prev > 0 ? prev - 1 : 0));
@@ -208,6 +244,8 @@ const TestScreen = ({ route, navigation }) => {
     }, []);
 
     const handleSelectAnswer = async (optionId) => {
+        // console.log("questions:", questions)
+        console.log("currentQuestionIndex:", currentQuestionIndex)
         const currentQuestion = questions[currentQuestionIndex];
         setUserAnswers(prev => ({ ...prev, [currentQuestion.id]: optionId }));
 
@@ -275,6 +313,10 @@ const TestScreen = ({ route, navigation }) => {
     };
 
     const currentQuestion = questions[currentQuestionIndex];
+
+    // console.log("questions:", questions)
+    console.log("currentQuestionIndex:", currentQuestionIndex)
+    console.log("currentQuestion: ", currentQuestion)
     const progress = isLoading ? 0 : ((currentQuestionIndex + 1) / questions.length) * 100;
 
     if (isLoading) {
@@ -341,7 +383,7 @@ const TestScreen = ({ route, navigation }) => {
                                 <View style={[styles.radioCircle, isSelected && styles.selectedRadio]}>
                                     {isSelected && <View style={styles.radioInnerCircle} />}
                                 </View>
-                                
+
                                 {isOptionImage ? (
                                     <Image source={{ uri: option.optionText }} style={styles.optionImage} />
                                 ) : (
@@ -423,9 +465,9 @@ const TestScreen = ({ route, navigation }) => {
                 <Pressable style={styles.modalOverlay} onPress={() => setIsExitModalVisible(false)}>
                     <Pressable style={styles.exitModalContent}>
                         <View style={styles.dragHandle} />
-                        <Text style={styles.modalTitle}>Yakin Ingin Keluar dari Ujian?</Text>
+                        <Text style={styles.modalTitle}>Yakin Ingin Keluar?</Text>
                         <Text style={styles.modalSubtitle}>
-                            Progres Anda untuk ujian ini tidak akan tersimpan. Anda harus memulai kembali dari awal jika keluar sekarang.
+                            Progres Anda sudah tersimpan. Anda dapat melanjutkan tes ini nanti dari halaman Materi Belajar.
                         </Text>
                         <View style={styles.modalButtonContainer}>
                             <TouchableOpacity
@@ -501,6 +543,7 @@ const TestScreen = ({ route, navigation }) => {
                     </Pressable>
                 </Pressable>
             </Modal>
+
         </View>
     );
 };

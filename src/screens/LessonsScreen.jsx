@@ -31,6 +31,11 @@ const LessonItem = ({ item, onPress }) => {
             <View style={styles.itemTextContainer}>
                 <StyledText style={styles.itemTitle}>{item.title}</StyledText>
                 <StyledText style={styles.itemDescription}>{item.description}</StyledText>
+                {item.status === 'In Progress' && (
+                    <View style={styles.inProgressBadge}>
+                        <StyledText style={styles.inProgressText}>In Progress</StyledText>
+                    </View>
+                )}
             </View>
             <Image source={imageSource} style={styles.itemImage} />
         </TouchableOpacity>
@@ -68,6 +73,7 @@ const LessonsScreen = ({ navigation }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedLesson, setSelectedLesson] = useState(null);
     const [myTests, setMyTests] = useState([]);
+    const [inProgressTests, setInProgressTests] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [completedTests, setCompletedTests] = useState([]);
     const [isHistoryLoading, setIsHistoryLoading] = useState(true);
@@ -79,16 +85,28 @@ const LessonsScreen = ({ navigation }) => {
             try {
                 const response = await api.get('/api/v1/test-attempts/my-tests');
                 const readyToStartTests = response.data.data.readyToStart;
+                const inProgressTestsData = response.data.data.inProgress;
 
-                const formattedTests = readyToStartTests.map(item => ({
+                const formattedReadyToStart = readyToStartTests.map(item => ({
                     id: item.testPackage.id,
                     title: item.testPackage.name,
                     description: item.testPackage.description,
                     image: item.testPackage.imageUrl,
                     transactionId: item.transactionId,
+                    status: 'Ready to Start'
                 }));
 
-                setMyTests(formattedTests);
+                const formattedInProgress = inProgressTestsData.map(item => ({
+                    id: item.testPackage.id,
+                    title: item.testPackage.name,
+                    description: item.testPackage.description,
+                    image: item.testPackage.imageUrl,
+                    attemptId: item.attemptId, // Penting untuk melanjutkan tes
+                    status: 'In Progress'
+                }));
+
+                setMyTests(formattedReadyToStart);
+                setInProgressTests(formattedInProgress);
             } catch (error) {
                 console.error("Gagal mengambil data tes:", error.response?.data || error.message);
                 Alert.alert("Error", "Tidak dapat memuat daftar tes Anda.");
@@ -123,12 +141,34 @@ const LessonsScreen = ({ navigation }) => {
         setIsModalVisible(true);
     };
 
-    const handleStartTest = () => {
-        console.log("Mulai mengerjakan:", selectedLesson.title);
-        console.log("id:", selectedLesson.id);
+    const handleStartTest = async () => {
+        console.log("first")
         if (!selectedLesson) return;
+
         setIsModalVisible(false);
+        // try {
+        //     // Memulai tes baru, baik itu yang pertama kali atau memulai ulang
+        //     console.log("selectedLesson.id : ", selectedLesson)
+        //     const response = await api.post(`/api/v1/test-attempts/start/${selectedLesson.id}`);
+        //     console.log("bingung",response)
+        //     const testData = response.data.data;
+        //     const a = testData.id;
+        //     console.log("bingung2:", testData.id)
+        //     navigation.navigate('Test', { a });
+        // } catch (error) {
+        //     console.error("Gagal memulai tes:", error.response?.data || error.message);
+        //     Alert.alert("Error", "Tidak dapat memulai tes. Silakan coba lagi.");
+        // }
         navigation.navigate('Test', { packageId: selectedLesson.id });
+    };
+
+    const handleContinueTest = () => {
+        console.log("hadie")
+        if (!selectedLesson || !selectedLesson.attemptId) return;
+        console.log("hadie2")
+
+        setIsModalVisible(false);
+        navigation.navigate('Test', { attemptId: selectedLesson.attemptId  });
     };
 
 
@@ -137,9 +177,13 @@ const LessonsScreen = ({ navigation }) => {
             if (isLoading) {
                 return <ActivityIndicator size="large" color={COLORS.primary} style={{ marginTop: 20 }} />;
             }
+
+            const allTests = [...inProgressTests, ...myTests];
+            // console.log("allTests : ", allTests)
+
             return (
                 <FlatList
-                    data={myTests}
+                    data={allTests}
                     renderItem={({ item }) => <LessonItem item={item} onPress={() => handleLessonPress(item)} />}
                     keyExtractor={(item) => item.id}
                     contentContainerStyle={styles.listContainer}
@@ -220,22 +264,37 @@ const LessonsScreen = ({ navigation }) => {
                 <Pressable style={styles.modalOverlay} onPress={() => setIsModalVisible(false)}>
                     <Pressable style={styles.confirmModalContent}>
                         <View style={styles.dragHandle} />
-                        <StyledText style={styles.modalTitle}>Anda Yakin Ingin Mengerjakan?</StyledText>
+                        <StyledText style={styles.modalTitle}>
+                            {selectedLesson?.status === 'In Progress' ? 'Lanjutkan Tes?' : 'Anda Yakin Ingin Mengerjakan?'}
+                        </StyledText>
 
-                        <View style={styles.warningsContainer}>
-                            <WarningItem icon="⚠️" text="Ujian ini hanya bisa dikerjakan 1 (satu) kali. Progres tidak dapat diulang atau dibatalkan setelah dimulai." />
-                            <WarningItem icon="⏱️" text="Waktu pengerjaan adalah 50 menit dan timer tidak bisa dijeda (pause)." />
-                            <WarningItem icon="📶" text="Pastikan koneksi internet Anda stabil." />
-                        </View>
+                        {selectedLesson?.status !== 'In Progress' && (
+                            <View style={styles.warningsContainer}>
+                                <WarningItem icon="⚠️" text="Ujian ini hanya bisa dikerjakan 1 (satu) kali. Progres tidak dapat diulang atau dibatalkan setelah dimulai." />
+                                <WarningItem icon="⏱️" text="Waktu pengerjaan adalah 50 menit dan timer tidak bisa dijeda (pause)." />
+                                <WarningItem icon="📶" text="Pastikan koneksi internet Anda stabil." />
+                            </View>
+                        )}
 
-                        <View style={styles.modalButtonContainer}>
-                            <TouchableOpacity style={[styles.modalButton, styles.cancelButton]} onPress={() => setIsModalVisible(false)}>
-                                <StyledText style={styles.cancelButtonText}>Nanti saja</StyledText>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={[styles.modalButton, styles.startButton]} onPress={handleStartTest}>
-                                <StyledText style={styles.startButtonText}>Mulai Sekarang</StyledText>
-                            </TouchableOpacity>
-                        </View>
+                        {selectedLesson?.status === 'In Progress' ? (
+                            <View style={styles.modalButtonContainer}>
+                                <TouchableOpacity style={[styles.modalButton, styles.startButton]} onPress={handleContinueTest}>
+                                    <StyledText style={styles.startButtonText}>Lanjutkan</StyledText>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={[styles.modalButton, styles.cancelButton]} onPress={handleStartTest}>
+                                    <StyledText style={styles.cancelButtonText}>Mulai Ulang</StyledText>
+                                </TouchableOpacity>
+                            </View>
+                        ) : (
+                            <View style={styles.modalButtonContainer}>
+                                <TouchableOpacity style={[styles.modalButton, styles.cancelButton]} onPress={() => setIsModalVisible(false)}>
+                                    <StyledText style={styles.cancelButtonText}>Nanti saja</StyledText>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={[styles.modalButton, styles.startButton]} onPress={handleStartTest}>
+                                    <StyledText style={styles.startButtonText}>Mulai Sekarang</StyledText>
+                                </TouchableOpacity>
+                            </View>
+                        )}
                     </Pressable>
                 </Pressable>
             </Modal>
@@ -326,6 +385,19 @@ const styles = StyleSheet.create({
         width: 90,
         height: 90,
         borderRadius: 8,
+    },
+    inProgressBadge: {
+        marginTop: 8,
+        backgroundColor: COLORS.primary,
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 6,
+        alignSelf: 'flex-start',
+    },
+    inProgressText: {
+        color: COLORS.white,
+        fontSize: 12,
+        fontWeight: 'bold',
     },
     // Styles untuk History
     historyItemContainer: {
