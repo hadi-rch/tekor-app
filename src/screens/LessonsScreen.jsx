@@ -43,7 +43,7 @@ const LessonItem = ({ item, onPress }) => {
 };
 
 // --- Komponen untuk setiap item dalam daftar History ---
-const HistoryItem = ({ item }) => (
+const HistoryItem = ({ item, navigation }) => (
     <View style={styles.historyItemContainer}>
         <View style={styles.historyHeader}>
             <View>
@@ -56,6 +56,15 @@ const HistoryItem = ({ item }) => (
             <StyledText style={styles.scoreLabel}>Score</StyledText>
             <StyledText style={styles.scoreValue}>{item.score}</StyledText>
         </View>
+        {item.aiEvaluationResult && (
+            <TouchableOpacity
+                style={styles.viewEvaluationButton}
+                onPress={() => navigation.navigate('EvaluationDetail', { aiEvaluationResult: item.aiEvaluationResult, packageId: item.packageId })}
+            >
+                <StyledText style={styles.viewEvaluationButtonText}>Lihat Evaluasi</StyledText>
+                <Ionicons name="arrow-forward" size={16} color={COLORS.white} />
+            </TouchableOpacity>
+        )}
     </View>
 );
 
@@ -197,7 +206,7 @@ const LessonsScreen = ({ navigation }) => {
             return (
                 <FlatList
                     data={completedTests}
-                    renderItem={({ item }) => <HistoryItem item={item} />}
+                    renderItem={({ item }) => <HistoryItem item={item} navigation={navigation} />}
                     keyExtractor={(item) => item.transactionId || item.id}
                     contentContainerStyle={styles.listContainer}
                     ListEmptyComponent={<View style={styles.emptyContainer}><Text>Anda belum memiliki riwayat tes.</Text></View>}
@@ -450,6 +459,21 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: COLORS.text,
         fontWeight: 'bold',
+    },
+    viewEvaluationButton: {
+        backgroundColor: COLORS.primary,
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderRadius: 8,
+        marginTop: 10,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    viewEvaluationButtonText: {
+        color: COLORS.white,
+        fontWeight: 'bold',
+        marginRight: 5,
     },
     //style modal
     modalOverlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)', },
