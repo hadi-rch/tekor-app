@@ -10,6 +10,7 @@ import LessonsScreen from '../screens/LessonsScreen';
 import ProductsScreen from '../screens/ProductsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import { fontPixel, heightPixel } from '../../helper';
+import GameCategoryScreen from '../screens/GameCategoryScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -25,6 +26,8 @@ const MainTabNavigator = () => {
 
                     if (route.name === 'Home') {
                         iconName = focused ? 'home' : 'home-outline';
+                    } else if (route.name === 'Game') {
+                        iconName = focused ? 'game-controller' : 'game-controller-outline';
                     } else if (route.name === 'Try-out') {
                         iconName = focused ? 'book' : 'book-outline';
                     } else if (route.name === 'Produk') {
@@ -51,6 +54,7 @@ const MainTabNavigator = () => {
             })}
         >
             <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: 'Beranda' }} />
+            <Tab.Screen name="Game" component={GameCategoryScreen} />
             <Tab.Screen name="Try-out" component={LessonsScreen} />
             <Tab.Screen name="Produk" component={ProductsScreen} />
             <Tab.Screen name="Profil" component={ProfileScreen} />

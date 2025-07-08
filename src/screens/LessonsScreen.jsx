@@ -11,6 +11,7 @@ import {
     Modal,
     ActivityIndicator,
     Pressable,
+    Alert,
 } from 'react-native'
 import { COLORS } from '../constants/colors'
 import { Ionicons } from '@expo/vector-icons'
@@ -20,51 +21,40 @@ import { LinearGradient } from 'expo-linear-gradient'
 import api from '../../api/axiosConfig';
 import StyledText from '../components/StyledText'
 
-const historyData = [
-    { id: 'h1', title: 'eps-topik soal 1', date: 'Selesai pada 12 Mei 2024', score: '80/100', correct: 32, wrong: 8 },
-    { id: 'h2', title: 'eps-topik soal 1', date: 'Selesai pada 12 Mei 2024', score: '80/100', correct: 32, wrong: 8 },
-    { id: 'h3', title: 'eps-topik soal 1', date: 'Selesai pada 12 Mei 2024', score: '80/100', correct: 32, wrong: 8 },
-];
-
 // --- Komponen untuk setiap item dalam daftar Test ---
 const LessonItem = ({ item, onPress }) => {
     const imageSource = item.image
         ? { uri: item.image }
         : require('../../assets/images/no-image.jpg');
     return (
-    <TouchableOpacity style={styles.itemContainer} onPress={onPress}>
-        <View style={styles.itemTextContainer}>
-            <StyledText style={styles.itemTitle}>{item.title}</StyledText>
-            <StyledText style={styles.itemDescription}>{item.description}</StyledText>
-        </View>
-        <Image source={imageSource} style={styles.itemImage} />
-    </TouchableOpacity>
-)};
+        <TouchableOpacity style={styles.itemContainer} onPress={onPress}>
+            <View style={styles.itemTextContainer}>
+                <StyledText style={styles.itemTitle}>{item.title}</StyledText>
+                <StyledText style={styles.itemDescription}>{item.description}</StyledText>
+                {item.status === 'In Progress' && (
+                    <View style={styles.inProgressBadge}>
+                        <StyledText style={styles.inProgressText}>In Progress</StyledText>
+                    </View>
+                )}
+            </View>
+            <Image source={imageSource} style={styles.itemImage} />
+        </TouchableOpacity>
+    )
+};
 
 // --- Komponen untuk setiap item dalam daftar History ---
 const HistoryItem = ({ item }) => (
     <View style={styles.historyItemContainer}>
         <View style={styles.historyHeader}>
             <View>
-                <StyledText style={styles.historyTitle}>{item.title}</StyledText>
-                <StyledText style={styles.historyDate}>{item.date}</StyledText>
+                <StyledText style={styles.historyTitle}>Package ID: {item.packageId}</StyledText>
+                <StyledText style={styles.historyDate}>Start Time: {new Date(item.startTime).toLocaleString()}</StyledText>
+                <StyledText style={styles.historyDate}>End Time: {new Date(item.endTime).toLocaleString()}</StyledText>
             </View>
-            <TouchableOpacity style={styles.discussionButton}>
-                <StyledText style={styles.discussion}>Lihat Pembahasan</StyledText>
-                <Ionicons name="arrow-forward" size={16} color={COLORS.primary} />
-            </TouchableOpacity>
         </View>
         <View style={styles.scoreRow}>
-            <StyledText style={styles.scoreLabel}>Skor</StyledText>
+            <StyledText style={styles.scoreLabel}>Score</StyledText>
             <StyledText style={styles.scoreValue}>{item.score}</StyledText>
-        </View>
-        <View style={styles.scoreRow}>
-            <StyledText style={styles.scoreLabel}>Benar</StyledText>
-            <StyledText style={styles.scoreValue}>{item.correct}</StyledText>
-        </View>
-        <View style={styles.scoreRow}>
-            <StyledText style={styles.scoreLabel}>Salah</StyledText>
-            <StyledText style={styles.scoreValue}>{item.wrong}</StyledText>
         </View>
     </View>
 );
@@ -83,23 +73,40 @@ const LessonsScreen = ({ navigation }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedLesson, setSelectedLesson] = useState(null);
     const [myTests, setMyTests] = useState([]);
+    const [inProgressTests, setInProgressTests] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [completedTests, setCompletedTests] = useState([]);
+    const [isHistoryLoading, setIsHistoryLoading] = useState(true);
+
 
     useEffect(() => {
         const fetchMyTests = async () => {
+            setIsLoading(true);
             try {
                 const response = await api.get('/api/v1/test-attempts/my-tests');
                 const readyToStartTests = response.data.data.readyToStart;
+                const inProgressTestsData = response.data.data.inProgress;
 
-                const formattedTests = readyToStartTests.map(item => ({
+                const formattedReadyToStart = readyToStartTests.map(item => ({
                     id: item.testPackage.id,
                     title: item.testPackage.name,
                     description: item.testPackage.description,
                     image: item.testPackage.imageUrl,
                     transactionId: item.transactionId,
+                    status: 'Ready to Start'
                 }));
 
-                setMyTests(formattedTests);
+                const formattedInProgress = inProgressTestsData.map(item => ({
+                    id: item.testPackage.id,
+                    title: item.testPackage.name,
+                    description: item.testPackage.description,
+                    image: item.testPackage.imageUrl,
+                    attemptId: item.attemptId, // Penting untuk melanjutkan tes
+                    status: 'In Progress'
+                }));
+
+                setMyTests(formattedReadyToStart);
+                setInProgressTests(formattedInProgress);
             } catch (error) {
                 console.error("Gagal mengambil data tes:", error.response?.data || error.message);
                 Alert.alert("Error", "Tidak dapat memuat daftar tes Anda.");
@@ -108,8 +115,24 @@ const LessonsScreen = ({ navigation }) => {
             }
         };
 
+        const fetchCompletedTests = async () => {
+            setIsHistoryLoading(true);
+            try {
+                // const response = await getCompletedTests();
+                const response = await api.get('/api/v1/test-attempts/my-tests/completed');
+                const completedData = response.data.data || [];
+                setCompletedTests(completedData);
+            } catch (error) {
+                Alert.alert("Error", "Tidak dapat memuat riwayat tes Anda.");
+            } finally {
+                setIsHistoryLoading(false);
+            }
+        };
+
         if (activeTab === 'Test') {
             fetchMyTests();
+        } else if (activeTab === 'History') {
+            fetchCompletedTests();
         }
     }, [activeTab]);
 
@@ -118,21 +141,49 @@ const LessonsScreen = ({ navigation }) => {
         setIsModalVisible(true);
     };
 
-    const handleStartTest = () => {
-        console.log("Mulai mengerjakan:", selectedLesson.title);
-        console.log("id:", selectedLesson.id);
+    const handleStartTest = async () => {
+        console.log("first")
         if (!selectedLesson) return;
+
         setIsModalVisible(false);
+        // try {
+        //     // Memulai tes baru, baik itu yang pertama kali atau memulai ulang
+        //     console.log("selectedLesson.id : ", selectedLesson)
+        //     const response = await api.post(`/api/v1/test-attempts/start/${selectedLesson.id}`);
+        //     console.log("bingung",response)
+        //     const testData = response.data.data;
+        //     const a = testData.id;
+        //     console.log("bingung2:", testData.id)
+        //     navigation.navigate('Test', { a });
+        // } catch (error) {
+        //     console.error("Gagal memulai tes:", error.response?.data || error.message);
+        //     Alert.alert("Error", "Tidak dapat memulai tes. Silakan coba lagi.");
+        // }
         navigation.navigate('Test', { packageId: selectedLesson.id });
     };
 
-    // console.log("myTests:", myTests)
+    const handleContinueTest = () => {
+        console.log("hadie")
+        if (!selectedLesson || !selectedLesson.attemptId) return;
+        console.log("hadie2")
+
+        setIsModalVisible(false);
+        navigation.navigate('Test', { attemptId: selectedLesson.attemptId  });
+    };
+
 
     const renderContent = () => {
         if (activeTab === 'Test') {
+            if (isLoading) {
+                return <ActivityIndicator size="large" color={COLORS.primary} style={{ marginTop: 20 }} />;
+            }
+
+            const allTests = [...inProgressTests, ...myTests];
+            // console.log("allTests : ", allTests)
+
             return (
                 <FlatList
-                    data={myTests}
+                    data={allTests}
                     renderItem={({ item }) => <LessonItem item={item} onPress={() => handleLessonPress(item)} />}
                     keyExtractor={(item) => item.id}
                     contentContainerStyle={styles.listContainer}
@@ -140,12 +191,16 @@ const LessonsScreen = ({ navigation }) => {
                 />
             )
         } else if (activeTab === 'History') {
+            if (isHistoryLoading) {
+                return <ActivityIndicator size="large" color={COLORS.primary} style={{ marginTop: 20 }} />;
+            }
             return (
                 <FlatList
-                    data={historyData}
+                    data={completedTests}
                     renderItem={({ item }) => <HistoryItem item={item} />}
-                    keyExtractor={(item) => item.id}
+                    keyExtractor={(item) => item.transactionId || item.id}
                     contentContainerStyle={styles.listContainer}
+                    ListEmptyComponent={<View style={styles.emptyContainer}><Text>Anda belum memiliki riwayat tes.</Text></View>}
                 />
             )
         }
@@ -209,22 +264,37 @@ const LessonsScreen = ({ navigation }) => {
                 <Pressable style={styles.modalOverlay} onPress={() => setIsModalVisible(false)}>
                     <Pressable style={styles.confirmModalContent}>
                         <View style={styles.dragHandle} />
-                        <StyledText style={styles.modalTitle}>Anda Yakin Ingin Mengerjakan?</StyledText>
+                        <StyledText style={styles.modalTitle}>
+                            {selectedLesson?.status === 'In Progress' ? 'Lanjutkan Tes?' : 'Anda Yakin Ingin Mengerjakan?'}
+                        </StyledText>
 
-                        <View style={styles.warningsContainer}>
-                            <WarningItem icon="⚠️" text="Ujian ini hanya bisa dikerjakan 1 (satu) kali. Progres tidak dapat diulang atau dibatalkan setelah dimulai." />
-                            <WarningItem icon="⏱️" text="Waktu pengerjaan adalah 50 menit dan timer tidak bisa dijeda (pause)." />
-                            <WarningItem icon="📶" text="Pastikan koneksi internet Anda stabil." />
-                        </View>
+                        {selectedLesson?.status !== 'In Progress' && (
+                            <View style={styles.warningsContainer}>
+                                <WarningItem icon="⚠️" text="Ujian ini hanya bisa dikerjakan 1 (satu) kali. Progres tidak dapat diulang atau dibatalkan setelah dimulai." />
+                                <WarningItem icon="⏱️" text="Waktu pengerjaan adalah 50 menit dan timer tidak bisa dijeda (pause)." />
+                                <WarningItem icon="📶" text="Pastikan koneksi internet Anda stabil." />
+                            </View>
+                        )}
 
-                        <View style={styles.modalButtonContainer}>
-                            <TouchableOpacity style={[styles.modalButton, styles.cancelButton]} onPress={() => setIsModalVisible(false)}>
-                                <StyledText style={styles.cancelButtonText}>Nanti saja</StyledText>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={[styles.modalButton, styles.startButton]} onPress={handleStartTest}>
-                                <StyledText style={styles.startButtonText}>Mulai Sekarang</StyledText>
-                            </TouchableOpacity>
-                        </View>
+                        {selectedLesson?.status === 'In Progress' ? (
+                            <View style={styles.modalButtonContainer}>
+                                <TouchableOpacity style={[styles.modalButton, styles.startButton]} onPress={handleContinueTest}>
+                                    <StyledText style={styles.startButtonText}>Lanjutkan</StyledText>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={[styles.modalButton, styles.cancelButton]} onPress={handleStartTest}>
+                                    <StyledText style={styles.cancelButtonText}>Mulai Ulang</StyledText>
+                                </TouchableOpacity>
+                            </View>
+                        ) : (
+                            <View style={styles.modalButtonContainer}>
+                                <TouchableOpacity style={[styles.modalButton, styles.cancelButton]} onPress={() => setIsModalVisible(false)}>
+                                    <StyledText style={styles.cancelButtonText}>Nanti saja</StyledText>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={[styles.modalButton, styles.startButton]} onPress={handleStartTest}>
+                                    <StyledText style={styles.startButtonText}>Mulai Sekarang</StyledText>
+                                </TouchableOpacity>
+                            </View>
+                        )}
                     </Pressable>
                 </Pressable>
             </Modal>
@@ -316,8 +386,25 @@ const styles = StyleSheet.create({
         height: 90,
         borderRadius: 8,
     },
+    inProgressBadge: {
+        marginTop: 8,
+        backgroundColor: COLORS.primary,
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 6,
+        alignSelf: 'flex-start',
+    },
+    inProgressText: {
+        color: COLORS.white,
+        fontSize: 12,
+        fontWeight: 'bold',
+    },
     // Styles untuk History
     historyItemContainer: {
+        backgroundColor: COLORS.white,
+        marginHorizontal: 15,
+        borderRadius: 12,
+        marginBottom: 12,
         paddingHorizontal: 20,
         paddingVertical: 15,
         borderBottomWidth: 1,
@@ -330,9 +417,10 @@ const styles = StyleSheet.create({
         marginBottom: 12,
     },
     historyTitle: {
-        fontSize: 20,
+        fontSize: 16,
         fontWeight: 'bold',
         color: COLORS.text,
+        marginBottom: 4,
     },
     historyDate: {
         fontSize: 12,
@@ -352,6 +440,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginBottom: 4,
+        marginTop: 8,
     },
     scoreLabel: {
         fontSize: 14,
@@ -377,6 +466,12 @@ const styles = StyleSheet.create({
     startButton: { backgroundColor: COLORS.primary, marginLeft: 10, },
     cancelButtonText: { color: COLORS.primary, fontWeight: 'bold', fontSize: fontPixel(16), },
     startButtonText: { color: COLORS.white, fontWeight: 'bold', fontSize: fontPixel(16), },
+    emptyContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 50,
+    },
 })
 
 export default LessonsScreen
