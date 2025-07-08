@@ -23,11 +23,10 @@ const StatBox = ({ label, value, fullWidth = false }) => (
     </View>
 );
 
-
 // --- Komponen Utama TestResultScreen ---
 const TestResultScreen = ({ navigation, route }) => {
     // Menerima data dari TestScreen melalui route.params
-    const { testResult, attemptId } = route.params || {};
+    const { testResult, start, attemptId } = route.params || {};
 
     // Fallback jika data tidak ada
     if (!testResult) {
@@ -42,17 +41,48 @@ const TestResultScreen = ({ navigation, route }) => {
             </View>
         );
     }
-
+    
+    console.log("testResult:", testResult);
+    
     const { score, totalCorrect, totalIncorrect, completionTime } = testResult;
+    console.log("start:", start);
+    console.log("completionTime:", completionTime);
+    
+    // Perbaikan perhitungan waktu selesai
+    let finishTime;
+    
+    if (completionTime && start) {
+        // Jika completionTime sudah dalam detik, gunakan langsung
+        if (typeof completionTime === 'number') {
+            finishTime = Math.abs(completionTime);
+        } else {
+            // Jika completionTime adalah timestamp, hitung selisih
+            const startTime = typeof start === 'number' ? start : new Date(start).getTime();
+            const endTime = typeof completionTime === 'number' ? completionTime : new Date(completionTime).getTime();
+            finishTime = Math.abs(endTime - startTime) / 1000; // Konversi ke detik
+        }
+    } else if (completionTime) {
+        // Jika hanya ada completionTime
+        finishTime = typeof completionTime === 'number' ? Math.abs(completionTime) : 0;
+    } else {
+        finishTime = 0;
+    }
+    
+    console.log("finishTime:", finishTime);
 
     const formatTime = (seconds) => {
-        if (seconds === null || seconds === undefined) return 'N/A';
-        const m = Math.floor(seconds / 60);
-        const s = seconds % 60;
+        if (seconds === null || seconds === undefined || isNaN(seconds)) {
+            return 'N/A';
+        }
+        
+        const totalSeconds = Math.floor(Math.abs(seconds));
+        const m = Math.floor(totalSeconds / 60);
+        const s = totalSeconds % 60;
+        
         return `${m} menit ${s} detik`;
     };
 
-    const scorePercentage = (score / 100) * 100;
+    // const scorePercentage = (score / 100) * 100;
 
     return (
         <View style={styles.screenContainer}>
@@ -71,20 +101,19 @@ const TestResultScreen = ({ navigation, route }) => {
                 <View style={styles.mainContent}>
                     <Text style={styles.congratsTitle}>Selamat! Kamu telah menyelesaikan ujian</Text>
 
-                    <View style={styles.scoreContainer}>
-                        <Text style={styles.scoreText}>{score}/100</Text>
-                        <View style={styles.progressBarBackground}>
-                            <View style={[styles.progressBar, { width: `${scorePercentage}%` }]} />
+                    <View style={styles.scoreSection}>
+                        <Text style={styles.sectionTitle}>Ringkasan</Text>
+                        <View style={styles.statsRow}>
+                            <StatBox label="Score" value={score || 0} />
                         </View>
                     </View>
 
                     <View style={styles.summarySection}>
-                        <Text style={styles.sectionTitle}>Ringkasan</Text>
                         <View style={styles.statsRow}>
-                            <StatBox label="Jawaban Benar" value={totalCorrect} />
-                            <StatBox label="Jawaban Salah" value={totalIncorrect} />
+                            <StatBox label="Jawaban Benar" value={totalCorrect || 0} />
+                            <StatBox label="Jawaban Salah" value={totalIncorrect || 0} />
                         </View>
-                        <StatBox label="Waktu Selesai" value={formatTime(completionTime)} fullWidth={true} />
+                        <StatBox label="Waktu Selesai" value={formatTime(finishTime)} fullWidth={true} />
                     </View>
 
                     <Image
@@ -173,6 +202,11 @@ const styles = StyleSheet.create({
         height: '100%',
         backgroundColor: COLORS.primary,
         borderRadius: 4,
+    },
+    scoreSection: {
+        width: '100%',
+        alignItems: 'center',
+        marginBottom: pixelSizeVertical(25),
     },
     summarySection: {
         width: '100%',

@@ -99,13 +99,17 @@ const TestScreen = ({ route, navigation }) => {
     const [questions, setQuestions] = useState([]);
     const [attemptId, setAttemptId] = useState(existingAttemptId || null);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-    const [timeLeft, setTimeLeft] = useState(50 * 60);
+    const [timeLeft, setTimeLeft] = useState(3000);
     const [userAnswers, setUserAnswers] = useState({});
     const [isNavModalVisible, setIsNavModalVisible] = useState(false);
     const [isExitModalVisible, setIsExitModalVisible] = useState(false);
     const [isSubmitModalVisible, setIsSubmitModalVisible] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [playedAudios, setPlayedAudios] = useState([]);
+    const timerRef = useRef(null);
+    const finishTimeRef = useRef(null); // Ref untuk menyimpan finishTime
+    const [startTime, setStartTime] = useState(null); // State untuk menyimpan startTime
+
 
 
     // --- State untuk Deteksi Kecurangan ---
@@ -114,52 +118,43 @@ const TestScreen = ({ route, navigation }) => {
     const [warningMessage, setWarningMessage] = useState('');
     const appState = useRef(AppState.currentState);
 
-    console.log("packageId : ", packageId)
-    console.log("existingAttemptId : ", existingAttemptId)
-    console.log("attemptId :", attemptId)
-    console.log("testData :", testData)
-
-
-    const timerRef = useRef(null);
-
     useEffect(() => {
         const initializeTest = async () => {
-            // setIsLoading(true);
             try {
-                let currentAttemptId = attemptId;
-                // Jika ini adalah tes yang dilanjutkan, kita perlu mengambil detailnya
+                let attemptData;
                 if (existingAttemptId) {
-                    console.log("hadiiiii")
                     const detailsResponse = await getTestAttemptDetails(existingAttemptId);
-                    console.log("detailsResponse: ", detailsResponse)
-                    const data = detailsResponse.data;
-                    setQuestions(data.questions);
-                    setTimeLeft(data.remainingDuration);
+                    attemptData = detailsResponse.data;
+                    setAttemptId(existingAttemptId);
+                } else if (testData) {
+                    attemptData = testData;
+                    setAttemptId(testData.id);
+                } else if (packageId) {
+                    const startResponse = await startTestAttempt(packageId);
+                    // Setelah start, langsung ambil detail untuk mendapatkan finishTime
+                    const detailsResponse = await getTestAttemptDetails(startResponse.data.id);
+                    attemptData = detailsResponse.data;
+                    setAttemptId(startResponse.data.id);
+                    setStartTime(startResponse.data.startTime);
 
-                    // Mengisi jawaban yang sudah ada
+                }
+
+                if (attemptData) {
+                    setQuestions(attemptData.questions);
+
+                    // --- PERBAIKAN 2: Simpan finishTime dan Hitung Sisa Waktu ---
+                    if (attemptData.finishTime) {
+                        finishTimeRef.current = new Date(attemptData.finishTime).getTime();
+                        const now = new Date().getTime();
+                        const remainingSeconds = Math.max(0, Math.floor((finishTimeRef.current - now) / 1000));
+                        setTimeLeft(remainingSeconds);
+                    }
+
                     const answers = {};
-                    data.userAnswers.forEach(answer => {
+                    attemptData.userAnswers.forEach(answer => {
                         answers[answer.questionId] = answer.selectedOptionId;
                     });
                     setUserAnswers(answers);
-
-                } else if (testData) {
-                    // Jika ini adalah tes baru yang datanya sudah dilewatkan
-                    setAttemptId(testData.id);
-                    setQuestions(testData.questions);
-                    setTimeLeft(testData.remainingDuration);
-                    setUserAnswers({}); // Tes baru, jawaban kosong
-                } else if (packageId) {
-                    // Fallback jika hanya packageId yang diberikan (skenario lama)
-                    const startResponse = await startTestAttempt(packageId);
-                    const newAttemptId = startResponse.data.id;
-                    setAttemptId(newAttemptId);
-                    currentAttemptId = newAttemptId;
-
-                    const detailsResponse = await getTestAttemptDetails(newAttemptId);
-                    setQuestions(detailsResponse.data.questions);
-                    setTimeLeft(detailsResponse.data.remainingDuration || 50 * 60);
-                    setUserAnswers({});
                 }
 
             } catch (error) {
@@ -173,7 +168,7 @@ const TestScreen = ({ route, navigation }) => {
         };
 
         initializeTest();
-    }, [packageId, existingAttemptId, testData]);
+    }, [packageId, existingAttemptId, testData, navigation]);
 
     // --- Logika untuk AppState ---
     useEffect(() => {
@@ -237,21 +232,36 @@ const TestScreen = ({ route, navigation }) => {
 
 
     useEffect(() => {
+        // Jangan jalankan timer jika masih loading atau finishTime belum di-set
+        if (isLoading || !finishTimeRef.current) return;
+
         timerRef.current = setInterval(() => {
-            setTimeLeft(prev => (prev > 0 ? prev - 1 : 0));
+            const now = new Date().getTime();
+            const remainingSeconds = Math.max(0, Math.floor((finishTimeRef.current - now) / 1000));
+
+            setTimeLeft(remainingSeconds);
+
+            // Jika waktu habis, submit otomatis
+            if (remainingSeconds <= 0) {
+                clearInterval(timerRef.current);
+                // Menampilkan alert sebelum auto-submit
+                Alert.alert("Waktu Habis", "Waktu pengerjaan Anda telah berakhir. Jawaban akan dikumpulkan secara otomatis.", [
+                    { text: "OK", onPress: () => confirmSubmit(true) } // true menandakan forced submit
+                ]);
+            }
         }, 1000);
+
         return () => clearInterval(timerRef.current);
-    }, []);
+    }, [isLoading]);
 
     const handleSelectAnswer = async (optionId) => {
-        // console.log("questions:", questions)
-        console.log("currentQuestionIndex:", currentQuestionIndex)
         const currentQuestion = questions[currentQuestionIndex];
         setUserAnswers(prev => ({ ...prev, [currentQuestion.id]: optionId }));
 
         try {
-            const response = await submitAnswer(attemptId, currentQuestion.id, optionId, timeLeft);
-            // You might want to update the timeLeft based on the response
+            const now = new Date().getTime();
+            const remainingSeconds = Math.max(0, Math.floor((finishTimeRef.current - now) / 1000));
+            await submitAnswer(attemptId, currentQuestion.id, optionId, remainingSeconds);
         } catch (error) {
             console.error("Failed to submit answer:", error);
             // Handle error, maybe show a toast or an alert
@@ -296,9 +306,11 @@ const TestScreen = ({ route, navigation }) => {
         try {
             const response = await submitTestAttempt(attemptId);
             if (response.status === "OK" && response.data) {
+                console.log("hadi",response.data)
                 // Navigasi ke halaman hasil dengan membawa data hasil tes
                 navigation.replace('TestResult', {
                     testResult: response.data,
+                    start: startTime,
                     attemptId: attemptId, // Juga kirim attemptId jika diperlukan untuk review
                 });
             } else {
@@ -314,9 +326,6 @@ const TestScreen = ({ route, navigation }) => {
 
     const currentQuestion = questions[currentQuestionIndex];
 
-    // console.log("questions:", questions)
-    console.log("currentQuestionIndex:", currentQuestionIndex)
-    console.log("currentQuestion: ", currentQuestion)
     const progress = isLoading ? 0 : ((currentQuestionIndex + 1) / questions.length) * 100;
 
     if (isLoading) {
