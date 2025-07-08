@@ -256,14 +256,20 @@ const TestScreen = ({ route, navigation }) => {
         clearInterval(timerRef.current);
 
         try {
-            await submitTestAttempt(attemptId);
-            navigation.replace('TestResult', {
-                attemptId: attemptId,
-            });
+            const response = await submitTestAttempt(attemptId);
+            if (response.status === "OK" && response.data) {
+                // Navigasi ke halaman hasil dengan membawa data hasil tes
+                navigation.replace('TestResult', {
+                    testResult: response.data,
+                    attemptId: attemptId, // Juga kirim attemptId jika diperlukan untuk review
+                });
+            } else {
+                throw new Error(response.message || "Gagal mengirimkan hasil tes.");
+            }
         } catch (error) {
             console.error("Failed to submit test:", error);
             Alert.alert("Error", "Gagal mengirimkan hasil tes. Silakan coba lagi.", [
-                { text: "OK", onPress: () => setIsSubmitModalVisible(true) }, // Re-open modal on failure
+                { text: "OK", onPress: () => setIsSubmitModalVisible(true) }, // Buka kembali modal jika gagal
             ]);
         }
     };
