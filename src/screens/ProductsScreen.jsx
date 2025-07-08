@@ -68,10 +68,7 @@ const ProductsScreen = ({ navigation }) => {
                 const response = await api.get('/api/v1/test-packages');
                 const allItems = response.data.data;
 
-                // Filter item berdasarkan tipe
-                const productItems = allItems.filter(item => item.type === 'package');
-
-                setProducts(productItems);
+                setProducts(allItems);
 
             } catch (error) {
                 console.error("Gagal mengambil data produk:", error);
