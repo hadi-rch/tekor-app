@@ -15,6 +15,7 @@ import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 import { fontPixel, pixelSizeVertical, pixelSizeHorizontal, widthPixel } from '../../helper';
 import api from '../../api/axiosConfig';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const categoryDisplayMap = {
     "VERB": { title: 'Kata Kerja', image: require('../../assets/images/kerja.jpg') },
