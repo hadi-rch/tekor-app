@@ -88,20 +88,20 @@ const LessonsScreen = ({ navigation }) => {
     const [completedTests, setCompletedTests] = useState([]);
     const [isHistoryLoading, setIsHistoryLoading] = useState(true);
 
-  // Handle navigation parameters when screen is focused
+    // Handle navigation parameters when screen is focused
     useEffect(() => {
         const unsubscribe = navigation.addListener('focus', () => {
             const state = navigation.getState();
             const currentRoute = state.routes[state.index];
-           
-            // Check if we're on the Try-out tab and if there's a setActiveTab parameter
-            if (currentRoute.name === 'Try-out' && currentRoute.params?.setActiveTab) {
+
+            // Check if we're on the My Try out tab and if there's a setActiveTab parameter
+            if (currentRoute.name === 'My Try out' && currentRoute.params?.setActiveTab) {
                 setActiveTab(currentRoute.params.setActiveTab);
                 // Clear the parameter after using it
                 navigation.setParams({ setActiveTab: undefined });
             }
         });
-       
+
         return unsubscribe;
     }, [navigation]);
 
@@ -115,7 +115,7 @@ const LessonsScreen = ({ navigation }) => {
 
                 const formattedReadyToStart = readyToStartTests.map(item => ({
                     id: item.transactionId,
-                    packageId: item.testPackage.id, 
+                    packageId: item.testPackage.id,
                     title: item.testPackage.name,
                     description: item.testPackage.description,
                     image: item.testPackage.imageUrl,
@@ -125,11 +125,11 @@ const LessonsScreen = ({ navigation }) => {
 
                 const formattedInProgress = inProgressTestsData.map(item => ({
                     id: item.attemptId,
-                    packageId: item.testPackage.id, 
+                    packageId: item.testPackage.id,
                     title: item.testPackage.name,
                     description: item.testPackage.description,
                     image: item.testPackage.imageUrl,
-                    attemptId: item.attemptId, 
+                    attemptId: item.attemptId,
                     status: 'In Progress'
                 }));
 
@@ -196,7 +196,7 @@ const LessonsScreen = ({ navigation }) => {
         console.log("hadie2")
 
         setIsModalVisible(false);
-        navigation.navigate('Test', { attemptId: selectedLesson.attemptId  });
+        navigation.navigate('Test', { attemptId: selectedLesson.attemptId });
     };
 
     const renderContent = () => {

@@ -130,9 +130,9 @@ const HomeScreen = ({ navigation }) => {
                 </View>
 
                 {/* --- PERBAIKAN 2: Menghapus TouchableOpacity yang membungkus seluruh section --- */}
-                {/* 3. Produk Unggulan */}
+                {/* 3. Try out Unggulan */}
                 <View style={styles.sectionContainer}>
-                    <Text style={styles.sectionTitle}>Produk Unggulan</Text>
+                    <Text style={styles.sectionTitle}>Try out Unggulan</Text>
                     {!loading && featuredProducts.length > 0 && (
                         <FlatList
                             data={featuredProducts}
@@ -144,9 +144,9 @@ const HomeScreen = ({ navigation }) => {
                             contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }}
                         />
                     )}
-                    {/* Tampilkan pesan jika tidak ada produk unggulan */}
+                    {/* Tampilkan pesan jika tidak ada Try out unggulan */}
                     {!loading && featuredProducts.length === 0 && !error && (
-                        <Text style={styles.errorText}>Tidak ada produk unggulan saat ini.</Text>
+                        <Text style={styles.errorText}>Tidak ada Try out unggulan saat ini.</Text>
                     )}
                 </View>
 
@@ -159,8 +159,8 @@ const HomeScreen = ({ navigation }) => {
                     }}
                 >
                     {/* <View style={styles.ctaBanner}> */}
-                        {/* <Ionicons name="sparkles-outline" size={24} color={COLORS.white} /> */}
-                        <Text style={styles.ctaText}>Coba fitur hafalan kosa kata gratis sekarang!</Text>
+                    {/* <Ionicons name="sparkles-outline" size={24} color={COLORS.white} /> */}
+                    <Text style={styles.ctaText}>Coba fitur hafalan kosa kata gratis sekarang!</Text>
                     {/* </View> */}
                 </TouchableOpacity>
 
