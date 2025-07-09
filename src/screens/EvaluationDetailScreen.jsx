@@ -72,6 +72,7 @@ const markdownStyles = {
         fontSize: 14,
         lineHeight: 20,
         color: COLORS.text,
+        marginBottom: 15,
     },
     heading1: {
         fontSize: 24,
