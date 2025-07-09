@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+
 import {
     View,
     Text,
@@ -76,7 +77,6 @@ const WarningItem = ({ icon, text }) => (
     </View>
 );
 
-
 // --- Komponen Utama LessonsScreen ---
 const LessonsScreen = ({ navigation }) => {
     const [activeTab, setActiveTab] = useState('Test') //Test atau History
@@ -93,7 +93,7 @@ const LessonsScreen = ({ navigation }) => {
         const unsubscribe = navigation.addListener('focus', () => {
             const state = navigation.getState();
             const currentRoute = state.routes[state.index];
-            
+           
             // Check if we're on the Try-out tab and if there's a setActiveTab parameter
             if (currentRoute.name === 'Try-out' && currentRoute.params?.setActiveTab) {
                 setActiveTab(currentRoute.params.setActiveTab);
@@ -101,7 +101,7 @@ const LessonsScreen = ({ navigation }) => {
                 navigation.setParams({ setActiveTab: undefined });
             }
         });
-        
+       
         return unsubscribe;
     }, [navigation]);
 
@@ -114,7 +114,8 @@ const LessonsScreen = ({ navigation }) => {
                 const inProgressTestsData = response.data.data.inProgress;
 
                 const formattedReadyToStart = readyToStartTests.map(item => ({
-                    id: item.testPackage.id,
+                    id: item.transactionId,
+                    packageId: item.testPackage.id, 
                     title: item.testPackage.name,
                     description: item.testPackage.description,
                     image: item.testPackage.imageUrl,
@@ -123,11 +124,12 @@ const LessonsScreen = ({ navigation }) => {
                 }));
 
                 const formattedInProgress = inProgressTestsData.map(item => ({
-                    id: item.testPackage.id,
+                    id: item.attemptId,
+                    packageId: item.testPackage.id, 
                     title: item.testPackage.name,
                     description: item.testPackage.description,
                     image: item.testPackage.imageUrl,
-                    attemptId: item.attemptId, // Penting untuk melanjutkan tes
+                    attemptId: item.attemptId, 
                     status: 'In Progress'
                 }));
 
@@ -175,7 +177,7 @@ const LessonsScreen = ({ navigation }) => {
         // try {
         //     // Memulai tes baru, baik itu yang pertama kali atau memulai ulang
         //     console.log("selectedLesson.id : ", selectedLesson)
-        //     const response = await api.post(`/api/v1/test-attempts/start/${selectedLesson.id}`);
+        //     const response = await api.post(`/api/v1/test-attempts/start/${selectedLesson.packageId}`); // Gunakan packageId
         //     console.log("bingung",response)
         //     const testData = response.data.data;
         //     const a = testData.id;
@@ -185,7 +187,7 @@ const LessonsScreen = ({ navigation }) => {
         //     console.error("Gagal memulai tes:", error.response?.data || error.message);
         //     Alert.alert("Error", "Tidak dapat memulai tes. Silakan coba lagi.");
         // }
-        navigation.navigate('Test', { packageId: selectedLesson.id });
+        navigation.navigate('Test', { packageId: selectedLesson.packageId }); // Gunakan packageId
     };
 
     const handleContinueTest = () => {
@@ -196,7 +198,6 @@ const LessonsScreen = ({ navigation }) => {
         setIsModalVisible(false);
         navigation.navigate('Test', { attemptId: selectedLesson.attemptId  });
     };
-
 
     const renderContent = () => {
         if (activeTab === 'Test') {
@@ -211,7 +212,7 @@ const LessonsScreen = ({ navigation }) => {
                 <FlatList
                     data={allTests}
                     renderItem={({ item }) => <LessonItem item={item} onPress={() => handleLessonPress(item)} />}
-                    keyExtractor={(item) => item.id}
+                    keyExtractor={(item) => item.id} // Sekarang menggunakan transactionId/attemptId yang unik
                     contentContainerStyle={styles.listContainer}
                     ListEmptyComponent={<View style={styles.emptyContainer}><Text>Anda belum memiliki paket tes.</Text></View>}
                 />
