@@ -46,28 +46,52 @@ const LessonItem = ({ item, onPress }) => {
 
 // --- Komponen untuk setiap item dalam daftar History ---
 const HistoryItem = ({ item, navigation }) => (
-    <View style={styles.historyItemContainer}>
-        <View style={styles.historyHeader}>
-            <View>
-                <StyledText style={styles.historyTitle}>Package ID: {item.packageId}</StyledText>
-                <StyledText style={styles.historyDate}>Start Time: {new Date(item.startTime).toLocaleString()}</StyledText>
-                <StyledText style={styles.historyDate}>End Time: {new Date(item.endTime).toLocaleString()}</StyledText>
-            </View>
-        </View>
-        <View style={styles.scoreRow}>
-            <StyledText style={styles.scoreLabel}>Score</StyledText>
-            <StyledText style={styles.scoreValue}>{item.score}</StyledText>
-        </View>
-        {item.aiEvaluationResult && (
-            <TouchableOpacity
-                style={styles.viewEvaluationButton}
-                onPress={() => navigation.navigate('EvaluationDetail', { aiEvaluationResult: item.aiEvaluationResult, packageId: item.packageId })}
-            >
-                <StyledText style={styles.viewEvaluationButtonText}>Lihat Evaluasi</StyledText>
-                <Ionicons name="arrow-forward" size={16} color={COLORS.white} />
-            </TouchableOpacity>
-        )}
+  <View style={styles.historyItemContainer}>
+    <View style={styles.historyHeader}>
+      <View>
+        <StyledText style={styles.historyTitle}>
+          Package ID: {item.packageId}
+        </StyledText>
+        <StyledText style={styles.historyDate}>
+          Start Time: {new Date(item.startTime).toLocaleString()}
+        </StyledText>
+        <StyledText style={styles.historyDate}>
+          End Time: {new Date(item.endTime).toLocaleString()}
+        </StyledText>
+      </View>
     </View>
+    <View style={styles.scoreRow}>
+      <StyledText style={styles.scoreLabel}>Score</StyledText>
+      <StyledText style={styles.scoreValue}>{item.score}</StyledText>
+    </View>
+    <View style={styles.buttonContainer}>
+      {item.aiEvaluationResult && (
+        <TouchableOpacity
+          style={styles.viewEvaluationButton}
+          onPress={() =>
+            navigation.navigate("EvaluationDetail", {
+              aiEvaluationResult: item.aiEvaluationResult,
+              packageId: item.packageId,
+            })
+          }
+        >
+          <StyledText style={styles.viewEvaluationButtonText}>
+            Lihat Evaluasi
+          </StyledText>
+          <Ionicons name="arrow-forward" size={16} color={COLORS.white} />
+        </TouchableOpacity>
+      )}
+      <TouchableOpacity
+        style={styles.viewReviewButton}
+        onPress={() => navigation.navigate("Review", { attemptId: item.id })}
+      >
+        <StyledText style={styles.viewEvaluationButtonText}>
+          Lihat Jawaban
+        </StyledText>
+        <Ionicons name="arrow-forward" size={16} color={COLORS.white} />
+      </TouchableOpacity>
+    </View>
+  </View>
 );
 
 const WarningItem = ({ icon, text }) => (
@@ -328,189 +352,246 @@ const LessonsScreen = ({ navigation }) => {
 }
 
 const styles = StyleSheet.create({
-    screenContainer: {
-        flex: 1,
-        // backgroundColor: COLORS.white,
-        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-    },
-    header: {
-        paddingVertical: 15,
-        paddingHorizontal: 20,
-        alignItems: 'center',
-        borderBottomWidth: 1,
-        borderBottomColor: COLORS.borderColor,
-    },
-    headerTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: COLORS.text,
-    },
-    tabContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        borderBottomWidth: 1,
-        borderBottomColor: COLORS.borderColor,
-    },
-    tab: {
-        flex: 1,
-        paddingVertical: 15,
-        alignItems: 'center',
-        borderBottomWidth: 2,
-        borderBottomColor: 'transparent',
-    },
-    activeTab: {
-        borderBottomColor: COLORS.primary,
-    },
-    tabText: {
-        fontSize: 16,
-        color: COLORS.gray,
-    },
-    activeTabText: {
-        color: COLORS.primary,
-        fontWeight: 'bold',
-    },
-    listContainer: {
-        paddingVertical: 10,
-    },
-    // Styles untuk Test
-    itemContainer: {
-        backgroundColor: COLORS.white,
-        marginHorizontal: 15,
-        borderRadius: 12,
-        marginBottom: 12,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingVertical: 15,
-        borderBottomWidth: 1,
-        borderBottomColor: COLORS.borderColor,
-    },
-    itemTextContainer: {
-        flex: 1,
-        marginRight: 15,
-    },
-    itemCategory: {
-        fontSize: 12,
-        color: COLORS.gray,
-        marginBottom: 4,
-    },
-    itemTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: COLORS.text,
-        marginBottom: 4,
-    },
-    itemDescription: {
-        fontSize: 14,
-        color: COLORS.text,
-    },
-    itemImage: {
-        width: 90,
-        height: 90,
-        borderRadius: 8,
-    },
-    inProgressBadge: {
-        marginTop: 8,
-        backgroundColor: COLORS.primary,
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 6,
-        alignSelf: 'flex-start',
-    },
-    inProgressText: {
-        color: COLORS.white,
-        fontSize: 12,
-        fontWeight: 'bold',
-    },
-    // Styles untuk History
-    historyItemContainer: {
-        backgroundColor: COLORS.white,
-        marginHorizontal: 15,
-        borderRadius: 12,
-        marginBottom: 12,
-        paddingHorizontal: 20,
-        paddingVertical: 15,
-        borderBottomWidth: 1,
-        borderBottomColor: COLORS.borderColor,
-    },
-    historyHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        marginBottom: 12,
-    },
-    historyTitle: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: COLORS.text,
-        marginBottom: 4,
-    },
-    historyDate: {
-        fontSize: 12,
-        color: COLORS.gray,
-        marginTop: 2,
-    },
-    discussionButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    discussion: {
-        color: COLORS.primary,
-        fontWeight: 'bold',
-        marginRight: 4,
-    },
-    scoreRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 4,
-        marginTop: 8,
-    },
-    scoreLabel: {
-        fontSize: 14,
-        color: COLORS.gray,
-    },
-    scoreValue: {
-        fontSize: 14,
-        color: COLORS.text,
-        fontWeight: 'bold',
-    },
-    viewEvaluationButton: {
-        backgroundColor: COLORS.primary,
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        borderRadius: 8,
-        marginTop: 10,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    viewEvaluationButtonText: {
-        color: COLORS.white,
-        fontWeight: 'bold',
-        marginRight: 5,
-    },
-    //style modal
-    modalOverlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)', },
-    confirmModalContent: { backgroundColor: 'white', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, alignItems: 'center', },
-    dragHandle: { width: 40, height: 5, backgroundColor: COLORS.borderColor, borderRadius: 3, marginBottom: 15, },
-    modalTitle: { fontSize: fontPixel(20), fontWeight: 'bold', color: COLORS.text, marginBottom: 20, },
-    warningsContainer: { width: '100%', marginBottom: 25, },
-    warningItem: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 15, },
-    warningIcon: { fontSize: fontPixel(16), marginRight: 10, },
-    warningText: { flex: 1, fontSize: fontPixel(14), color: COLORS.text, lineHeight: fontPixel(20), },
-    modalButtonContainer: { flexDirection: 'row', width: '100%', justifyContent: 'space-between', },
-    modalButton: { flex: 1, paddingVertical: 15, borderRadius: 12, alignItems: 'center', },
-    cancelButton: { backgroundColor: COLORS.secondary, marginRight: 10, },
-    startButton: { backgroundColor: COLORS.primary, marginLeft: 10, },
-    cancelButtonText: { color: COLORS.primary, fontWeight: 'bold', fontSize: fontPixel(16), },
-    startButtonText: { color: COLORS.white, fontWeight: 'bold', fontSize: fontPixel(16), },
-    emptyContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginTop: 50,
-    },
-})
+  screenContainer: {
+    flex: 1,
+    // backgroundColor: COLORS.white,
+    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+  },
+  header: {
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.borderColor,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: COLORS.text,
+  },
+  tabContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.borderColor,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 15,
+    alignItems: "center",
+    borderBottomWidth: 2,
+    borderBottomColor: "transparent",
+  },
+  activeTab: {
+    borderBottomColor: COLORS.primary,
+  },
+  tabText: {
+    fontSize: 16,
+    color: COLORS.gray,
+  },
+  activeTabText: {
+    color: COLORS.primary,
+    fontWeight: "bold",
+  },
+  listContainer: {
+    paddingVertical: 10,
+  },
+  // Styles untuk Test
+  itemContainer: {
+    backgroundColor: COLORS.white,
+    marginHorizontal: 15,
+    borderRadius: 12,
+    marginBottom: 12,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.borderColor,
+  },
+  itemTextContainer: {
+    flex: 1,
+    marginRight: 15,
+  },
+  itemCategory: {
+    fontSize: 12,
+    color: COLORS.gray,
+    marginBottom: 4,
+  },
+  itemTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: COLORS.text,
+    marginBottom: 4,
+  },
+  itemDescription: {
+    fontSize: 14,
+    color: COLORS.text,
+  },
+  itemImage: {
+    width: 90,
+    height: 90,
+    borderRadius: 8,
+  },
+  inProgressBadge: {
+    marginTop: 8,
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    alignSelf: "flex-start",
+  },
+  inProgressText: {
+    color: COLORS.white,
+    fontSize: 12,
+    fontWeight: "bold",
+  },
+  // Styles untuk History
+  historyItemContainer: {
+    backgroundColor: COLORS.white,
+    marginHorizontal: 15,
+    borderRadius: 12,
+    marginBottom: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.borderColor,
+  },
+  historyHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 12,
+  },
+  historyTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: COLORS.text,
+    marginBottom: 4,
+  },
+  historyDate: {
+    fontSize: 12,
+    color: COLORS.gray,
+    marginTop: 2,
+  },
+  discussionButton: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  discussion: {
+    color: COLORS.primary,
+    fontWeight: "bold",
+    marginRight: 4,
+  },
+  scoreRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 4,
+    marginTop: 8,
+  },
+  scoreLabel: {
+    fontSize: 14,
+    color: COLORS.gray,
+  },
+  scoreValue: {
+    fontSize: 14,
+    color: COLORS.text,
+    fontWeight: "bold",
+  },
+  viewEvaluationButton: {
+    backgroundColor: COLORS.primary,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    marginTop: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  viewReviewButton: {
+    backgroundColor: COLORS.kred,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    marginTop: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  viewEvaluationButtonText: {
+    color: COLORS.white,
+    fontWeight: "bold",
+    marginRight: 5,
+  },
+  //style modal
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  confirmModalContent: {
+    backgroundColor: "white",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    alignItems: "center",
+  },
+  dragHandle: {
+    width: 40,
+    height: 5,
+    backgroundColor: COLORS.borderColor,
+    borderRadius: 3,
+    marginBottom: 15,
+  },
+  modalTitle: {
+    fontSize: fontPixel(20),
+    fontWeight: "bold",
+    color: COLORS.text,
+    marginBottom: 20,
+  },
+  warningsContainer: { width: "100%", marginBottom: 25 },
+  warningItem: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 15,
+  },
+  warningIcon: { fontSize: fontPixel(16), marginRight: 10 },
+  warningText: {
+    flex: 1,
+    fontSize: fontPixel(14),
+    color: COLORS.text,
+    lineHeight: fontPixel(20),
+  },
+  modalButtonContainer: {
+    flexDirection: "row",
+    width: "100%",
+    justifyContent: "space-between",
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: 15,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  cancelButton: { backgroundColor: COLORS.secondary, marginRight: 10 },
+  startButton: { backgroundColor: COLORS.primary, marginLeft: 10 },
+  cancelButtonText: {
+    color: COLORS.primary,
+    fontWeight: "bold",
+    fontSize: fontPixel(16),
+  },
+  startButtonText: {
+    color: COLORS.white,
+    fontWeight: "bold",
+    fontSize: fontPixel(16),
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 50,
+  },
+});
 
 export default LessonsScreen

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     View,
     Text,
@@ -8,47 +8,175 @@ import {
     StatusBar,
     ScrollView,
     Image,
+    ActivityIndicator,
+    FlatList,
+    Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 import { fontPixel, heightPixel, pixelSizeVertical, pixelSizeHorizontal, widthPixel } from '../../helper';
+import api from '../../api/axiosConfig';
+import StyledText from '../components/StyledText';
+import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 
-// --- Data Dummy (Harus sama dengan yang digunakan di TestScreen) ---
-const dummyQuestions = Array.from({ length: 40 }, (_, i) => ({
-    id: i + 1,
-    type: i < 20 ? 'reading' : 'listening',
-    question: `Ini adalah pertanyaan nomor ${i + 1}. Pilih jawaban yang paling tepat.`,
-    image: i < 5 ? require('../../assets/images/no-image.jpg') : null,
-    audio: i >= 20 ? 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' : null,
-    options: ['Jawaban A', 'Jawaban B', 'Jawaban C', 'Jawaban D'],
-    correctAnswer: i % 4,
-    explanation: `Penjelasan untuk soal nomor ${i + 1}. Opsi yang benar adalah karena lorem ipsum dolor sit amet, consectetur adipiscing elit.`
-}));
+const AudioPlayer = ({ uri }) => {
+    const player = useAudioPlayer(uri);
+    const status = useAudioPlayerStatus(player);
 
+    const handlePlayAudio = async () => {
+        try {
+            if (status.isLoaded && !status.playing) {
+                await player.play();
+            } else if (status.isLoaded && status.playing) {
+                await player.stop();
+            }
+        } catch (error) {
+            console.warn('Audio playback error:', error);
+        }
+    };
 
-// --- Komponen Utama ReviewScreen ---
+    return (
+        <TouchableOpacity
+            style={styles.audioPlayer}
+            onPress={handlePlayAudio}
+        >
+            <Ionicons
+                name={status.playing ? "volume-high" : "play-circle"}
+                size={fontPixel(32)}
+                color={COLORS.primary}
+            />
+            <Text style={styles.audioText}>
+                {status.playing ? 'Audio sedang diputar...' : 'Putar Audio'}
+            </Text>
+        </TouchableOpacity>
+    );
+};
+
+const isImageUrl = (text) => {
+    return typeof text === 'string' && (text.startsWith('http') && (text.endsWith('.png') || text.endsWith('.jpg') || text.endsWith('.jpeg')));
+};
+
 const ReviewScreen = ({ navigation, route }) => {
-    // Menerima jawaban pengguna dari layar sebelumnya
-    const { userAnswers } = route.params || { userAnswers: { 0: 0, 1: 2, 2: 3, 14: 0 } }; // Contoh jawaban
-    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+    const { attemptId } = route.params;
+    const [reviewData, setReviewData] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    const handleNext = () => {
-        if (currentQuestionIndex < dummyQuestions.length - 1) {
-            setCurrentQuestionIndex(prev => prev + 1);
+    useEffect(() => {
+        const fetchReviewData = async () => {
+            try {
+                const response = await api.get(`/api/v1/test-attempts/${attemptId}/review`);
+                setReviewData(response.data.data);
+            } catch (err) {
+                console.error("Failed to fetch review data:", err.response?.data || err.message);
+                setError("Failed to load review data. Please try again.");
+                Alert.alert("Error", "Failed to load review data. Please try again.");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        if (attemptId) {
+            fetchReviewData();
+        } else {
+            setError("No attempt ID provided.");
+            setIsLoading(false);
         }
-    };
+    }, [attemptId]);
 
-    const handlePrevious = () => {
-        if (currentQuestionIndex > 0) {
-            setCurrentQuestionIndex(prev => prev - 1);
-        }
-    };
+    const renderQuestionItem = ({ item: question, index }) => {
 
-    const currentQuestion = dummyQuestions[currentQuestionIndex];
-    const userAnswer = userAnswers[currentQuestionIndex];
-    const correctAnswer = currentQuestion.correctAnswer;
-    const isCorrect = userAnswer === correctAnswer;
+        return (
+          <View style={styles.questionContainer}>
+            <View>
+              <StyledText style={{marginBottom:5, fontWeight:'bold', fontSize:18}}>{question.isCorrect ? "Benar" : "Salah"}</StyledText>
+            </View>
+            <View style={styles.questionHeader}>
+              <View
+                style={[
+                  styles.indicator,
+                  {
+                    backgroundColor: question.isCorrect
+                      ? "#28a745"
+                      : COLORS.danger,
+                  },
+                ]}
+              />
+              <StyledText style={styles.questionText}>
+                {index + 1}. {question.questionText}
+              </StyledText>
+            </View>
+
+            {question.questionImage && (
+                    <Image source={{ uri: question.questionImage }} style={styles.questionImage} />
+                )}
+                {question.questionAudio && (
+                    <AudioPlayer
+                        uri={question.questionAudio}
+                    />
+                )}
+
+            <View style={styles.optionsContainer}>
+              {question.options.map((option) => {
+                const isUserAnswer = question.selectedOptionId === option.id;
+                const isCorrectAnswer = question.correctOptionId === option.id;
+                let optionStyle = styles.optionButton;
+                let radioStyle = styles.radioCircle;
+                let textStyle = styles.optionText;
+                const isOptionImage = isImageUrl(option.optionText);
+
+                if (isCorrectAnswer) {
+                  optionStyle = [optionStyle, styles.correctOption];
+                  radioStyle = [radioStyle, styles.correctRadio];
+                  textStyle = [textStyle, styles.correctText];
+                }
+                if (isUserAnswer && !isCorrectAnswer) {
+                  optionStyle = [optionStyle, styles.wrongOption];
+                  radioStyle = [radioStyle, styles.wrongRadio];
+                  textStyle = [textStyle, styles.wrongText];
+                }
+
+                return (
+                  <View
+                    key={option.id}
+                    style={[
+                      optionStyle,
+                      isOptionImage && styles.imageOptionButton,
+                    ]}
+                  >
+                    <View style={radioStyle}>
+                      {isUserAnswer && (
+                        <View
+                          style={[
+                            styles.radioInnerCircle,
+                            {
+                              backgroundColor: isCorrectAnswer
+                                ? "#34E55D"
+                                : COLORS.primary,
+                            },
+                          ]}
+                        />
+                      )}
+                    </View>
+
+                    {isOptionImage ? (
+                      <Image
+                        source={{ uri: option.optionText }}
+                        style={styles.optionImage}
+                      />
+                    ) : (
+                      <StyledText style={textStyle}>
+                        {option.optionText}
+                      </StyledText>
+                    )}
+                  </View>
+                );
+              })}
+            </View>
+          </View>
+        );
+    };
 
     return (
         <View style={styles.screenContainer}>
@@ -62,73 +190,28 @@ const ReviewScreen = ({ navigation, route }) => {
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerButton}>
                     <Ionicons name="close" size={fontPixel(28)} color={COLORS.text} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Pembahasan</Text>
+                <StyledText style={styles.headerTitle}>Pembahasan Tes</StyledText>
                 <View style={{ width: fontPixel(28) }} />
             </View>
 
-            <ScrollView contentContainerStyle={styles.scrollContainer}>
-                <Text style={styles.progressText}>Pertanyaan {currentQuestionIndex + 1}/{dummyQuestions.length}</Text>
-                <View style={styles.questionHeader}>
-                    <View style={[styles.indicator, { backgroundColor: isCorrect ? '#28a745' : COLORS.primary }]} />
-                    <Text style={styles.questionText}>{currentQuestion.id}. {currentQuestion.question}</Text>
+            {isLoading ? (
+                <ActivityIndicator size="large" color={COLORS.primary} style={styles.loadingIndicator} />
+            ) : error ? (
+                <View style={styles.errorContainer}>
+                    <StyledText style={styles.errorText}>{error}</StyledText>
                 </View>
-
-                {currentQuestion.image && (
-                    <Image source={currentQuestion.image} style={styles.questionImage} />
-                )}
-
-                <View style={styles.optionsContainer}>
-                    {currentQuestion.options.map((option, index) => {
-                        const isUserAnswer = userAnswer === index;
-                        const isCorrectAnswer = correctAnswer === index;
-                        let optionStyle = styles.optionButton;
-                        let radioStyle = styles.radioCircle;
-                        let textStyle = styles.optionText;
-
-                        if (isCorrectAnswer) {
-                            optionStyle = [optionStyle, styles.correctOption];
-                            radioStyle = [radioStyle, styles.correctRadio];
-                            textStyle = [textStyle, styles.correctText];
-                        }
-                        if (isUserAnswer && !isCorrectAnswer) {
-                            optionStyle = [optionStyle, styles.wrongOption];
-                            radioStyle = [radioStyle, styles.wrongRadio];
-                            textStyle = [textStyle, styles.wrongText];
-                        }
-
-                        return (
-                            <View key={index} style={optionStyle}>
-                                <View style={radioStyle}>
-                                    {isUserAnswer && <View style={styles.radioInnerCircle} />}
-                                </View>
-                                <Text style={textStyle}>{option}</Text>
-                            </View>
-                        );
-                    })}
+            ) : reviewData && reviewData.questions.length > 0 ? (
+                <FlatList
+                    data={reviewData.questions}
+                    renderItem={renderQuestionItem}
+                    keyExtractor={(item) => item.questionId}
+                    contentContainerStyle={styles.listContentContainer}
+                />
+            ) : (
+                <View style={styles.emptyContainer}>
+                    <StyledText style={styles.emptyText}>Tidak ada data pembahasan yang tersedia.</StyledText>
                 </View>
-
-                <View style={styles.explanationContainer}>
-                    <Text style={styles.explanationTitle}>Penjelasan</Text>
-                    <Text style={styles.explanationText}>{currentQuestion.explanation}</Text>
-                </View>
-            </ScrollView>
-
-            <View style={styles.footer}>
-                <TouchableOpacity
-                    style={[styles.footerButton, styles.prevButton, currentQuestionIndex === 0 && styles.disabledButton]}
-                    onPress={handlePrevious}
-                    disabled={currentQuestionIndex === 0}
-                >
-                    <Text style={styles.prevButtonText}>Sebelumnya</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={[styles.footerButton, styles.nextButton, currentQuestionIndex === dummyQuestions.length - 1 && styles.disabledButton]}
-                    onPress={handleNext}
-                    disabled={currentQuestionIndex === dummyQuestions.length - 1}
-                >
-                    <Text style={styles.nextButtonText}>Berikutnya</Text>
-                </TouchableOpacity>
-            </View>
+            )}
         </View>
     );
 };
@@ -156,15 +239,44 @@ const styles = StyleSheet.create({
         fontSize: fontPixel(20),
         fontWeight: 'bold',
     },
-    scrollContainer: {
-        padding: pixelSizeHorizontal(20),
-        paddingBottom: heightPixel(120),
+    loadingIndicator: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
-    progressText: {
+    errorContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+    },
+    errorText: {
         fontSize: fontPixel(16),
-        fontWeight: '500',
+        color: COLORS.primary,
+        textAlign: 'center',
+    },
+    emptyContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+    },
+    emptyText: {
+        fontSize: fontPixel(16),
         color: COLORS.gray,
-        marginBottom: pixelSizeVertical(15),
+        textAlign: 'center',
+    },
+    listContentContainer: {
+        padding: pixelSizeHorizontal(20),
+        paddingBottom: pixelSizeVertical(20), // Adjust as needed
+    },
+    questionContainer: {
+        backgroundColor: COLORS.white,
+        borderRadius: 12,
+        padding: pixelSizeHorizontal(15),
+        marginBottom: pixelSizeVertical(20),
+        borderWidth: 1,
+        borderColor: COLORS.borderColor,
     },
     questionHeader: {
         flexDirection: 'row',
@@ -183,11 +295,29 @@ const styles = StyleSheet.create({
     },
     questionImage: {
         width: '100%',
-        height: heightPixel(200),
-        borderRadius: 12,
-        marginBottom: pixelSizeVertical(20),
+        height: heightPixel(180),
+        borderRadius: 8,
         resizeMode: 'contain',
-        backgroundColor: COLORS.white,
+        marginBottom: pixelSizeVertical(15),
+    },
+    audioPlayer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#f5f5f5',
+        borderRadius: 8,
+        padding: pixelSizeHorizontal(10),
+        marginBottom: pixelSizeVertical(15),
+    },
+    audioPlayerPlayed: {
+        backgroundColor: '#e0e0e0',
+    },
+    audioText: {
+        marginLeft: pixelSizeHorizontal(10),
+        fontSize: fontPixel(14),
+        color: COLORS.text
+    },
+    audioTextPlayed: {
+        color: '#666',
     },
     optionsContainer: {
         marginBottom: pixelSizeVertical(25),
@@ -201,6 +331,15 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         padding: pixelSizeHorizontal(15),
         marginBottom: pixelSizeVertical(10),
+    },
+    imageOptionButton: {
+        paddingVertical: pixelSizeVertical(10),
+    },
+    optionImage: {
+        flex: 1,
+        height: heightPixel(80),
+        resizeMode: 'contain',
+        borderRadius: 8,
     },
     correctOption: {
         borderColor: '#28a745',
@@ -230,7 +369,7 @@ const styles = StyleSheet.create({
         height: 10,
         width: 10,
         borderRadius: 15,
-        backgroundColor: '#34E55D', // Default merah
+        // backgroundColor will be set dynamically based on correctness
     },
     optionText: {
         flex: 1,
@@ -262,46 +401,6 @@ const styles = StyleSheet.create({
         lineHeight: fontPixel(22),
         color: COLORS.gray,
     },
-    footer: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingHorizontal: pixelSizeHorizontal(20),
-        paddingTop: pixelSizeVertical(15),
-        paddingBottom: pixelSizeVertical(50),
-        borderTopWidth: 1,
-        borderTopColor: COLORS.borderColor,
-        backgroundColor: COLORS.white,
-    },
-    footerButton: {
-        flex: 1,
-        paddingVertical: pixelSizeVertical(15),
-        borderRadius: 12,
-        alignItems: 'center',
-    },
-    prevButton: {
-        backgroundColor: COLORS.secondary,
-        marginRight: 10,
-    },
-    prevButtonText: {
-        color: COLORS.primary,
-        fontWeight: 'bold',
-        fontSize: fontPixel(16),
-    },
-    nextButton: {
-        backgroundColor: COLORS.primary,
-    },
-    nextButtonText: {
-        color: COLORS.white,
-        fontWeight: 'bold',
-        fontSize: fontPixel(16),
-    },
-    disabledButton: {
-        opacity: 0.5,
-    }
 });
 
 export default ReviewScreen;
