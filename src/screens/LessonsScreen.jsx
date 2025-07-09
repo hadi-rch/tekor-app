@@ -308,9 +308,6 @@ const LessonsScreen = ({ navigation }) => {
                                 <TouchableOpacity style={[styles.modalButton, styles.startButton]} onPress={handleContinueTest}>
                                     <StyledText style={styles.startButtonText}>Lanjutkan</StyledText>
                                 </TouchableOpacity>
-                                <TouchableOpacity style={[styles.modalButton, styles.cancelButton]} onPress={handleStartTest}>
-                                    <StyledText style={styles.cancelButtonText}>Mulai Ulang</StyledText>
-                                </TouchableOpacity>
                             </View>
                         ) : (
                             <View style={styles.modalButtonContainer}>
