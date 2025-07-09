@@ -275,7 +275,8 @@ const TestScreen = ({ route, navigation }) => {
 
     const handleExit = () => {
         clearInterval(timerRef.current);
-        navigation.goBack();
+        confirmSubmit();
+        // navigation.goBack();
     };
 
     const handleNext = () => {

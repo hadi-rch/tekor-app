@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+
 import {
     View,
     Text,
@@ -20,6 +21,7 @@ import { fontPixel } from '../../helper'
 import { LinearGradient } from 'expo-linear-gradient'
 import api from '../../api/axiosConfig';
 import StyledText from '../components/StyledText'
+import { useFocusEffect } from '@react-navigation/native'
 
 // --- Komponen untuk setiap item dalam daftar Test ---
 const LessonItem = ({ item, onPress }) => {
@@ -75,7 +77,6 @@ const WarningItem = ({ icon, text }) => (
     </View>
 );
 
-
 // --- Komponen Utama LessonsScreen ---
 const LessonsScreen = ({ navigation }) => {
     const [activeTab, setActiveTab] = useState('Test') //Test atau History
@@ -87,6 +88,22 @@ const LessonsScreen = ({ navigation }) => {
     const [completedTests, setCompletedTests] = useState([]);
     const [isHistoryLoading, setIsHistoryLoading] = useState(true);
 
+  // Handle navigation parameters when screen is focused
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
+            const state = navigation.getState();
+            const currentRoute = state.routes[state.index];
+           
+            // Check if we're on the Try-out tab and if there's a setActiveTab parameter
+            if (currentRoute.name === 'Try-out' && currentRoute.params?.setActiveTab) {
+                setActiveTab(currentRoute.params.setActiveTab);
+                // Clear the parameter after using it
+                navigation.setParams({ setActiveTab: undefined });
+            }
+        });
+       
+        return unsubscribe;
+    }, [navigation]);
 
     useEffect(() => {
         const fetchMyTests = async () => {
@@ -97,7 +114,8 @@ const LessonsScreen = ({ navigation }) => {
                 const inProgressTestsData = response.data.data.inProgress;
 
                 const formattedReadyToStart = readyToStartTests.map(item => ({
-                    id: item.testPackage.id,
+                    id: item.transactionId,
+                    packageId: item.testPackage.id, 
                     title: item.testPackage.name,
                     description: item.testPackage.description,
                     image: item.testPackage.imageUrl,
@@ -106,11 +124,12 @@ const LessonsScreen = ({ navigation }) => {
                 }));
 
                 const formattedInProgress = inProgressTestsData.map(item => ({
-                    id: item.testPackage.id,
+                    id: item.attemptId,
+                    packageId: item.testPackage.id, 
                     title: item.testPackage.name,
                     description: item.testPackage.description,
                     image: item.testPackage.imageUrl,
-                    attemptId: item.attemptId, // Penting untuk melanjutkan tes
+                    attemptId: item.attemptId, 
                     status: 'In Progress'
                 }));
 
@@ -158,7 +177,7 @@ const LessonsScreen = ({ navigation }) => {
         // try {
         //     // Memulai tes baru, baik itu yang pertama kali atau memulai ulang
         //     console.log("selectedLesson.id : ", selectedLesson)
-        //     const response = await api.post(`/api/v1/test-attempts/start/${selectedLesson.id}`);
+        //     const response = await api.post(`/api/v1/test-attempts/start/${selectedLesson.packageId}`); // Gunakan packageId
         //     console.log("bingung",response)
         //     const testData = response.data.data;
         //     const a = testData.id;
@@ -168,7 +187,7 @@ const LessonsScreen = ({ navigation }) => {
         //     console.error("Gagal memulai tes:", error.response?.data || error.message);
         //     Alert.alert("Error", "Tidak dapat memulai tes. Silakan coba lagi.");
         // }
-        navigation.navigate('Test', { packageId: selectedLesson.id });
+        navigation.navigate('Test', { packageId: selectedLesson.packageId }); // Gunakan packageId
     };
 
     const handleContinueTest = () => {
@@ -179,7 +198,6 @@ const LessonsScreen = ({ navigation }) => {
         setIsModalVisible(false);
         navigation.navigate('Test', { attemptId: selectedLesson.attemptId  });
     };
-
 
     const renderContent = () => {
         if (activeTab === 'Test') {
@@ -194,7 +212,7 @@ const LessonsScreen = ({ navigation }) => {
                 <FlatList
                     data={allTests}
                     renderItem={({ item }) => <LessonItem item={item} onPress={() => handleLessonPress(item)} />}
-                    keyExtractor={(item) => item.id}
+                    keyExtractor={(item) => item.id} // Sekarang menggunakan transactionId/attemptId yang unik
                     contentContainerStyle={styles.listContainer}
                     ListEmptyComponent={<View style={styles.emptyContainer}><Text>Anda belum memiliki paket tes.</Text></View>}
                 />
@@ -289,9 +307,6 @@ const LessonsScreen = ({ navigation }) => {
                             <View style={styles.modalButtonContainer}>
                                 <TouchableOpacity style={[styles.modalButton, styles.startButton]} onPress={handleContinueTest}>
                                     <StyledText style={styles.startButtonText}>Lanjutkan</StyledText>
-                                </TouchableOpacity>
-                                <TouchableOpacity style={[styles.modalButton, styles.cancelButton]} onPress={handleStartTest}>
-                                    <StyledText style={styles.cancelButtonText}>Mulai Ulang</StyledText>
                                 </TouchableOpacity>
                             </View>
                         ) : (

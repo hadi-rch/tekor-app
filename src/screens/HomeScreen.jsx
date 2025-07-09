@@ -1,17 +1,12 @@
-import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Image, FlatList, Platform, StatusBar } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Image, FlatList, Platform, StatusBar, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors';
 import CustomButton from '../components/CustomButton';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 import { LinearGradient } from 'expo-linear-gradient';
 import StyledText from '../components/StyledText';
-
-const featuredProducts = [
-    { id: '1', title: 'Tes Level Bahasa Korea', description: 'Uji level bahasa Koreamu dengan tes komprehensif.', image: require('../../assets/images/no-image.jpg') },
-    { id: '2', title: 'Tes Topik', description: 'Persiapkan diri untuk ujian TOPIK dengan simulasi tes.', image: require('../../assets/images/no-image.jpg') },
-    { id: '3', title: 'Materi Belajar', description: 'Akses ribuan materi belajar interaktif.', image: require('../../assets/images/no-image.jpg') },
-];
+import api from '../../api/axiosConfig';
 
 const whyUsFeatures = [
     { id: '1', icon: 'ribbon-outline', title: 'Tes Terstandarisasi', description: 'Kurikulum mengikuti standar internasional.' },
@@ -19,14 +14,20 @@ const whyUsFeatures = [
     { id: '3', icon: 'people-outline', title: 'Komunitas Pembelajaran', description: 'Bergabung dengan komunitas pembelajar.' },
 ];
 
-// --- Komponen Kecil untuk Kartu ---
-const ProductCard = ({ item }) => (
-    <View style={styles.productCard}>
-        <Image source={item.image} style={styles.productImage} />
-        <StyledText style={styles.productTitle}>{item.title}</StyledText>
-        <StyledText style={styles.productDescription}>{item.description}</StyledText>
-    </View>
+
+const ProductCard = ({ item, navigation }) => (
+    <TouchableOpacity
+        style={styles.productCard}
+        onPress={() => {
+            navigation.navigate('ProductDetail', { productId: item.id, productType: item.type });
+        }}
+    >
+        <Image source={{ uri: item.imageUrl }} style={styles.productImage} />
+        <StyledText style={styles.productTitle} numberOfLines={1}>{item.name}</StyledText>
+        <StyledText style={styles.productDescription} numberOfLines={2}>{item.description}</StyledText>
+    </TouchableOpacity>
 );
+
 
 const FeatureCard = ({ item }) => (
     <View style={styles.featureCard}>
@@ -41,6 +42,35 @@ const FeatureCard = ({ item }) => (
 
 // --- Komponen Utama HomeScreen ---
 const HomeScreen = ({ navigation }) => {
+    const [specialOffer, setSpecialOffer] = useState(null);
+    const [featuredProducts, setFeaturedProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchHomePageData = async () => {
+            try {
+                setLoading(true);
+                const response = await api.get('/api/v1/test-packages');
+                const allData = response.data.data;
+
+                const offerData = allData.find(item => item.name === "Paket Hemat A & B");
+                setSpecialOffer(offerData);
+
+                const prodUnggulan = allData.filter(item => item.type === "package");
+                setFeaturedProducts(prodUnggulan);
+
+            } catch (e) {
+                console.error("API Error:", e);
+                setError('Gagal memuat data. Coba lagi nanti.');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchHomePageData();
+    }, []);
+
     return (
         <LinearGradient
             colors={['#FDEAEB', '#E6ECF5']}
@@ -55,10 +85,9 @@ const HomeScreen = ({ navigation }) => {
                 {/* 1. Hero Section */}
                 <View style={styles.heroSection}>
                     <Image
-                        source={require('../../assets/images/logo.png')}
+                        source={require('../../assets/images/logo-new.png')}
                         style={styles.heroLogo}
                     />
-                    
                     <Text style={styles.heroSubtitle}>Ukur kemampuan bahasa Koreamu dengan tes terstandarisasi.</Text>
                     <CustomButton
                         title="Mulai Tes Sekarang!"
@@ -70,39 +99,70 @@ const HomeScreen = ({ navigation }) => {
                 {/* 2. Penawaran Spesial */}
                 <View style={styles.sectionContainer}>
                     <Text style={styles.sectionTitle}>Penawaran Spesial</Text>
-                    <View style={styles.specialOfferCard}>
-                        <View style={styles.specialOfferText}>
-                            <StyledText style={styles.specialOfferTitle}>Paket Tes Lengkap</StyledText>
-                            <StyledText fontType="montserrat" style={styles.specialOfferDesc}>Dapatkan akses ke semua tes dengan harga khusus.</StyledText>
-                            <TouchableOpacity style={styles.buyNowButton}>
-                                <Text style={styles.buyNowText}>Beli Sekarang</Text>
-                            </TouchableOpacity>
+                    {loading && (
+                        <ActivityIndicator size="large" color={COLORS.primary} style={{ marginHorizontal: 20 }} />
+                    )}
+                    {error && !loading && (
+                        <Text style={styles.errorText}>{error}</Text>
+                    )}
+                    {specialOffer && !loading && (
+                        <View style={styles.specialOfferCard}>
+                            <View style={styles.specialOfferText}>
+                                <StyledText style={styles.specialOfferTitle}>{specialOffer.name}</StyledText>
+                                <StyledText fontType="montserrat" style={styles.specialOfferDesc}>
+                                    {specialOffer.description}
+                                </StyledText>
+                                <TouchableOpacity
+                                    style={styles.buyNowButton}
+                                    onPress={() => {
+                                        navigation.navigate('ProductDetail', { productId: specialOffer.id, productType: specialOffer.type });
+                                    }}
+                                >
+                                    <Text style={styles.buyNowText}>Beli Sekarang</Text>
+                                </TouchableOpacity>
+                            </View>
+                            <Image
+                                source={{ uri: specialOffer.imageUrl }}
+                                style={styles.specialOfferImage}
+                            />
                         </View>
-                        <Image
-                            source={require('../../assets/images/no-image.jpg')}
-                            style={styles.specialOfferImage}
-                        />
-                    </View>
+                    )}
                 </View>
 
+                {/* --- PERBAIKAN 2: Menghapus TouchableOpacity yang membungkus seluruh section --- */}
                 {/* 3. Produk Unggulan */}
                 <View style={styles.sectionContainer}>
                     <Text style={styles.sectionTitle}>Produk Unggulan</Text>
-                    <FlatList
-                        data={featuredProducts}
-                        renderItem={({ item }) => <ProductCard item={item} />}
-                        keyExtractor={item => item.id}
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={{ paddingLeft: 20, paddingBottom: 20 }}
-                    />
+                    {!loading && featuredProducts.length > 0 && (
+                        <FlatList
+                            data={featuredProducts}
+                            // --- PERBAIKAN 3: Meneruskan 'navigation' ke setiap ProductCard ---
+                            renderItem={({ item }) => <ProductCard item={item} navigation={navigation} />}
+                            keyExtractor={item => item.id.toString()} // Lebih aman menggunakan toString()
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }}
+                        />
+                    )}
+                    {/* Tampilkan pesan jika tidak ada produk unggulan */}
+                    {!loading && featuredProducts.length === 0 && !error && (
+                        <Text style={styles.errorText}>Tidak ada produk unggulan saat ini.</Text>
+                    )}
                 </View>
 
+
                 {/* 4. CTA Banner */}
-                <View style={styles.ctaBanner}>
-                    <Ionicons name="sparkles-outline" size={24} color={COLORS.white} />
-                    <Text style={styles.ctaText}>Coba fitur hafalan kosa kata gratis sekarang!</Text>
-                </View>
+                <TouchableOpacity
+                    style={styles.ctaBanner}
+                    onPress={() => {
+                        navigation.navigate('GameCategory');
+                    }}
+                >
+                    {/* <View style={styles.ctaBanner}> */}
+                        {/* <Ionicons name="sparkles-outline" size={24} color={COLORS.white} /> */}
+                        <Text style={styles.ctaText}>Coba fitur hafalan kosa kata gratis sekarang!</Text>
+                    {/* </View> */}
+                </TouchableOpacity>
 
                 {/* 5. Kenapa Memilih Kami? */}
                 <View style={styles.sectionContainer}>
@@ -111,11 +171,11 @@ const HomeScreen = ({ navigation }) => {
                 </View>
 
             </ScrollView>
-
         </LinearGradient>
     );
 };
 
+// ... Styles Anda tetap sama, tidak perlu diubah ...
 const styles = StyleSheet.create({
     screenContainer: {
         flex: 1,
@@ -126,7 +186,9 @@ const styles = StyleSheet.create({
     sectionContainer: { marginBottom: 30 },
     sectionTitle: { fontSize: 20, fontWeight: 'bold', color: COLORS.text, marginBottom: 16, paddingHorizontal: 20, },
     // Hero
+    // heroSection: { backgroundColor: 'transparent', padding: 20, paddingTop: 60, alignItems: 'center', marginBottom: 20 },
     heroSection: { backgroundColor: COLORS.secondary, padding: 20, paddingTop: 40, alignItems: 'center', marginBottom: 20 },
+
     heroTitle: { fontSize: 32, fontWeight: 'bold', color: COLORS.primary },
     heroSubtitle: { fontSize: 16, color: COLORS.text, textAlign: 'center', marginVertical: 12, },
     heroLogo: {
@@ -137,20 +199,25 @@ const styles = StyleSheet.create({
     },
     // Special Offer
     specialOfferCard: { flexDirection: 'row', backgroundColor: 'white', borderRadius: 12, marginHorizontal: 20, padding: 16, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2, },
-    specialOfferText: { flex: 1, marginRight: 10 },
+    specialOfferText: { flex: 1, marginRight: 10, justifyContent: 'center' },
     specialOfferTitle: { fontSize: 16, fontWeight: 'bold' },
     specialOfferDesc: { fontSize: 14, color: COLORS.gray, marginVertical: 8 },
     buyNowButton: { backgroundColor: COLORS.secondary, borderRadius: 20, paddingVertical: 8, paddingHorizontal: 16, alignSelf: 'flex-start' },
     buyNowText: { color: COLORS.primary, fontWeight: 'bold' },
     specialOfferImage: { width: 80, height: 80, borderRadius: 8 },
+    errorText: {
+        color: 'red',
+        paddingHorizontal: 20,
+        textAlign: 'center'
+    },
     // Product
     productCard: { width: 160, marginRight: 16, backgroundColor: 'white', borderRadius: 12, padding: 12, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2, },
-    productImage: { width: '100%', height: 120, borderRadius: 8, marginBottom: 8 },
+    productImage: { width: '100%', height: 100, borderRadius: 8, marginBottom: 8 },
     productTitle: { fontSize: 14, fontWeight: 'bold' },
     productDescription: { fontSize: 12, color: COLORS.gray, marginTop: 4 },
     // CTA
-    ctaBanner: { marginHorizontal: 20, backgroundColor: '#F97B22', borderRadius: 12, padding: 20, flexDirection: 'row', alignItems: 'center', marginBottom: 30, },
-    ctaText: { color: 'white', fontWeight: 'bold', fontSize: 16, marginLeft: 12, flex: 1 },
+    ctaBanner: { marginHorizontal: 20, backgroundColor: '#F97B22', borderRadius: 12, paddingBottom: 50, paddingTop: 50, flexDirection: 'row', alignItems: 'center', marginBottom: 30, },
+    ctaText: { color: 'white', fontWeight: 'bold', fontSize: 22, marginLeft: 12, flex: 1 },
     // Feature
     featureCard: { flexDirection: 'row', alignItems: 'flex-start', marginHorizontal: 20, marginBottom: 20, backgroundColor: 'white', padding: 16, borderRadius: 12, borderWidth: 1, borderColor: '#eee' },
     featureTextContainer: { marginLeft: 16, flex: 1 },

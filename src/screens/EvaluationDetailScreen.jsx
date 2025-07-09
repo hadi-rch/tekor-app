@@ -11,7 +11,7 @@ const EvaluationDetailScreen = ({ route }) => {
     const { aiEvaluationResult, packageId } = route.params;
 
     const handleGoBack = () => {
-        navigation.navigate('MainApp', { screen: 'Lessons', params: { setActiveTab: 'History' } });
+        navigation.navigate('MainApp', { screen: 'Try-out', params: { setActiveTab: 'History' } });
     };
 
     return (
@@ -72,6 +72,7 @@ const markdownStyles = {
         fontSize: 14,
         lineHeight: 20,
         color: COLORS.text,
+        marginBottom: 15
     },
     heading1: {
         fontSize: 24,

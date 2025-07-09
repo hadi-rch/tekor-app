@@ -33,23 +33,15 @@ const ProductCard = ({ item, navigation }) => {
         <TouchableOpacity
             style={styles.cardContainer}
             onPress={() => {
-                if (item.type === 'package') {
-                    navigation.navigate('ProductDetail', { productId: item.id });
-                }
+                    navigation.navigate('ProductDetail', { productId: item.id, productType:item.type });
             }}
         >
             <View style={styles.cardTextContainer}>
                 <StyledText style={styles.cardTitle}>{item.name}</StyledText>
                 <StyledText style={styles.cardDescription}>{item.description}</StyledText>
-                {item.type === 'package' ? (
                     <View style={styles.priceTag}>
                         <StyledText style={styles.priceText}>{formatPrice(item.price)}</StyledText>
                     </View>
-                ) : (
-                    <View style={styles.playButton}>
-                        <StyledText style={styles.playButtonText}>Play</StyledText>
-                    </View>
-                )}
             </View>
             <Image source={imageSource} style={styles.cardImage} />
         </TouchableOpacity>

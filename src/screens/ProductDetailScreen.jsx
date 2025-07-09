@@ -22,12 +22,14 @@ import api from '../../api/axiosConfig';
 
 // --- Komponen Utama ProductDetailScreen ---
 const ProductDetailScreen = ({ navigation, route }) => {
-    const { productId } = route.params;
+    const { productId, productType } = route.params;
     const insets = useSafeAreaInsets(); // Untuk padding bawah yang aman
 
     const [product, setProduct] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isBuying, setIsBuying] = useState(false);
+
+    console.log("type :", productType)
 
     useEffect(() => {
         if (!productId) {
@@ -38,8 +40,17 @@ const ProductDetailScreen = ({ navigation, route }) => {
 
         const fetchProductDetail = async () => {
             try {
-                const response = await api.get(`/api/v1/test-packages/${productId}`);
-                setProduct(response.data.data);
+                if (productType == "package") {
+                    // console.log("had package");
+                    const response = await api.get(`/api/v1/test-packages/${productId}`);
+                    // console.log("hadi pkg");
+                    setProduct(response.data.data);
+                } else {
+                    // console.log("had bundles");
+                    const response = await api.get(`/api/v1/bundles/${productId}`);
+                    // console.log("hadi bdls");
+                    setProduct(response.data.data);
+                }
             } catch (error) {
                 console.error("Gagal mengambil detail produk:", error);
                 Alert.alert("Error", "Tidak dapat memuat detail produk.");
@@ -55,12 +66,22 @@ const ProductDetailScreen = ({ navigation, route }) => {
     const handleBuyPress = async () => {
         setIsBuying(true);
         try {
-            const requestBody = {
-                testPackageId: productId,
-                quantity: 1,
-            };
+            let requestBody;
 
+            if (productType === "package") {
+                requestBody = {
+                    testPackageId: productId,
+                    quantity: 1,
+                };
+            } else {
+                requestBody = {
+                    bundleId: productId,
+                    quantity: 1,
+                };
+            }
+            console.log("requestBody : ", requestBody)
             const response = await api.post('/api/v1/transactions/create', requestBody);
+            console.log("responses : ", response)
             const redirectUrl = response.data.data?.redirectUrl;
 
             if (redirectUrl) {
@@ -101,8 +122,8 @@ const ProductDetailScreen = ({ navigation, route }) => {
         );
     }
 
-    const imageSource = product.imageUrl 
-        ? { uri: product.imageUrl } 
+    const imageSource = product.imageUrl
+        ? { uri: product.imageUrl }
         : require('../../assets/images/no-image.jpg');
 
     return (
