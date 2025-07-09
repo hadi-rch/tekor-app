@@ -20,6 +20,7 @@ import { fontPixel } from '../../helper'
 import { LinearGradient } from 'expo-linear-gradient'
 import api from '../../api/axiosConfig';
 import StyledText from '../components/StyledText'
+import { useFocusEffect } from '@react-navigation/native'
 
 // --- Komponen untuk setiap item dalam daftar Test ---
 const LessonItem = ({ item, onPress }) => {
@@ -87,6 +88,22 @@ const LessonsScreen = ({ navigation }) => {
     const [completedTests, setCompletedTests] = useState([]);
     const [isHistoryLoading, setIsHistoryLoading] = useState(true);
 
+  // Handle navigation parameters when screen is focused
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
+            const state = navigation.getState();
+            const currentRoute = state.routes[state.index];
+            
+            // Check if we're on the Try-out tab and if there's a setActiveTab parameter
+            if (currentRoute.name === 'Try-out' && currentRoute.params?.setActiveTab) {
+                setActiveTab(currentRoute.params.setActiveTab);
+                // Clear the parameter after using it
+                navigation.setParams({ setActiveTab: undefined });
+            }
+        });
+        
+        return unsubscribe;
+    }, [navigation]);
 
     useEffect(() => {
         const fetchMyTests = async () => {
