@@ -24,6 +24,8 @@ import TestResultScreen from '../screens/TestResultScreen';
 import ReviewScreen from '../screens/ReviewScreen';
 import TransactionHistoryDetailScreen from '../screens/TransactionHistoryDetailScreen';
 import EvaluationDetailScreen from '../screens/EvaluationDetailScreen';
+import DummyTestScreen from '../screens/DummyTestScreen';
+import DummyReviewScreen from '../screens/DummyReviewScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -56,6 +58,8 @@ const AppNavigator = () => {
                 <Stack.Screen name="Review" component={ReviewScreen} /> 
                 <Stack.Screen name="TransactionDetail" component={TransactionHistoryDetailScreen} /> 
                 <Stack.Screen name="EvaluationDetail" component={EvaluationDetailScreen} />
+                <Stack.Screen name="DummyTest" component={DummyTestScreen} />
+                <Stack.Screen name="DummyReview" component={DummyReviewScreen} />
 
             </Stack.Navigator>
         </NavigationContainer>

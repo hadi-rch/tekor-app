@@ -89,9 +89,6 @@ const GameCategoryScreen = ({ navigation }) => {
             <FocusAwareStatusBar barStyle="dark-content" backgroundColor="transparent" translucent={true} />
 
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerButton}>
-                    <Ionicons name="arrow-back" size={fontPixel(24)} color={COLORS.text} />
-                </TouchableOpacity>
                 <Text style={styles.headerTitle}>Pilih Kategori Permainan</Text>
                 <View style={{ width: fontPixel(24) }} />
             </View>
@@ -126,14 +123,11 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        justifyContent: 'center',
         paddingVertical: pixelSizeVertical(15),
         paddingHorizontal: pixelSizeHorizontal(20),
         borderBottomWidth: 1,
         borderBottomColor: COLORS.borderColor,
-    },
-    headerButton: {
-        padding: pixelSizeHorizontal(5),
     },
     headerTitle: {
         fontSize: fontPixel(20),

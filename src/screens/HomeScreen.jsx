@@ -91,9 +91,14 @@ const HomeScreen = ({ navigation }) => {
                     <Text style={styles.heroSubtitle}>Ukur kemampuan bahasa Koreamu dengan tes terstandarisasi.</Text>
                     <CustomButton
                         title="Mulai Tes Sekarang!"
-                        onPress={() => { /* Navigasi ke halaman tes */ }}
+                        onPress={() => navigation.navigate('DummyTest')}
                         style={{ backgroundColor: COLORS.primary }}
                     />
+                    {/* <CustomButton
+                        title="Coba Tes Dummy"
+                        onPress={() => navigation.navigate('DummyTest')}
+                        style={{ backgroundColor: COLORS.accent, marginTop: 10 }}
+                    /> */}
                 </View>
 
                 {/* 2. Penawaran Spesial */}
