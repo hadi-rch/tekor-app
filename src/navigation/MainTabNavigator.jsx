@@ -28,9 +28,9 @@ const MainTabNavigator = () => {
                         iconName = focused ? 'home' : 'home-outline';
                     } else if (route.name === 'Game') {
                         iconName = focused ? 'game-controller' : 'game-controller-outline';
-                    } else if (route.name === 'Try-out') {
+                    } else if (route.name === 'My Try out') {
                         iconName = focused ? 'book' : 'book-outline';
-                    } else if (route.name === 'Produk') {
+                    } else if (route.name === 'Try out') {
                         iconName = focused ? 'cube' : 'cube-outline';
                     } else if (route.name === 'Profil') {
                         iconName = focused ? 'person' : 'person-outline';
@@ -54,9 +54,9 @@ const MainTabNavigator = () => {
             })}
         >
             <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: 'Beranda' }} />
+            <Tab.Screen name="Try out" component={ProductsScreen} />
+            <Tab.Screen name="My Try out" component={LessonsScreen} />
             <Tab.Screen name="Game" component={GameCategoryScreen} />
-            <Tab.Screen name="Try-out" component={LessonsScreen} />
-            <Tab.Screen name="Produk" component={ProductsScreen} />
             <Tab.Screen name="Profil" component={ProfileScreen} />
         </Tab.Navigator>
     );

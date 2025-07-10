@@ -33,15 +33,15 @@ const ProductCard = ({ item, navigation }) => {
         <TouchableOpacity
             style={styles.cardContainer}
             onPress={() => {
-                    navigation.navigate('ProductDetail', { productId: item.id, productType:item.type });
+                navigation.navigate('ProductDetail', { productId: item.id, productType: item.type });
             }}
         >
             <View style={styles.cardTextContainer}>
                 <StyledText style={styles.cardTitle}>{item.name}</StyledText>
                 <StyledText style={styles.cardDescription}>{item.description}</StyledText>
-                    <View style={styles.priceTag}>
-                        <StyledText style={styles.priceText}>{formatPrice(item.price)}</StyledText>
-                    </View>
+                <View style={styles.priceTag}>
+                    <StyledText style={styles.priceText}>{formatPrice(item.price)}</StyledText>
+                </View>
             </View>
             <Image source={imageSource} style={styles.cardImage} />
         </TouchableOpacity>
@@ -63,8 +63,8 @@ const ProductsScreen = ({ navigation }) => {
                 setProducts(allItems);
 
             } catch (error) {
-                console.error("Gagal mengambil data produk:", error);
-                Alert.alert("Error", "Tidak dapat memuat data produk.");
+                console.error("Gagal mengambil data Try out:", error);
+                Alert.alert("Error", "Tidak dapat memuat data Try out.");
             } finally {
                 setIsLoading(false);
             }
@@ -114,7 +114,7 @@ const ProductsScreen = ({ navigation }) => {
                         </View>
                     </View>
 
-                    {/* Daftar Produk */}
+                    {/* Daftar Try out */}
                     <View style={styles.section}>
                         {products.map(item => <ProductCard key={item.id} item={item} navigation={navigation} />)}
                     </View>

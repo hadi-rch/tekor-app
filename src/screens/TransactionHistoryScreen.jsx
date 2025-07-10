@@ -23,12 +23,12 @@ const TransactionItem = ({ item, navigation }) => {
         switch (status.toLowerCase()) {
             case 'success':
             case 'settlement':
-                return { color: '#28a745' }; 
+                return { color: '#28a745' };
             case 'pending':
                 return { color: '#ffc107' };
             case 'failure':
             case 'expire':
-                return { color: '#dc3545' }; 
+                return { color: '#dc3545' };
             default:
                 return { color: COLORS.gray };
         }
@@ -65,7 +65,7 @@ const TransactionHistoryScreen = ({ navigation }) => {
                 const formattedData = backendData.map(tx => ({
                     id: tx.orderId,
                     status: tx.transactionStatus.toLowerCase(),
-                    title: tx.packageName || tx.bundleName || 'Produk Tidak Dikenal',
+                    title: tx.packageName || tx.bundleName || 'Try out Tidak Dikenal',
                     price: `Rp ${new Intl.NumberFormat('id-ID').format(tx.amount)}`,
                     date: new Date(tx.createdAt).toLocaleDateString('id-ID', {
                         day: '2-digit', month: 'long', year: 'numeric'
@@ -135,7 +135,7 @@ const TransactionHistoryScreen = ({ navigation }) => {
             ) : (
                 <FlatList
                     data={filteredTransactions}
-                    renderItem={({ item }) => <TransactionItem item={item} navigation={navigation}/>}
+                    renderItem={({ item }) => <TransactionItem item={item} navigation={navigation} />}
                     keyExtractor={(item) => item.id}
                     contentContainerStyle={styles.listContainer}
                     ListEmptyComponent={

@@ -11,7 +11,7 @@ const EvaluationDetailScreen = ({ route }) => {
     const { aiEvaluationResult, packageId } = route.params;
 
     const handleGoBack = () => {
-        navigation.navigate('MainApp', { screen: 'Try-out', params: { setActiveTab: 'History' } });
+        navigation.navigate('MainApp', { screen: 'My Try out', params: { setActiveTab: 'History' } });
     };
 
     return (

@@ -33,7 +33,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
 
     useEffect(() => {
         if (!productId) {
-            Alert.alert("Error", "ID Produk tidak ditemukan.");
+            Alert.alert("Error", "ID Try out tidak ditemukan.");
             navigation.goBack();
             return;
         }
@@ -52,8 +52,8 @@ const ProductDetailScreen = ({ navigation, route }) => {
                     setProduct(response.data.data);
                 }
             } catch (error) {
-                console.error("Gagal mengambil detail produk:", error);
-                Alert.alert("Error", "Tidak dapat memuat detail produk.");
+                console.error("Gagal mengambil detail Try out:", error);
+                Alert.alert("Error", "Tidak dapat memuat detail Try out.");
             } finally {
                 setIsLoading(false);
             }
@@ -117,7 +117,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
     if (!product) {
         return (
             <View style={styles.loaderContainer}>
-                <Text>Produk tidak ditemukan.</Text>
+                <Text>Try out tidak ditemukan.</Text>
             </View>
         );
     }
@@ -138,7 +138,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerButton}>
                     <Ionicons name="arrow-back" size={fontPixel(24)} color={COLORS.text} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Detail Produk</Text>
+                <Text style={styles.headerTitle}>Detail Try out</Text>
                 <View style={{ width: fontPixel(24) }} />
             </View>
 

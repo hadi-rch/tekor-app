@@ -125,7 +125,7 @@ const TransactionDetailScreen = ({ navigation, route }) => {
     return (
         <View style={styles.screenContainer}>
             <FocusAwareStatusBar barStyle="dark-content" backgroundColor="transparent" translucent={true} />
-            
+
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerButton}>
                     <Ionicons name="arrow-back" size={fontPixel(24)} color={COLORS.text} />
@@ -143,7 +143,7 @@ const TransactionDetailScreen = ({ navigation, route }) => {
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Rincian Pesanan</Text>
                     <View style={styles.card}>
-                        <DetailRow label={transaction.packageName || 'Produk'} value={formatPrice(transaction.amount)} />
+                        <DetailRow label={transaction.packageName || 'Try out'} value={formatPrice(transaction.amount)} />
                     </View>
                 </View>
 
