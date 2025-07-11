@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Keyboard, StatusBar, Platform, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-
 import api from '../../api/axiosConfig';
 import CustomTextInput from '../components/CustomTextInput';
 import CustomButton from '../components/CustomButton';
@@ -26,12 +25,10 @@ const ForgotPasswordScreen = ({ navigation }) => {
         return !newError;
     };
 
-    //Ubah handleSendLink menjadi async dan integrasikan dengan API
     const handleSendLink = async () => {
         if (validateEmail()) {
             setIsLoading(true);
             try {
-                // const response = await api.post(`/api/v1/auth/forgot-password?email=${email}`);
                 const response = await api.post('/api/v1/auth/forgot-password', { email });
 
                 Alert.alert("Permintaan Terkirim", response.data.message || 'Jika email terdaftar, link reset telah dikirim.');
@@ -48,11 +45,11 @@ const ForgotPasswordScreen = ({ navigation }) => {
                     if (err.response.data && err.response.data.message) {
                         errorMessage = err.response.data.message;
                     } else {
-                        // Jika tidak ada pesan spesifik, berikan pesan umum berdasarkan status code
+                        //klo gk ada pesan spesifik, kasih pesan umum berdasarkan status code
                         errorMessage = `Terjadi kesalahan pada server (Status: ${err.response.status}).`;
                     }
                 } else {
-                    // Jika tidak ada respons sama sekali (masalah jaringan)
+                    //klo gk ada respons sama sekali (masalah jaringan)
                     errorMessage = 'Tidak dapat terhubung ke server. Pastikan koneksi internet dan alamat IP server sudah benar.';
                 }
 
@@ -99,7 +96,6 @@ const ForgotPasswordScreen = ({ navigation }) => {
                     />
                 </View>
 
-                {/* 4. Perbarui tombol untuk menangani state loading */}
                 <CustomButton
                     title={isLoading ? "Mengirim..." : "Kirim Link Reset"}
                     onPress={handleSendLink}
@@ -112,38 +108,13 @@ const ForgotPasswordScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-    screenContainer: {
-        flex: 1,
-        backgroundColor: COLORS.white,
-        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-    },
-    container: {
-        flex: 1,
-        padding: 20,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: 24,
-    },
-    backButton: {
-        padding: 5,
-    },
-    headerTitle: {
-        fontSize: fontPixel(20),
-        fontWeight: 'bold',
-        color: COLORS.text,
-    },
-    content: {
-        flex: 1,
-    },
-    description: {
-        fontSize: fontPixel(16),
-        color: COLORS.text,
-        lineHeight: fontPixel(24),
-        marginBottom: 32,
-    },
+    screenContainer: { flex: 1, backgroundColor: COLORS.white, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0},
+    container: { flex: 1, padding: 20},
+    header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24},
+    backButton: { padding: 5},
+    headerTitle: { fontSize: fontPixel(20), fontWeight: 'bold', color: COLORS.text},
+    content: { flex: 1},
+    description: { fontSize: fontPixel(16), color: COLORS.text, lineHeight: fontPixel(24), marginBottom: 32},
 });
 
 export default ForgotPasswordScreen;

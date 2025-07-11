@@ -76,7 +76,7 @@ const CreateNewPasswordScreen = ({ navigation, route }) => {
                     confirmPassword: confirmPassword,
                 };
 
-                // Panggil endpoint backend Anda
+                // manggil endpoint be
                 const response = await api.post('/api/v1/auth/reset-password', requestBody);
 
                 Alert.alert(
@@ -100,7 +100,6 @@ const CreateNewPasswordScreen = ({ navigation, route }) => {
         navigation.navigate('Login');
     };
 
-    // Tampilkan loading atau pesan error jika email tidak ada
     if (!email) {
         return (
             <View style={styles.screenContainer}>
@@ -192,91 +191,21 @@ const CreateNewPasswordScreen = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
-    screenContainer: {
-        flex: 1,
-        backgroundColor: COLORS.white,
-        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-    },
-    container: {
-        flex: 1,
-        padding: 24,
-        justifyContent: 'space-between',
-    },
-    title: {
-        fontSize: 26,
-        fontWeight: 'bold',
-        color: COLORS.text,
-        marginBottom: 8,
-    },
-    description: {
-        fontSize: 16,
-        color: COLORS.text,
-        lineHeight: 24,
-        marginBottom: 32,
-    },
-    eyeIcon: {
-        padding: 10,
-    },
-    criteriaContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: 16,
-    },
-    criteriaText: {
-        marginLeft: 8,
-        fontSize: 14,
-    },
-    buttonContainer: {
-        paddingBottom: 10,
-    },
-
-    modalOverlay: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0,0,0,0.5)',
-    },
-    successModalContent: {
-        width: '85%',
-        backgroundColor: 'white',
-        borderRadius: 15,
-        padding: pixelSizeHorizontal(20),
-        alignItems: 'center',
-    },
-    successIconContainer: {
-        width: pixelSizeHorizontal(70),
-        height: pixelSizeHorizontal(70),
-        borderRadius: pixelSizeHorizontal(35),
-        backgroundColor: '#28a745',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: pixelSizeVertical(20),
-    },
-    successTitle: {
-        fontSize: fontPixel(22),
-        fontWeight: 'bold',
-        marginBottom: pixelSizeVertical(10),
-    },
-    successSubtitle: {
-        fontSize: fontPixel(16),
-        textAlign: 'center',
-        color: COLORS.gray,
-        marginBottom: pixelSizeVertical(25),
-        lineHeight: fontPixel(24),
-    },
-    successButton: {
-        backgroundColor: COLORS.primary,
-        paddingVertical: pixelSizeVertical(12),
-        paddingHorizontal: pixelSizeHorizontal(30),
-        borderRadius: 8,
-        width: '100%',
-        alignItems: 'center',
-    },
-    successButtonText: {
-        color: 'white',
-        fontWeight: 'bold',
-        fontSize: fontPixel(16),
-    },
+    screenContainer: { flex: 1, backgroundColor: COLORS.white, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 },
+    container: { flex: 1, padding: 24, justifyContent: 'space-between' },
+    title: { fontSize: 26, fontWeight: 'bold', color: COLORS.text, marginBottom: 8 },
+    description: { fontSize: 16, color: COLORS.text, lineHeight: 24, marginBottom: 32 },
+    eyeIcon: { padding: 10 },
+    criteriaContainer: { flexDirection: 'row', alignItems: 'center', marginTop: 16 },
+    criteriaText: { marginLeft: 8, fontSize: 14 },
+    buttonContainer: { paddingBottom: 10 },
+    modalOverlay: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' },
+    successModalContent: { width: '85%', backgroundColor: 'white', borderRadius: 15, padding: pixelSizeHorizontal(20), alignItems: 'center' },
+    successIconContainer: { width: pixelSizeHorizontal(70), height: pixelSizeHorizontal(70), borderRadius: pixelSizeHorizontal(35), backgroundColor: '#28a745', justifyContent: 'center', alignItems: 'center', marginBottom: pixelSizeVertical(20) },
+    successTitle: { fontSize: fontPixel(22), fontWeight: 'bold', marginBottom: pixelSizeVertical(10) },
+    successSubtitle: { fontSize: fontPixel(16), textAlign: 'center', color: COLORS.gray, marginBottom: pixelSizeVertical(25), lineHeight: fontPixel(24) },
+    successButton: { backgroundColor: COLORS.primary, paddingVertical: pixelSizeVertical(12), paddingHorizontal: pixelSizeHorizontal(30), borderRadius: 8, width: '100%', alignItems: 'center' },
+    successButtonText: { color: 'white', fontWeight: 'bold', fontSize: fontPixel(16) },
 });
 
 export default CreateNewPasswordScreen;

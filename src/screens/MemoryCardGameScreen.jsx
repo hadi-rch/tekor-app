@@ -39,11 +39,9 @@ const MemoryCard = ({ item, isFlipped, onPress }) => {
     );
 };
 
-
 // --- Komponen Utama Game ---
 const MemoryCardGameScreen = ({ navigation, route }) => {
     const { category } = route.params;
-
     const [cards, setCards] = useState([]);
     const [originalCards, setOriginalCards] = useState([]);
     const [flippedCardIds, setFlippedCardIds] = useState(new Set());
@@ -60,7 +58,6 @@ const MemoryCardGameScreen = ({ navigation, route }) => {
                 const response = await api.get(`/api/v1/vocabularies?category=${category}`);
                 const backendData = response.data.data;
 
-                // Transformasi data dari backend ke format yang dibutuhkan frontend
                 const formattedData = backendData.map(item => ({
                     id: item.id,
                     korean: item.koreanWord,
@@ -71,7 +68,6 @@ const MemoryCardGameScreen = ({ navigation, route }) => {
                 setOriginalCards(formattedData);
                 setCards([...formattedData].sort(() => Math.random() - 0.5));
             } catch (error) {
-                // console.error("Gagal mengambil kosakata:", error);
                 Alert.alert("Error", "Tidak dapat memuat data permainan untuk kategori ini.");
             } finally {
                 setIsLoading(false);
@@ -173,152 +169,32 @@ const MemoryCardGameScreen = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
-    screenContainer: {
-        flex: 1,
-        backgroundColor: '#F7F8FA',
-        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-    },
-    centerContainer: {
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingVertical: pixelSizeVertical(15),
-        paddingHorizontal: pixelSizeHorizontal(20),
-        backgroundColor: COLORS.white,
-        borderBottomWidth: 1,
-        borderBottomColor: COLORS.borderColor,
-    },
-    headerButton: {
-        padding: pixelSizeHorizontal(5),
-    },
-    headerTitle: {
-        fontSize: fontPixel(18),
-        fontWeight: 'bold',
-    },
-    statsContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        padding: pixelSizeHorizontal(20),
-    },
-    statBox: {
-        backgroundColor: COLORS.white,
-        padding: pixelSizeHorizontal(20),
-        borderRadius: 12,
-        alignItems: 'center',
-        width: '45%',
-        borderWidth: 1,
-        borderColor: COLORS.borderColor,
-    },
-    statValue: {
-        fontSize: fontPixel(24),
-        fontWeight: 'bold',
-    },
-    statLabel: {
-        fontSize: fontPixel(14),
-        color: COLORS.gray,
-        marginTop: pixelSizeVertical(5),
-    },
-    progressSection: {
-        paddingHorizontal: pixelSizeHorizontal(20),
-        marginBottom: pixelSizeVertical(15),
-    },
-    progressLabel: {
-        fontSize: fontPixel(16),
-        fontWeight: '500',
-        marginBottom: pixelSizeVertical(8),
-    },
-    progressBarBackground: {
-        height: heightPixel(8),
-        backgroundColor: COLORS.borderColor,
-        borderRadius: 4,
-    },
-    progressBar: {
-        height: '100%',
-        backgroundColor: COLORS.primary,
-        borderRadius: 4,
-    },
-    gameGrid: {
-        paddingHorizontal: pixelSizeHorizontal(15),
-        paddingBottom: pixelSizeVertical(20),
-    },
-    cardContainer: {
-        flex: 1,
-        aspectRatio: 1,
-        margin: pixelSizeHorizontal(5),
-        perspective: 1000,
-    },
-    card: {
-        width: '100%',
-        height: '100%',
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: 12,
-        backfaceVisibility: 'hidden',
-        position: 'absolute',
-        padding: pixelSizeHorizontal(10),
-    },
-    cardFront: {
-        backgroundColor: COLORS.white,
-        borderWidth: 1,
-        borderColor: COLORS.borderColor,
-    },
-    cardBack: {
-        backgroundColor: '#E9F5FF',
-    },
-    cardTextKorean: {
-        fontSize: fontPixel(26),
-        fontWeight: 'bold',
-        textAlign: 'center',
-        marginBottom: pixelSizeVertical(4),
-    },
-    cardTextRomanization: {
-        fontSize: fontPixel(16),
-        textAlign: 'center',
-        color: COLORS.gray,
-    },
-    cardTextIndonesian: {
-        fontSize: fontPixel(22),
-        textAlign: 'center',
-        color: COLORS.primary,
-        fontWeight: '500',
-    },
-    footer: {
-        flexDirection: 'row',
-        padding: pixelSizeHorizontal(20),
-        borderTopWidth: 1,
-        borderTopColor: COLORS.borderColor,
-        backgroundColor: COLORS.white,
-        paddingBottom: pixelSizeVertical(50),
-    },
-    resetButton: {
-        backgroundColor: '#f0f0f0',
-        paddingVertical: pixelSizeVertical(15),
-        borderRadius: 12,
-        alignItems: 'center',
-        flex: 1,
-        marginRight: pixelSizeHorizontal(10),
-    },
-    resetButtonText: {
-        fontSize: fontPixel(16),
-        fontWeight: 'bold',
-        color: COLORS.text,
-    },
-    shuffleButton: {
-        backgroundColor: COLORS.primary,
-        paddingVertical: pixelSizeVertical(15),
-        borderRadius: 12,
-        alignItems: 'center',
-        flex: 1,
-    },
-    shuffleButtonText: {
-        fontSize: fontPixel(16),
-        fontWeight: 'bold',
-        color: COLORS.white,
-    },
+    screenContainer: { flex: 1, backgroundColor: '#F7F8FA', paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0, },
+    centerContainer: { justifyContent: 'center', alignItems: 'center', },
+    header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: pixelSizeVertical(15), paddingHorizontal: pixelSizeHorizontal(20), backgroundColor: COLORS.white, borderBottomWidth: 1, borderBottomColor: COLORS.borderColor, },
+    headerButton: { padding: pixelSizeHorizontal(5), },
+    headerTitle: { fontSize: fontPixel(18), fontWeight: 'bold', },
+    statsContainer: { flexDirection: 'row', justifyContent: 'space-around', padding: pixelSizeHorizontal(20), },
+    statBox: { backgroundColor: COLORS.white, padding: pixelSizeHorizontal(20), borderRadius: 12, alignItems: 'center', width: '45%', borderWidth: 1, borderColor: COLORS.borderColor, },
+    statValue: { fontSize: fontPixel(24), fontWeight: 'bold', },
+    statLabel: { fontSize: fontPixel(14), color: COLORS.gray, marginTop: pixelSizeVertical(5), },
+    progressSection: { paddingHorizontal: pixelSizeHorizontal(20), marginBottom: pixelSizeVertical(15), },
+    progressLabel: { fontSize: fontPixel(16), fontWeight: '500', marginBottom: pixelSizeVertical(8), },
+    progressBarBackground: { height: heightPixel(8), backgroundColor: COLORS.borderColor, borderRadius: 4, },
+    progressBar: { height: '100%', backgroundColor: COLORS.primary, borderRadius: 4, },
+    gameGrid: { paddingHorizontal: pixelSizeHorizontal(15), paddingBottom: pixelSizeVertical(20), },
+    cardContainer: { flex: 1, aspectRatio: 1, margin: pixelSizeHorizontal(5), perspective: 1000, },
+    card: { width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center', borderRadius: 12, backfaceVisibility: 'hidden', position: 'absolute', padding: pixelSizeHorizontal(10), },
+    cardFront: { backgroundColor: COLORS.white, borderWidth: 1, borderColor: COLORS.borderColor, },
+    cardBack: { backgroundColor: '#E9F5FF', },
+    cardTextKorean: { fontSize: fontPixel(26), fontWeight: 'bold', textAlign: 'center', marginBottom: pixelSizeVertical(4), },
+    cardTextRomanization: { fontSize: fontPixel(16), textAlign: 'center', color: COLORS.gray, },
+    cardTextIndonesian: { fontSize: fontPixel(22), textAlign: 'center', color: COLORS.primary, fontWeight: '500', },
+    footer: { flexDirection: 'row', padding: pixelSizeHorizontal(20), borderTopWidth: 1, borderTopColor: COLORS.borderColor, backgroundColor: COLORS.white, paddingBottom: pixelSizeVertical(50), },
+    resetButton: { backgroundColor: '#f0f0f0', paddingVertical: pixelSizeVertical(15), borderRadius: 12, alignItems: 'center', flex: 1, marginRight: pixelSizeHorizontal(10), },
+    resetButtonText: { fontSize: fontPixel(16), fontWeight: 'bold', color: COLORS.text, },
+    shuffleButton: { backgroundColor: COLORS.primary, paddingVertical: pixelSizeVertical(15), borderRadius: 12, alignItems: 'center', flex: 1, },
+    shuffleButtonText: { fontSize: fontPixel(16), fontWeight: 'bold', color: COLORS.white, },
 });
 
 export default MemoryCardGameScreen;

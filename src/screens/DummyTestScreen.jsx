@@ -20,7 +20,6 @@ const Timer = ({ timeLeft }) => {
     );
 };
 
-// --- Komponen Utama DummyTestScreen ---
 const DummyTestScreen = ({ navigation }) => {
     const [testTitle, setTestTitle] = useState('');
     const [questions, setQuestions] = useState([]);
@@ -70,11 +69,10 @@ const DummyTestScreen = ({ navigation }) => {
         return () => clearInterval(timerRef.current);
     }, [isLoading]);
 
-    // --- Back Button Handler ---
     useEffect(() => {
         const backAction = () => {
             setIsExitModalVisible(true);
-            return true; // Prevent default behavior
+            return true;
         };
 
         const backHandler = BackHandler.addEventListener(
@@ -136,7 +134,6 @@ const DummyTestScreen = ({ navigation }) => {
         const totalQuestions = questions.length;
         const finalScore = (score / totalQuestions) * 100;
 
-        // Navigate to a simplified result screen or show an alert
         navigation.replace('DummyReview', { userAnswers });
     };
 
@@ -182,13 +179,9 @@ const DummyTestScreen = ({ navigation }) => {
                     {currentQuestion.questionImage ? (
                         <Image source={{ uri: currentQuestion.questionImage }} style={styles.questionImage} />
                     ) : null}
-                    {/* { console.log("currentQuestion.questionVoice:", currentQuestion.questionVoice) } */}
                     {currentQuestion.questionVoice ? (
                         <AudioPlayer uri={currentQuestion.questionVoice} />
                     ) : null}
-                    {/* {typeof currentQuestion.questionVoice === 'string' && currentQuestion.questionVoice ? (
-                        <AudioPlayer uri={currentQuestion.questionVoice} />
-                    ) : null} */}
                     <Text style={styles.questionText}>{currentQuestion.questionText}</Text>
                 </View>
 
@@ -272,7 +265,6 @@ const DummyTestScreen = ({ navigation }) => {
                 </Pressable>
             </Modal>
 
-            {/* Exit Confirmation Modal */}
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -304,7 +296,6 @@ const DummyTestScreen = ({ navigation }) => {
                 </Pressable>
             </Modal>
 
-            {/* Submit Confirmation Modal */}
             <Modal
                 animationType="slide"
                 transparent={true}

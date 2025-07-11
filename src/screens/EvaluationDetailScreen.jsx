@@ -37,72 +37,19 @@ const EvaluationDetailScreen = ({ route }) => {
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: COLORS.white,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        backgroundColor: COLORS.primary,
-        paddingHorizontal: 15,
-        paddingVertical: 15,
-        paddingTop: 40, // Adjust for status bar
-    },
-    backButton: {
-        marginRight: 10,
-    },
-    headerTitle: {
-        color: COLORS.white,
-        // alignItems: 'center',
-        // textAlign: 'center',
-        // justifyContent: 'left',
-        fontSize: 20,
-        fontWeight: 'bold',
-    },
-    content: {
-        flex: 1,
-        padding: 15,
-        marginBottom: 20
-    },
-    packageId: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        marginBottom: 10,
-        color: COLORS.text,
-    },
+    container: { flex: 1, backgroundColor: COLORS.white },
+    header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: COLORS.primary, paddingHorizontal: 15, paddingVertical: 15, paddingTop: 40 },
+    backButton: { marginRight: 10 },
+    headerTitle: { color: COLORS.white, fontSize: 20, fontWeight: 'bold' },
+    content: { flex: 1, padding: 15, marginBottom: 2 },
+    packageId: { fontSize: 16, fontWeight: 'bold', marginBottom: 10, color: COLORS.text },
 });
 
 const markdownStyles = {
-    body: {
-        fontSize: 14,
-        lineHeight: 20,
-        color: COLORS.text,
-        marginBottom: 15
-    },
-    heading1: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginTop: 10,
-        marginBottom: 5,
-        color: COLORS.primary,
-    },
-    heading2: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginTop: 8,
-        marginBottom: 4,
-        color: COLORS.primary,
-    },
-    heading3: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginTop: 6,
-        marginBottom: 3,
-        color: COLORS.primary,
-    },
-    // Add more markdown styles as needed
+    body: { fontSize: 14, lineHeight: 20, color: COLORS.text, marginBottom: 15 },
+    heading1: { fontSize: 24, fontWeight: 'bold', marginTop: 10, marginBottom: 5, color: COLORS.primary },
+    heading2: { fontSize: 20, fontWeight: 'bold', marginTop: 8, marginBottom: 4, color: COLORS.primary },
+    heading3: { fontSize: 18, fontWeight: 'bold', marginTop: 6, marginBottom: 3, color: COLORS.primary },
 };
 
 export default EvaluationDetailScreen;

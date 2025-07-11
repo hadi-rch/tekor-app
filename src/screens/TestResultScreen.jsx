@@ -1,15 +1,5 @@
 import React from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    Platform,
-    StatusBar,
-    ScrollView,
-    Image,
-    ActivityIndicator,
-    Alert
-} from 'react-native';
+import { View, Text, StyleSheet, Platform, StatusBar, ScrollView, Image} from 'react-native';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 import CustomButton from '../components/CustomButton';
@@ -25,10 +15,8 @@ const StatBox = ({ label, value, fullWidth = false }) => (
 
 // --- Komponen Utama TestResultScreen ---
 const TestResultScreen = ({ navigation, route }) => {
-    // Menerima data dari TestScreen melalui route.params
     const { testResult, start, attemptId } = route.params || {};
 
-    // Fallback jika data tidak ada
     if (!testResult) {
         return (
             <View style={styles.centerContainer}>
@@ -42,11 +30,7 @@ const TestResultScreen = ({ navigation, route }) => {
         );
     }
     
-    console.log("testResult:", testResult);
-    
     const { score, totalCorrect, totalIncorrect, completionTime } = testResult;
-    console.log("start:", start);
-    console.log("completionTime:", completionTime);
     
     // Perbaikan perhitungan waktu selesai
     let finishTime;
@@ -82,8 +66,6 @@ const TestResultScreen = ({ navigation, route }) => {
         return `${m} menit ${s} detik`;
     };
 
-    // const scorePercentage = (score / 100) * 100;
-
     return (
         <View style={styles.screenContainer}>
             <FocusAwareStatusBar
@@ -117,7 +99,7 @@ const TestResultScreen = ({ navigation, route }) => {
                     </View>
 
                     <Image
-                        source={require('../../assets/images/no-image.jpg')} // Ganti dengan gambar Anda
+                        source={require('../../assets/images/no-image.jpg')}
                         style={styles.promoImage}
                     />
                 </View>
@@ -136,130 +118,29 @@ const TestResultScreen = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
-    screenContainer: {
-        flex: 1,
-        backgroundColor: '#F7F8FA',
-        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-    },
-    centerContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: pixelSizeHorizontal(20),
-    },
-    loadingText: {
-        marginTop: pixelSizeVertical(10),
-        fontSize: fontPixel(16),
-        color: COLORS.gray,
-    },
-    errorText: {
-        fontSize: fontPixel(16),
-        color: 'red',
-        textAlign: 'center',
-    },
-    header: {
-        paddingVertical: pixelSizeVertical(15),
-        alignItems: 'center',
-        backgroundColor: COLORS.white,
-        borderBottomWidth: 1,
-        borderBottomColor: COLORS.borderColor,
-    },
-    headerTitle: {
-        fontSize: fontPixel(20),
-        fontWeight: 'bold',
-    },
-    scrollContainer: {
-        paddingBottom: heightPixel(120), // Memberi ruang dari footer
-    },
-    mainContent: {
-        padding: pixelSizeHorizontal(20),
-        alignItems: 'center',
-    },
-    congratsTitle: {
-        fontSize: fontPixel(22),
-        fontWeight: 'bold',
-        textAlign: 'center',
-        color: COLORS.text,
-        marginBottom: pixelSizeVertical(20),
-    },
-    scoreContainer: {
-        width: '100%',
-        alignItems: 'flex-end',
-        marginBottom: pixelSizeVertical(25),
-    },
-    scoreText: {
-        fontSize: fontPixel(14),
-        color: COLORS.gray,
-        marginBottom: pixelSizeVertical(8),
-    },
-    progressBarBackground: {
-        width: '100%',
-        height: heightPixel(8),
-        backgroundColor: COLORS.borderColor,
-        borderRadius: 4,
-    },
-    progressBar: {
-        height: '100%',
-        backgroundColor: COLORS.primary,
-        borderRadius: 4,
-    },
-    scoreSection: {
-        width: '100%',
-        alignItems: 'center',
-        marginBottom: pixelSizeVertical(25),
-    },
-    summarySection: {
-        width: '100%',
-        marginBottom: pixelSizeVertical(25),
-    },
-    sectionTitle: {
-        fontSize: fontPixel(18),
-        fontWeight: 'bold',
-        marginBottom: pixelSizeVertical(15),
-    },
-    statsRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: pixelSizeVertical(15),
-    },
-    statBox: {
-        backgroundColor: COLORS.white,
-        padding: pixelSizeHorizontal(20),
-        borderRadius: 12,
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: COLORS.borderColor,
-        width: '48%', // Sedikit kurang dari 50% untuk memberi jarak
-    },
-    fullWidthStatBox: {
-        width: '100%',
-    },
-    statLabel: {
-        fontSize: fontPixel(14),
-        color: COLORS.gray,
-    },
-    statValue: {
-        fontSize: fontPixel(28),
-        fontWeight: 'bold',
-        marginTop: pixelSizeVertical(8),
-    },
-    promoImage: {
-        width: '100%',
-        height: heightPixel(180),
-        borderRadius: 12,
-    },
-    footer: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        paddingHorizontal: pixelSizeHorizontal(20),
-        paddingTop: pixelSizeVertical(15),
-        paddingBottom: pixelSizeVertical(30),
-        borderTopWidth: 1,
-        borderTopColor: COLORS.borderColor,
-        backgroundColor: COLORS.white,
-    }
+    screenContainer: { flex: 1, backgroundColor: '#F7F8FA', paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,},
+    centerContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: pixelSizeHorizontal(20),},
+    loadingText: { marginTop: pixelSizeVertical(10), fontSize: fontPixel(16), color: COLORS.gray,},
+    errorText: { fontSize: fontPixel(16), color: 'red', textAlign: 'center',},
+    header: { paddingVertical: pixelSizeVertical(15), alignItems: 'center', backgroundColor: COLORS.white, borderBottomWidth: 1, borderBottomColor: COLORS.borderColor,},
+    headerTitle: { fontSize: fontPixel(20), fontWeight: 'bold',},
+    scrollContainer: { paddingBottom: heightPixel(120),},
+    mainContent: { padding: pixelSizeHorizontal(20), alignItems: 'center',},
+    congratsTitle: { fontSize: fontPixel(22), fontWeight: 'bold', textAlign: 'center', color: COLORS.text, marginBottom: pixelSizeVertical(20),},
+    scoreContainer: { width: '100%', alignItems: 'flex-end', marginBottom: pixelSizeVertical(25),},
+    scoreText: { fontSize: fontPixel(14), color: COLORS.gray, marginBottom: pixelSizeVertical(8),},
+    progressBarBackground: { width: '100%', height: heightPixel(8), backgroundColor: COLORS.borderColor, borderRadius: 4,},
+    progressBar: { height: '100%', backgroundColor: COLORS.primary, borderRadius: 4,},
+    scoreSection: { width: '100%', alignItems: 'center', marginBottom: pixelSizeVertical(25),},
+    summarySection: { width: '100%', marginBottom: pixelSizeVertical(25),},
+    sectionTitle: { fontSize: fontPixel(18), fontWeight: 'bold', marginBottom: pixelSizeVertical(15),},
+    statsRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: pixelSizeVertical(15),},
+    statBox: { backgroundColor: COLORS.white, padding: pixelSizeHorizontal(20), borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: COLORS.borderColor, width: '48%',},
+    fullWidthStatBox: { width: '100%',},
+    statLabel: { fontSize: fontPixel(14), color: COLORS.gray,},
+    statValue: { fontSize: fontPixel(28), fontWeight: 'bold', marginTop: pixelSizeVertical(8),},
+    promoImage: { width: '100%', height: heightPixel(180), borderRadius: 12,},
+    footer: { position: 'absolute', bottom: 0, left: 0, right: 0, paddingHorizontal: pixelSizeHorizontal(20), paddingTop: pixelSizeVertical(15), paddingBottom: pixelSizeVertical(30), borderTopWidth: 1, borderTopColor: COLORS.borderColor, backgroundColor: COLORS.white,}
 });
 
 export default TestResultScreen;

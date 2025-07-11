@@ -134,53 +134,16 @@ const LoginScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-    screenContainer: {
-        flex: 1,
-        backgroundColor: COLORS.white,
-        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-    },
-    container: {
-        flexGrow: 1,
-        padding: 24,
-        justifyContent: 'center',
-    },
-    title: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        color: COLORS.text,
-        textAlign: 'center',
-        marginBottom: 8
-    },
-    subtitle: {
-        fontSize: 16,
-        color: COLORS.gray,
-        textAlign: 'center',
-        marginBottom: 40
-    },
-    form: {
-        width: '100%'
-    },
-    forgotPassword: {
-        width: '100%',
-        alignItems: 'flex-end',
-        marginBottom: 24,
-    },
-    linkText: {
-        color: COLORS.primary,
-        fontWeight: 'bold'
-    },
-    footer: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        paddingTop: 40
-    },
-    footerText: {
-        fontSize: 14,
-        color: COLORS.text
-    },
-    eyeIcon: {
-        padding: 10,
-    }
+    screenContainer: { flex: 1, backgroundColor: COLORS.white, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0, },
+    container: { flexGrow: 1, padding: 24, justifyContent: 'center', },
+    title: { fontSize: 28, fontWeight: 'bold', color: COLORS.text, textAlign: 'center', marginBottom: 8 },
+    subtitle: { fontSize: 16, color: COLORS.gray, textAlign: 'center', marginBottom: 40 },
+    form: { width: '100%' },
+    forgotPassword: { width: '100%', alignItems: 'flex-end', marginBottom: 24, },
+    linkText: { color: COLORS.primary, fontWeight: 'bold' },
+    footer: { flexDirection: 'row', justifyContent: 'center', paddingTop: 40 },
+    footerText: { fontSize: 14, color: COLORS.text },
+    eyeIcon: { padding: 10, }
 });
 
 export default LoginScreen;

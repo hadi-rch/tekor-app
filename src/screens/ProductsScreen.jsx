@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, TextInput, ScrollView, Platform, StatusBar, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, Image, TouchableOpacity, TextInput, ScrollView, Platform, StatusBar, ActivityIndicator } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors';
@@ -9,7 +9,6 @@ import { fontPixel } from '../../helper';
 import StyledText from '../components/StyledText';
 
 const ProductCard = ({ item, navigation }) => {
-    // Fungsi untuk memformat harga
     const formatPrice = (price) => {
         return `Rp ${new Intl.NumberFormat('id-ID').format(price)}`;
     };
@@ -191,160 +190,36 @@ console.log("sortOrder:", sortOrder)
 };
 
 const styles = StyleSheet.create({
-    screenContainer: {
-        flex: 1,
-        backgroundColor: COLORS.white,
-        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-    },
-    loaderContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    header: {
-        paddingVertical: 15,
-        paddingHorizontal: 20,
-        alignItems: 'center',
-        borderBottomWidth: 1,
-        borderBottomColor: COLORS.borderColor,
-    },
-    headerTitle: {
-        fontSize: fontPixel(20),
-        fontWeight: 'bold',
-    },
-    scrollView: {
-        flex: 1,
-    },
-    controlsContainer: {
-        padding: 20,
-    },
-    searchBar: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#f5f5f5',
-        borderRadius: 10,
-        paddingHorizontal: 10,
-        marginBottom: 15,
-    },
-    searchIcon: {
-        marginRight: 10,
-    },
-    searchInput: {
-        flex: 1,
-        paddingVertical: 12,
-        fontSize: fontPixel(16),
-    },
-    filterButtons: {
-        flexDirection: 'row',
-    },
-    filterButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#f5f5f5',
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        borderRadius: 20,
-        marginRight: 10,
-    },
-    section: {
-        marginBottom: 20,
-    },
-    sectionTitle: {
-        fontSize: fontPixel(22),
-        fontWeight: 'bold',
-        marginBottom: 10,
-        paddingHorizontal: 20,
-    },
-    cardContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#F9F9F9',
-        borderRadius: 12,
-        padding: 15,
-        marginHorizontal: 20,
-        marginBottom: 15,
-    },
-    cardTextContainer: {
-        flex: 1,
-        marginRight: 15,
-    },
-    cardTitle: {
-        fontSize: fontPixel(16),
-        fontWeight: 'bold',
-        marginBottom: 5,
-    },
-    cardDescription: {
-        fontSize: fontPixel(14),
-        color: COLORS.gray,
-        marginBottom: 12,
-    },
-    priceText: {
-        fontWeight: 'bold',
-        color: COLORS.text,
-    },
-    cardImage: {
-        width: 100,
-        height: 100,
-        borderRadius: 10,
-        backgroundColor: '#e0e0e0',
-    },
-    activeFilterButton: {
-        backgroundColor: COLORS.primary, 
-    },
-    filterButtonText: {
-        color: COLORS.text,
-        fontWeight: '500',
-    },
-    activeFilterButtonText: {
-        color: COLORS.white,
-    },
-    noResultsText: {
-        textAlign: 'center',
-        marginTop: 40,
-        color: COLORS.gray,
-        fontSize: fontPixel(16),
-    },
-    filterButtons: {
-        flexDirection: 'row',
-        marginBottom: 15, 
-    },
-    filterButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#f5f5f5',
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        borderRadius: 20,
-        marginRight: 10,
-    },
-    priceContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: 10,
-    },
-    priceText: {
-        fontWeight: 'bold',
-        color: COLORS.primary,
-        fontSize: fontPixel(16),
-    },
-    discountPriceText: {
-        fontWeight: 'bold',
-        color: COLORS.primary,
-        fontSize: fontPixel(16),
-        marginRight: 8,
-    },
-    originalPriceText: {
-        color: COLORS.gray, 
-        textDecorationLine: 'line-through',
-        fontSize: fontPixel(14),
-    },
-    controlLabel: {
-        fontSize: fontPixel(14),
-        fontWeight: '600',
-        color: COLORS.gray,
-        marginBottom: 8,
-        marginTop: 10,
-    },
+    screenContainer: { flex: 1, backgroundColor: COLORS.white, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,},
+    loaderContainer: { flex: 1, justifyContent: 'center', alignItems: 'center',},
+    header: { paddingVertical: 15, paddingHorizontal: 20, alignItems: 'center', borderBottomWidth: 1, borderBottomColor: COLORS.borderColor,},
+    headerTitle: { fontSize: fontPixel(20), fontWeight: 'bold',},
+    scrollView: { flex: 1,},
+    controlsContainer: { padding: 20,},
+    searchBar: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f5f5f5', borderRadius: 10, paddingHorizontal: 10, marginBottom: 15,},
+    searchIcon: { marginRight: 10,},
+    searchInput: { flex: 1, paddingVertical: 12, fontSize: fontPixel(16),},
+    filterButtons: { flexDirection: 'row',},
+    filterButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f5f5f5', paddingVertical: 8, paddingHorizontal: 12, borderRadius: 20, marginRight: 10,},
+    section: { marginBottom: 20,},
+    sectionTitle: { fontSize: fontPixel(22), fontWeight: 'bold', marginBottom: 10, paddingHorizontal: 20,},
+    cardContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F9F9F9', borderRadius: 12, padding: 15, marginHorizontal: 20, marginBottom: 15,},
+    cardTextContainer: { flex: 1, marginRight: 15,},
+    cardTitle: { fontSize: fontPixel(16), fontWeight: 'bold', marginBottom: 5,},
+    cardDescription: { fontSize: fontPixel(14), color: COLORS.gray, marginBottom: 12,},
+    priceText: { fontWeight: 'bold', color: COLORS.text,},
+    cardImage: { width: 100, height: 100, borderRadius: 10, backgroundColor: '#e0e0e0',},
+    activeFilterButton: { backgroundColor: COLORS.primary, },
+    filterButtonText: { color: COLORS.text, fontWeight: '500',},
+    activeFilterButtonText: { color: COLORS.white,},
+    noResultsText: { textAlign: 'center', marginTop: 40, color: COLORS.gray, fontSize: fontPixel(16),},
+    filterButtons: { flexDirection: 'row', marginBottom: 15, },
+    filterButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f5f5f5', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 20, marginRight: 10,},
+    priceContainer: { flexDirection: 'row', alignItems: 'center', marginTop: 10,},
+    priceText: { fontWeight: 'bold', color: COLORS.primary, fontSize: fontPixel(16),},
+    discountPriceText: { fontWeight: 'bold', color: COLORS.primary, fontSize: fontPixel(16), marginRight: 8,},
+    originalPriceText: { color: COLORS.gray,  textDecorationLine: 'line-through', fontSize: fontPixel(14),},
+    controlLabel: { fontSize: fontPixel(14), fontWeight: '600', color: COLORS.gray, marginBottom: 8, marginTop: 10,},
 });
 
 export default ProductsScreen;

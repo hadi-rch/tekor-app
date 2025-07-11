@@ -67,7 +67,7 @@ const GameCategoryScreen = ({ navigation }) => {
     }, []); // Array dependensi kosong agar hanya berjalan sekali
 
     const handleCategoryPress = (category) => {
-        console.log("Selected Category:", category.backendKey);
+        // console.log("Selected Category:", category.backendKey);
         // Kirim key asli dari backend ke layar game
         navigation.navigate('MemoryCardGame', { category: category.backendKey });
     };

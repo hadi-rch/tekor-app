@@ -1,22 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    SafeAreaView,
-    Image,
-    TouchableOpacity,
-    Alert,
-    Platform,
-    StatusBar,
-    Modal,
-    Pressable,
-    ActivityIndicator,
-} from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Platform, StatusBar, Modal, Pressable, ActivityIndicator} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../store/authSlice';
-
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 import { fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical } from '../../helper';
@@ -49,7 +35,7 @@ const ProfileScreen = ({ navigation }) => {
     // Ambil data user dan status autentikasi dari state global
     const { user, isAuthenticated } = useSelector((state) => state.auth);
 
-    // PENAMBAHAN 3: useEffect untuk menangani navigasi setelah logout
+    //seEffect untuk menangani navigasi setelah logout
     useEffect(() => {
         // Jika state isAuthenticated berubah menjadi false (setelah logout),
         // maka reset navigasi ke layar Login.
@@ -166,133 +152,29 @@ const ProfileScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-    screenContainer: {
-        flex: 1,
-        // backgroundColor: COLORS.white,
-        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-    },
-    header: {
-        paddingVertical: 15,
-        alignItems: 'center',
-        borderBottomWidth: 1,
-        borderBottomColor: COLORS.borderColor,
-    },
-    headerTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-    },
-    container: {
-        flex: 1,
-        paddingHorizontal: 20,
-    },
-    profileInfoContainer: {
-        alignItems: 'center',
-        paddingTop: 30,
-    },
-    avatar: {
-        width: 100,
-        height: 100,
-        borderRadius: 50,
-        marginBottom: 15,
-    },
-    userName: {
-        fontSize: 22,
-        fontWeight: 'bold',
-        color: COLORS.text,
-    },
-    userEmail: {
-        fontSize: 16,
-        color: COLORS.gray,
-        marginTop: 5,
-    },
-    settingsContainer: {
-        marginTop: 20,
-    },
-    sectionTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: COLORS.text,
-        marginBottom: 10,
-    },
-    menuItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingVertical: 15,
-    },
-    iconContainer: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: '#f5f5f5',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: 15,
-    },
-    menuLabel: {
-        flex: 1,
-        fontSize: 16,
-        color: COLORS.text,
-    }, modalOverlay: {
-        flex: 1,
-        justifyContent: 'flex-end',
-        backgroundColor: 'rgba(0,0,0,0.5)',
-    },
-    logoutModalContent: {
-        backgroundColor: 'white',
-        borderTopLeftRadius: pixelSizeHorizontal(20),
-        borderTopRightRadius: pixelSizeHorizontal(20),
-        padding: pixelSizeHorizontal(20),
-        alignItems: 'center',
-    },
-    dragHandle: {
-        width: pixelSizeHorizontal(40),
-        height: heightPixel(5),
-        backgroundColor: COLORS.borderColor,
-        borderRadius: heightPixel(3),
-        marginBottom: pixelSizeVertical(15),
-    },
-    modalTitle: {
-        fontSize: fontPixel(20),
-        fontWeight: 'bold',
-        color: COLORS.text,
-        marginBottom: pixelSizeVertical(8),
-    },
-    modalSubtitle: {
-        fontSize: fontPixel(14),
-        color: COLORS.gray,
-        textAlign: 'center',
-        marginBottom: pixelSizeVertical(25),
-        lineHeight: fontPixel(20),
-    },
-    modalButtonContainer: {
-        flexDirection: 'row',
-        width: '100%',
-        justifyContent: 'space-between',
-    },
-    modalButton: {
-        flex: 1,
-        paddingVertical: pixelSizeVertical(15),
-        borderRadius: pixelSizeHorizontal(12),
-        alignItems: 'center',
-    },
-    cancelButton: {
-        backgroundColor: COLORS.secondary,
-        marginRight: pixelSizeHorizontal(10),
-    },
-    logoutButton: {
-        backgroundColor: COLORS.primary,
-        marginLeft: pixelSizeHorizontal(10),
-    },
-    cancelButtonText: {
-        color: COLORS.primary,
-        fontWeight: 'bold',
-        fontSize: fontPixel(16),
-    },
-    logoutButtonText: {
-        color: COLORS.white,
-        fontWeight: 'bold',
-        fontSize: fontPixel(16),
-    },
+    screenContainer: { flex: 1, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,},
+    header: { paddingVertical: 15, alignItems: 'center', borderBottomWidth: 1, borderBottomColor: COLORS.borderColor,},
+    headerTitle: { fontSize: 20, fontWeight: 'bold',},
+    container: { flex: 1, paddingHorizontal: 20,},
+    profileInfoContainer: { alignItems: 'center', paddingTop: 30,},
+    avatar: { width: 100, height: 100, borderRadius: 50, marginBottom: 15,},
+    userName: { fontSize: 22, fontWeight: 'bold', color: COLORS.text,},
+    userEmail: { fontSize: 16, color: COLORS.gray, marginTop: 5,},
+    settingsContainer: { marginTop: 20,},
+    sectionTitle: { fontSize: 18, fontWeight: 'bold', color: COLORS.text, marginBottom: 10,},
+    menuItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 15,},
+    iconContainer: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#f5f5f5', justifyContent: 'center', alignItems: 'center', marginRight: 15,},
+    menuLabel: { flex: 1, fontSize: 16, color: COLORS.text,}, modalOverlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)',},
+    logoutModalContent: { backgroundColor: 'white', borderTopLeftRadius: pixelSizeHorizontal(20), borderTopRightRadius: pixelSizeHorizontal(20), padding: pixelSizeHorizontal(20), alignItems: 'center',},
+    dragHandle: { width: pixelSizeHorizontal(40), height: heightPixel(5), backgroundColor: COLORS.borderColor, borderRadius: heightPixel(3), marginBottom: pixelSizeVertical(15),},
+    modalTitle: { fontSize: fontPixel(20), fontWeight: 'bold', color: COLORS.text, marginBottom: pixelSizeVertical(8),},
+    modalSubtitle: { fontSize: fontPixel(14), color: COLORS.gray, textAlign: 'center', marginBottom: pixelSizeVertical(25), lineHeight: fontPixel(20),},
+    modalButtonContainer: { flexDirection: 'row', width: '100%', justifyContent: 'space-between',},
+    modalButton: { flex: 1, paddingVertical: pixelSizeVertical(15), borderRadius: pixelSizeHorizontal(12), alignItems: 'center',},
+    cancelButton: { backgroundColor: COLORS.secondary, marginRight: pixelSizeHorizontal(10),},
+    logoutButton: { backgroundColor: COLORS.primary, marginLeft: pixelSizeHorizontal(10),},
+    cancelButtonText: { color: COLORS.primary, fontWeight: 'bold', fontSize: fontPixel(16),},
+    logoutButtonText: { color: COLORS.white, fontWeight: 'bold', fontSize: fontPixel(16),},
 });
 
 export default ProfileScreen;
