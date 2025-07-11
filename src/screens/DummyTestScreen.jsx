@@ -284,7 +284,7 @@ const DummyTestScreen = ({ navigation }) => {
                         <View style={styles.dragHandle} />
                         <Text style={styles.modalTitle}>Yakin Ingin Keluar?</Text>
                         <Text style={styles.modalSubtitle}>
-                            Progres tes dummy ini tidak akan disimpan.
+                            Progres tes ini tidak akan disimpan.
                         </Text>
                         <View style={styles.modalButtonContainer}>
                             <TouchableOpacity

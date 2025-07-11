@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
+import { fontPixel } from '../../helper';
 
 const EvaluationDetailScreen = ({ route }) => {
     const navigation = useNavigation();
@@ -22,6 +23,8 @@ const EvaluationDetailScreen = ({ route }) => {
                     <Ionicons name="arrow-back" size={24} color={COLORS.white} />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Evaluasi Try Out</Text>
+                <View style={{ width: fontPixel(24) }} />
+
             </View>
             <ScrollView style={styles.content}>
                 <Text style={styles.packageId}>Package ID: {packageId}</Text>
@@ -41,6 +44,7 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'space-between',
         backgroundColor: COLORS.primary,
         paddingHorizontal: 15,
         paddingVertical: 15,
@@ -51,6 +55,9 @@ const styles = StyleSheet.create({
     },
     headerTitle: {
         color: COLORS.white,
+        // alignItems: 'center',
+        // textAlign: 'center',
+        // justifyContent: 'left',
         fontSize: 20,
         fontWeight: 'bold',
     },

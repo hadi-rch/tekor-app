@@ -1,15 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-    Platform,
-    StatusBar,
-    FlatList,
-    Animated,
-    ActivityIndicator,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar, FlatList, Animated, ActivityIndicator} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
@@ -52,7 +42,6 @@ const MemoryCard = ({ item, isFlipped, onPress }) => {
 
 // --- Komponen Utama Game ---
 const MemoryCardGameScreen = ({ navigation, route }) => {
-    // 3. Ambil kategori dari parameter navigasi
     const { category } = route.params;
 
     const [cards, setCards] = useState([]);
@@ -60,7 +49,6 @@ const MemoryCardGameScreen = ({ navigation, route }) => {
     const [flippedCardIds, setFlippedCardIds] = useState(new Set());
     const [isLoading, setIsLoading] = useState(true);
 
-    // 4. useEffect untuk mengambil data dari backend
     useEffect(() => {
         const fetchVocabularies = async () => {
             if (!category) {
@@ -83,7 +71,7 @@ const MemoryCardGameScreen = ({ navigation, route }) => {
                 setOriginalCards(formattedData);
                 setCards([...formattedData].sort(() => Math.random() - 0.5));
             } catch (error) {
-                console.error("Gagal mengambil kosakata:", error);
+                // console.error("Gagal mengambil kosakata:", error);
                 Alert.alert("Error", "Tidak dapat memuat data permainan untuk kategori ini.");
             } finally {
                 setIsLoading(false);

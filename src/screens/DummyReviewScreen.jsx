@@ -147,7 +147,7 @@ const DummyReviewScreen = ({ navigation, route }) => {
                 >
                     <Ionicons name="close" size={fontPixel(28)} color={COLORS.text} />
                 </TouchableOpacity>
-                <StyledText style={styles.headerTitle}>Pembahasan Tes Dummy</StyledText>
+                <StyledText style={styles.headerTitle}>Pembahasan Tes</StyledText>
                 <View style={{ width: fontPixel(28) }} />
             </View>
 

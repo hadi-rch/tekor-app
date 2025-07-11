@@ -1,19 +1,6 @@
 import React, { useEffect, useState } from 'react'
 
-import {
-    View,
-    Text,
-    StyleSheet,
-    FlatList,
-    Image,
-    TouchableOpacity,
-    StatusBar,
-    Platform,
-    Modal,
-    ActivityIndicator,
-    Pressable,
-    Alert,
-} from 'react-native'
+import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, StatusBar, Platform, Modal, ActivityIndicator, Pressable, Alert } from 'react-native'
 import { COLORS } from '../constants/colors'
 import { Ionicons } from '@expo/vector-icons'
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar'
@@ -21,27 +8,25 @@ import { fontPixel } from '../../helper'
 import { LinearGradient } from 'expo-linear-gradient'
 import api from '../../api/axiosConfig';
 import StyledText from '../components/StyledText'
-import { useFocusEffect } from '@react-navigation/native'
 
 // --- Komponen untuk setiap item dalam daftar Test ---
 const LessonItem = ({ item, onPress }) => {
-    const imageSource = item.image
-        ? { uri: item.image }
-        : require('../../assets/images/no-image.jpg');
-    return (
-        <TouchableOpacity style={styles.itemContainer} onPress={onPress}>
-            <View style={styles.itemTextContainer}>
-                <StyledText style={styles.itemTitle}>{item.title}</StyledText>
-                <StyledText style={styles.itemDescription}>{item.description}</StyledText>
-                {item.status === 'In Progress' && (
-                    <View style={styles.inProgressBadge}>
-                        <StyledText style={styles.inProgressText}>In Progress</StyledText>
-                    </View>
-                )}
-            </View>
-            <Image source={imageSource} style={styles.itemImage} />
-        </TouchableOpacity>
-    )
+  const imageSource = item.image ? { uri: item.image } : require('../../assets/images/no-image.jpg');
+
+  return (
+    <TouchableOpacity style={styles.itemContainer} onPress={onPress}>
+      <View style={styles.itemTextContainer}>
+        <StyledText style={styles.itemTitle}>{item.title}</StyledText>
+        <StyledText style={styles.itemDescription}>{item.description}</StyledText>
+        {item.status === 'In Progress' && (
+          <View style={styles.inProgressBadge}>
+            <StyledText style={styles.inProgressText}>In Progress</StyledText>
+          </View>
+        )}
+      </View>
+      <Image source={imageSource} style={styles.itemImage} />
+    </TouchableOpacity>
+  )
 };
 
 // --- Komponen untuk setiap item dalam daftar History ---
@@ -62,7 +47,7 @@ const HistoryItem = ({ item, navigation }) => (
     </View>
     <View style={styles.scoreRow}>
       <StyledText style={styles.scoreLabel}>Score</StyledText>
-      <StyledText style={styles.scoreValue}>{item.score}</StyledText>
+      <StyledText style={styles.scoreValue}>{item.score} / 100</StyledText>
     </View>
     <View style={styles.buttonContainer}>
       {item.aiEvaluationResult && (
@@ -95,266 +80,245 @@ const HistoryItem = ({ item, navigation }) => (
 );
 
 const WarningItem = ({ icon, text }) => (
-    <View style={styles.warningItem}>
-        <StyledText style={styles.warningIcon}>{icon}</StyledText>
-        <StyledText style={styles.warningText}>{text}</StyledText>
-    </View>
+  <View style={styles.warningItem}>
+    <StyledText style={styles.warningIcon}>{icon}</StyledText>
+    <StyledText style={styles.warningText}>{text}</StyledText>
+  </View>
 );
 
 // --- Komponen Utama LessonsScreen ---
 const LessonsScreen = ({ navigation }) => {
-    const [activeTab, setActiveTab] = useState('Test') //Test atau History
-    const [isModalVisible, setIsModalVisible] = useState(false);
-    const [selectedLesson, setSelectedLesson] = useState(null);
-    const [myTests, setMyTests] = useState([]);
-    const [inProgressTests, setInProgressTests] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [completedTests, setCompletedTests] = useState([]);
-    const [isHistoryLoading, setIsHistoryLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('Test') //Test atau History
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedLesson, setSelectedLesson] = useState(null);
+  const [myTests, setMyTests] = useState([]);
+  const [inProgressTests, setInProgressTests] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [completedTests, setCompletedTests] = useState([]);
+  const [isHistoryLoading, setIsHistoryLoading] = useState(true);
 
-    // Handle navigation parameters when screen is focused
-    useEffect(() => {
-        const unsubscribe = navigation.addListener('focus', () => {
-            const state = navigation.getState();
-            const currentRoute = state.routes[state.index];
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      const state = navigation.getState();
+      const currentRoute = state.routes[state.index];
 
-            // Check if we're on the My Try out tab and if there's a setActiveTab parameter
-            if (currentRoute.name === 'My Try out' && currentRoute.params?.setActiveTab) {
-                setActiveTab(currentRoute.params.setActiveTab);
-                // Clear the parameter after using it
-                navigation.setParams({ setActiveTab: undefined });
-            }
-        });
+      if (currentRoute.name === 'My Try out' && currentRoute.params?.setActiveTab) {
+        setActiveTab(currentRoute.params.setActiveTab);
+        navigation.setParams({ setActiveTab: undefined });
+      }
+    });
 
-        return unsubscribe;
-    }, [navigation]);
+    return unsubscribe;
+  }, [navigation]);
 
-    useEffect(() => {
-        const fetchMyTests = async () => {
-            setIsLoading(true);
-            try {
-                const response = await api.get('/api/v1/test-attempts/my-tests');
-                const readyToStartTests = response.data.data.readyToStart;
-                const inProgressTestsData = response.data.data.inProgress;
+  useEffect(() => {
+    const fetchMyTests = async () => {
+      setIsLoading(true);
+      try {
+        const response = await api.get('/api/v1/test-attempts/my-tests');
+        const readyToStartTests = response.data.data.readyToStart;
+        const inProgressTestsData = response.data.data.inProgress;
 
-                const formattedReadyToStart = readyToStartTests.map(item => ({
-                    id: item.transactionId,
-                    packageId: item.testPackage.id,
-                    title: item.testPackage.name,
-                    description: item.testPackage.description,
-                    image: item.testPackage.imageUrl,
-                    transactionId: item.transactionId,
-                    status: 'Ready to Start'
-                }));
+        const formattedReadyToStart = readyToStartTests.map(item => ({
+          id: item.transactionId,
+          packageId: item.testPackage.id,
+          title: item.testPackage.name,
+          description: item.testPackage.description,
+          image: item.testPackage.imageUrl,
+          transactionId: item.transactionId,
+          status: 'Ready to Start'
+        }));
 
-                const formattedInProgress = inProgressTestsData.map(item => ({
-                    id: item.attemptId,
-                    packageId: item.testPackage.id,
-                    title: item.testPackage.name,
-                    description: item.testPackage.description,
-                    image: item.testPackage.imageUrl,
-                    attemptId: item.attemptId,
-                    status: 'In Progress'
-                }));
+        const formattedInProgress = inProgressTestsData.map(item => ({
+          id: item.attemptId,
+          packageId: item.testPackage.id,
+          title: item.testPackage.name,
+          description: item.testPackage.description,
+          image: item.testPackage.imageUrl,
+          attemptId: item.attemptId,
+          status: 'In Progress'
+        }));
 
-                setMyTests(formattedReadyToStart);
-                setInProgressTests(formattedInProgress);
-            } catch (error) {
-                console.error("Gagal mengambil data tes:", error.response?.data || error.message);
-                Alert.alert("Error", "Tidak dapat memuat daftar tes Anda.");
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        const fetchCompletedTests = async () => {
-            setIsHistoryLoading(true);
-            try {
-                // const response = await getCompletedTests();
-                const response = await api.get('/api/v1/test-attempts/my-tests/completed');
-                const completedData = response.data.data || [];
-                setCompletedTests(completedData);
-            } catch (error) {
-                Alert.alert("Error", "Tidak dapat memuat riwayat tes Anda.");
-            } finally {
-                setIsHistoryLoading(false);
-            }
-        };
-
-        if (activeTab === 'Test') {
-            fetchMyTests();
-        } else if (activeTab === 'History') {
-            fetchCompletedTests();
-        }
-    }, [activeTab]);
-
-    const handleLessonPress = (item) => {
-        setSelectedLesson(item);
-        setIsModalVisible(true);
+        setMyTests(formattedReadyToStart);
+        setInProgressTests(formattedInProgress);
+      } catch (error) {
+        console.error("Gagal mengambil data tes:", error.response?.data || error.message);
+        Alert.alert("Error", "Tidak dapat memuat daftar tes Anda.");
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    const handleStartTest = async () => {
-        console.log("first")
-        if (!selectedLesson) return;
-
-        setIsModalVisible(false);
-        // try {
-        //     // Memulai tes baru, baik itu yang pertama kali atau memulai ulang
-        //     console.log("selectedLesson.id : ", selectedLesson)
-        //     const response = await api.post(`/api/v1/test-attempts/start/${selectedLesson.packageId}`); // Gunakan packageId
-        //     console.log("bingung",response)
-        //     const testData = response.data.data;
-        //     const a = testData.id;
-        //     console.log("bingung2:", testData.id)
-        //     navigation.navigate('Test', { a });
-        // } catch (error) {
-        //     console.error("Gagal memulai tes:", error.response?.data || error.message);
-        //     Alert.alert("Error", "Tidak dapat memulai tes. Silakan coba lagi.");
-        // }
-        navigation.navigate('Test', { packageId: selectedLesson.packageId }); // Gunakan packageId
+    const fetchCompletedTests = async () => {
+      setIsHistoryLoading(true);
+      try {
+        const response = await api.get('/api/v1/test-attempts/my-tests/completed');
+        const completedData = response.data.data || [];
+        setCompletedTests(completedData);
+      } catch (error) {
+        Alert.alert("Error", "Tidak dapat memuat riwayat tes Anda.");
+      } finally {
+        setIsHistoryLoading(false);
+      }
     };
 
-    const handleContinueTest = () => {
-        console.log("hadie")
-        if (!selectedLesson || !selectedLesson.attemptId) return;
-        console.log("hadie2")
-
-        setIsModalVisible(false);
-        navigation.navigate('Test', { attemptId: selectedLesson.attemptId });
-    };
-
-    const renderContent = () => {
-        if (activeTab === 'Test') {
-            if (isLoading) {
-                return <ActivityIndicator size="large" color={COLORS.primary} style={{ marginTop: 20 }} />;
-            }
-
-            const allTests = [...inProgressTests, ...myTests];
-            // console.log("allTests : ", allTests)
-
-            return (
-                <FlatList
-                    data={allTests}
-                    renderItem={({ item }) => <LessonItem item={item} onPress={() => handleLessonPress(item)} />}
-                    keyExtractor={(item) => item.id} // Sekarang menggunakan transactionId/attemptId yang unik
-                    contentContainerStyle={styles.listContainer}
-                    ListEmptyComponent={<View style={styles.emptyContainer}><Text>Anda belum memiliki paket tes.</Text></View>}
-                />
-            )
-        } else if (activeTab === 'History') {
-            if (isHistoryLoading) {
-                return <ActivityIndicator size="large" color={COLORS.primary} style={{ marginTop: 20 }} />;
-            }
-            return (
-                <FlatList
-                    data={completedTests}
-                    renderItem={({ item }) => <HistoryItem item={item} navigation={navigation} />}
-                    keyExtractor={(item) => item.transactionId || item.id}
-                    contentContainerStyle={styles.listContainer}
-                    ListEmptyComponent={<View style={styles.emptyContainer}><Text>Anda belum memiliki riwayat tes.</Text></View>}
-                />
-            )
-        }
+    if (activeTab === 'Test') {
+      fetchMyTests();
+    } else if (activeTab === 'History') {
+      fetchCompletedTests();
     }
+  }, [activeTab]);
 
-    return (
-        <LinearGradient
-            colors={['#FDEAEB', '#E6ECF5']}
-            style={styles.screenContainer}
+  const handleLessonPress = (item) => {
+    setSelectedLesson(item);
+    setIsModalVisible(true);
+  };
+
+  const handleStartTest = async () => {
+    if (!selectedLesson) return;
+
+    setIsModalVisible(false);
+    navigation.navigate('Test', { packageId: selectedLesson.packageId });
+  };
+
+  const handleContinueTest = () => {
+    console.log("hadie")
+    if (!selectedLesson || !selectedLesson.attemptId) return;
+    console.log("hadie2")
+
+    setIsModalVisible(false);
+    navigation.navigate('Test', { attemptId: selectedLesson.attemptId });
+  };
+
+  const renderContent = () => {
+    if (activeTab === 'Test') {
+      if (isLoading) {
+        return <ActivityIndicator size="large" color={COLORS.primary} style={{ marginTop: 20 }} />;
+      }
+
+      const allTests = [...inProgressTests, ...myTests];
+
+      return (
+        <FlatList
+          data={allTests}
+          renderItem={({ item }) => <LessonItem item={item} onPress={() => handleLessonPress(item)} />}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.listContainer}
+          ListEmptyComponent={<View style={styles.emptyContainer}><Text>Anda belum memiliki paket tes.</Text></View>}
+        />
+      )
+    } else if (activeTab === 'History') {
+      if (isHistoryLoading) {
+        return <ActivityIndicator size="large" color={COLORS.primary} style={{ marginTop: 20 }} />;
+      }
+      return (
+        <FlatList
+          data={completedTests}
+          renderItem={({ item }) => <HistoryItem item={item} navigation={navigation} />}
+          keyExtractor={(item) => item.transactionId || item.id}
+          contentContainerStyle={styles.listContainer}
+          ListEmptyComponent={<View style={styles.emptyContainer}><Text>Anda belum memiliki riwayat tes.</Text></View>}
+        />
+      )
+    }
+  }
+
+  return (
+    <LinearGradient
+      colors={['#FDEAEB', '#E6ECF5']}
+      style={styles.screenContainer}
+    >
+      <FocusAwareStatusBar
+        barStyle="dark-content"
+        backgroundColor="transparent"
+        translucent={true}
+      />
+      {/* Header */}
+      <View style={styles.header}>
+        <StyledText style={styles.headerTitle}>Materi Belajar</StyledText>
+      </View>
+
+      {/* Tab Switcher */}
+      <View style={styles.tabContainer}>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'Test' && styles.activeTab]}
+          onPress={() => setActiveTab('Test')}
         >
-            <FocusAwareStatusBar
-                barStyle="dark-content"
-                backgroundColor="transparent"
-                translucent={true}
-            />
-            {/* Header */}
-            <View style={styles.header}>
-                <StyledText style={styles.headerTitle}>Materi Belajar</StyledText>
-            </View>
+          <StyledText
+            style={[
+              styles.tabText,
+              activeTab === 'Test' && styles.activeTabText,
+            ]}
+          >
+            Test
+          </StyledText>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'History' && styles.activeTab]}
+          onPress={() => setActiveTab('History')}
+        >
+          <StyledText
+            style={[
+              styles.tabText,
+              activeTab === 'History' && styles.activeTabText,
+            ]}
+          >
+            History Jawaban
+          </StyledText>
+        </TouchableOpacity>
+      </View>
 
-            {/* Tab Switcher */}
-            <View style={styles.tabContainer}>
-                <TouchableOpacity
-                    style={[styles.tab, activeTab === 'Test' && styles.activeTab]}
-                    onPress={() => setActiveTab('Test')}
-                >
-                    <StyledText
-                        style={[
-                            styles.tabText,
-                            activeTab === 'Test' && styles.activeTabText,
-                        ]}
-                    >
-                        Test
-                    </StyledText>
+      {/* Konten dinamis berdasarkan tab yang aktif */}
+      {renderContent()}
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isModalVisible}
+        onRequestClose={() => setIsModalVisible(false)}
+      >
+        <Pressable style={styles.modalOverlay} onPress={() => setIsModalVisible(false)}>
+          <Pressable style={styles.confirmModalContent}>
+            <View style={styles.dragHandle} />
+            <StyledText style={styles.modalTitle}>
+              {selectedLesson?.status === 'In Progress' ? 'Lanjutkan Tes?' : 'Anda Yakin Ingin Mengerjakan?'}
+            </StyledText>
+
+            {selectedLesson?.status !== 'In Progress' && (
+              <View style={styles.warningsContainer}>
+                <WarningItem icon="⚠️" text="Ujian ini hanya bisa dikerjakan 1 (satu) kali. Progres tidak dapat diulang atau dibatalkan setelah dimulai." />
+                <WarningItem icon="⏱️" text="Waktu pengerjaan adalah 50 menit dan timer tidak bisa dijeda (pause)." />
+                <WarningItem icon="📶" text="Pastikan koneksi internet Anda stabil." />
+              </View>
+            )}
+
+            {selectedLesson?.status === 'In Progress' ? (
+              <View style={styles.modalButtonContainer}>
+                <TouchableOpacity style={[styles.modalButton, styles.startButton]} onPress={handleContinueTest}>
+                  <StyledText style={styles.startButtonText}>Lanjutkan</StyledText>
                 </TouchableOpacity>
-                <TouchableOpacity
-                    style={[styles.tab, activeTab === 'History' && styles.activeTab]}
-                    onPress={() => setActiveTab('History')}
-                >
-                    <StyledText
-                        style={[
-                            styles.tabText,
-                            activeTab === 'History' && styles.activeTabText,
-                        ]}
-                    >
-                        History Jawaban
-                    </StyledText>
+              </View>
+            ) : (
+              <View style={styles.modalButtonContainer}>
+                <TouchableOpacity style={[styles.modalButton, styles.cancelButton]} onPress={() => setIsModalVisible(false)}>
+                  <StyledText style={styles.cancelButtonText}>Nanti saja</StyledText>
                 </TouchableOpacity>
-            </View>
+                <TouchableOpacity style={[styles.modalButton, styles.startButton]} onPress={handleStartTest}>
+                  <StyledText style={styles.startButtonText}>Mulai Sekarang</StyledText>
+                </TouchableOpacity>
+              </View>
+            )}
+          </Pressable>
+        </Pressable>
+      </Modal>
 
-            {/* Konten dinamis berdasarkan tab yang aktif */}
-            {renderContent()}
-
-            {/* Modal Konfirmasi Mengerjakan */}
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={isModalVisible}
-                onRequestClose={() => setIsModalVisible(false)}
-            >
-                <Pressable style={styles.modalOverlay} onPress={() => setIsModalVisible(false)}>
-                    <Pressable style={styles.confirmModalContent}>
-                        <View style={styles.dragHandle} />
-                        <StyledText style={styles.modalTitle}>
-                            {selectedLesson?.status === 'In Progress' ? 'Lanjutkan Tes?' : 'Anda Yakin Ingin Mengerjakan?'}
-                        </StyledText>
-
-                        {selectedLesson?.status !== 'In Progress' && (
-                            <View style={styles.warningsContainer}>
-                                <WarningItem icon="⚠️" text="Ujian ini hanya bisa dikerjakan 1 (satu) kali. Progres tidak dapat diulang atau dibatalkan setelah dimulai." />
-                                <WarningItem icon="⏱️" text="Waktu pengerjaan adalah 50 menit dan timer tidak bisa dijeda (pause)." />
-                                <WarningItem icon="📶" text="Pastikan koneksi internet Anda stabil." />
-                            </View>
-                        )}
-
-                        {selectedLesson?.status === 'In Progress' ? (
-                            <View style={styles.modalButtonContainer}>
-                                <TouchableOpacity style={[styles.modalButton, styles.startButton]} onPress={handleContinueTest}>
-                                    <StyledText style={styles.startButtonText}>Lanjutkan</StyledText>
-                                </TouchableOpacity>
-                            </View>
-                        ) : (
-                            <View style={styles.modalButtonContainer}>
-                                <TouchableOpacity style={[styles.modalButton, styles.cancelButton]} onPress={() => setIsModalVisible(false)}>
-                                    <StyledText style={styles.cancelButtonText}>Nanti saja</StyledText>
-                                </TouchableOpacity>
-                                <TouchableOpacity style={[styles.modalButton, styles.startButton]} onPress={handleStartTest}>
-                                    <StyledText style={styles.startButtonText}>Mulai Sekarang</StyledText>
-                                </TouchableOpacity>
-                            </View>
-                        )}
-                    </Pressable>
-                </Pressable>
-            </Modal>
-
-        </LinearGradient>
-    )
+    </LinearGradient>
+  )
 }
 
 const styles = StyleSheet.create({
   screenContainer: {
     flex: 1,
-    // backgroundColor: COLORS.white,
     paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
   },
   header: {
@@ -396,7 +360,6 @@ const styles = StyleSheet.create({
   listContainer: {
     paddingVertical: 10,
   },
-  // Styles untuk Test
   itemContainer: {
     backgroundColor: COLORS.white,
     marginHorizontal: 15,
@@ -447,7 +410,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "bold",
   },
-  // Styles untuk History
   historyItemContainer: {
     backgroundColor: COLORS.white,
     marginHorizontal: 15,
@@ -524,7 +486,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginRight: 5,
   },
-  //style modal
   modalOverlay: {
     flex: 1,
     justifyContent: "flex-end",
