@@ -1,16 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    Image,
-    TouchableOpacity,
-    TextInput,
-    ScrollView,
-    Platform,
-    StatusBar,
-    ActivityIndicator,
-} from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, TextInput, ScrollView, Platform, StatusBar, ActivityIndicator } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors';
@@ -25,9 +14,8 @@ const ProductCard = ({ item, navigation }) => {
         return `Rp ${new Intl.NumberFormat('id-ID').format(price)}`;
     };
 
-    const imageSource = item.imageUrl
-        ? { uri: item.imageUrl }
-        : require('../../assets/images/no-image.jpg');
+    const hasDiscount = item.discountPrice != null;
+    const imageSource = item.imageUrl ? { uri: item.imageUrl } : require('../../assets/images/no-image.jpg');
 
     return (
         <TouchableOpacity
@@ -39,8 +27,21 @@ const ProductCard = ({ item, navigation }) => {
             <View style={styles.cardTextContainer}>
                 <StyledText style={styles.cardTitle}>{item.name}</StyledText>
                 <StyledText style={styles.cardDescription}>{item.description}</StyledText>
-                <View style={styles.priceTag}>
-                    <StyledText style={styles.priceText}>{formatPrice(item.price)}</StyledText>
+                <View style={styles.priceContainer}>
+                    {hasDiscount ? (
+                        <>
+                            <StyledText style={styles.discountPriceText}>
+                                {formatPrice(item.discountPrice)}
+                            </StyledText>
+                            <StyledText style={styles.originalPriceText}>
+                                {formatPrice(item.price)}
+                            </StyledText>
+                        </>
+                    ) : (
+                        <StyledText style={styles.priceText}>
+                            {formatPrice(item.price)}
+                        </StyledText>
+                    )}
                 </View>
             </View>
             <Image source={imageSource} style={styles.cardImage} />
@@ -52,6 +53,10 @@ const ProductCard = ({ item, navigation }) => {
 // --- Komponen Utama ProductsScreen ---
 const ProductsScreen = ({ navigation }) => {
     const [products, setProducts] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [activeFilter, setActiveFilter] = useState('all');
+    const [filteredProducts, setFilteredProducts] = useState([]);
+    const [sortOrder, setSortOrder] = useState('low_to_high');
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -61,6 +66,7 @@ const ProductsScreen = ({ navigation }) => {
                 const allItems = response.data.data;
 
                 setProducts(allItems);
+                setFilteredProducts(allItems);
 
             } catch (error) {
                 console.error("Gagal mengambil data Try out:", error);
@@ -73,6 +79,32 @@ const ProductsScreen = ({ navigation }) => {
         fetchPackages();
     }, []); // Dependensi kosong agar hanya berjalan sekali saat mount
 
+    const getEffectivePrice = (item) => {
+        return item.discountPrice != null ? item.discountPrice : item.price;
+    };
+
+    useEffect(() => {
+        let result = [...products];
+
+        if (searchQuery) {
+            result = result.filter(product =>
+                product.name.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+        }
+
+        if (activeFilter !== 'all') {
+            result = result.filter(product => product.type === activeFilter);
+        }
+
+        if (sortOrder === 'low_to_high') {
+            result.sort((a, b) => getEffectivePrice(a) - getEffectivePrice(b));
+        } else if (sortOrder === 'high_to_low') {
+            result.sort((a, b) => getEffectivePrice(b) - getEffectivePrice(a));
+        }
+
+        setFilteredProducts(result);
+    }, [products, searchQuery, activeFilter, sortOrder]);
+console.log("sortOrder:", sortOrder)
     return (
         <LinearGradient
             colors={['#E6ECF5', '#FDEAEB']}
@@ -84,7 +116,7 @@ const ProductsScreen = ({ navigation }) => {
                 translucent={true}
             />
             <View style={styles.header}>
-                <StyledText style={styles.headerTitle}>Products</StyledText>
+                <StyledText style={styles.headerTitle}>Try Out</StyledText>
             </View>
 
             {isLoading ? (
@@ -97,26 +129,60 @@ const ProductsScreen = ({ navigation }) => {
                         <View style={styles.searchBar}>
                             <Ionicons name="search" size={20} color={COLORS.gray} style={styles.searchIcon} />
                             <TextInput
-                                placeholder="Search products"
+                                placeholder="Search"
                                 placeholderTextColor={COLORS.gray}
                                 style={styles.searchInput}
+                                value={searchQuery}
+                                onChangeText={setSearchQuery}
                             />
                         </View>
                         <View style={styles.filterButtons}>
-                            <TouchableOpacity style={styles.filterButton}>
-                                <Text>Sort</Text>
-                                <Ionicons name="chevron-down" size={16} color={COLORS.gray} />
+                            <TouchableOpacity
+                                style={[styles.filterButton, activeFilter === 'all' && styles.activeFilterButton]}
+                                onPress={() => setActiveFilter('all')}
+                            >
+                                <StyledText style={[styles.filterButtonText, activeFilter === 'all' && styles.activeFilterButtonText]}>All</StyledText>
                             </TouchableOpacity>
-                            <TouchableOpacity style={styles.filterButton}>
-                                <StyledText>Filter</StyledText>
-                                <Ionicons name="options" size={16} color={COLORS.gray} />
+                            <TouchableOpacity
+                                style={[styles.filterButton, activeFilter === 'package' && styles.activeFilterButton]}
+                                onPress={() => setActiveFilter('package')}
+                            >
+                                <StyledText style={[styles.filterButtonText, activeFilter === 'package' && styles.activeFilterButtonText]}>Package</StyledText>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.filterButton, activeFilter === 'bundle' && styles.activeFilterButton]}
+                                onPress={() => setActiveFilter('bundle')}
+                            >
+                                <StyledText style={[styles.filterButtonText, activeFilter === 'bundle' && styles.activeFilterButtonText]}>Bundle</StyledText>
+                            </TouchableOpacity>
+                        </View>
+                        <StyledText style={styles.controlLabel}>Sort by Price</StyledText>
+                        <View style={styles.filterButtons}>
+                            <TouchableOpacity
+                                style={[styles.filterButton, sortOrder === 'low_to_high' && styles.activeFilterButton]}
+                                onPress={() => setSortOrder('low_to_high')}
+                            >
+                                <StyledText style={[styles.filterButtonText, sortOrder === 'low_to_high' && styles.activeFilterButtonText]}>Termurah</StyledText>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.filterButton, sortOrder === 'high_to_low' && styles.activeFilterButton]}
+                                onPress={() => setSortOrder('high_to_low')}
+                            >
+                                <StyledText style={[styles.filterButtonText, sortOrder === 'high_to_low' && styles.activeFilterButtonText]}>Termahal</StyledText>
                             </TouchableOpacity>
                         </View>
                     </View>
 
                     {/* Daftar Try out */}
-                    <View style={styles.section}>
+                    {/* <View style={styles.section}>
                         {products.map(item => <ProductCard key={item.id} item={item} navigation={navigation} />)}
+                    </View> */}
+                    <View style={styles.section}>
+                        {filteredProducts.length > 0 ? (
+                            filteredProducts.map(item => <ProductCard key={item.id} item={item} navigation={navigation} />)
+                        ) : (
+                            <StyledText style={styles.noResultsText}>No products found.</StyledText>
+                        )}
                     </View>
                 </ScrollView>
             )}
@@ -212,33 +278,72 @@ const styles = StyleSheet.create({
         color: COLORS.gray,
         marginBottom: 12,
     },
-    priceTag: {
-        backgroundColor: '#EAEAEA',
-        borderRadius: 20,
-        paddingVertical: 5,
-        paddingHorizontal: 12,
-        alignSelf: 'flex-start',
-    },
     priceText: {
         fontWeight: 'bold',
         color: COLORS.text,
-    },
-    playButton: {
-        backgroundColor: COLORS.primary,
-        borderRadius: 20,
-        paddingVertical: 8,
-        paddingHorizontal: 20,
-        alignSelf: 'flex-start',
-    },
-    playButtonText: {
-        color: COLORS.white,
-        fontWeight: 'bold',
     },
     cardImage: {
         width: 100,
         height: 100,
         borderRadius: 10,
         backgroundColor: '#e0e0e0',
+    },
+    activeFilterButton: {
+        backgroundColor: COLORS.primary, 
+    },
+    filterButtonText: {
+        color: COLORS.text,
+        fontWeight: '500',
+    },
+    activeFilterButtonText: {
+        color: COLORS.white,
+    },
+    noResultsText: {
+        textAlign: 'center',
+        marginTop: 40,
+        color: COLORS.gray,
+        fontSize: fontPixel(16),
+    },
+    filterButtons: {
+        flexDirection: 'row',
+        marginBottom: 15, 
+    },
+    filterButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#f5f5f5',
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 20,
+        marginRight: 10,
+    },
+    priceContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 10,
+    },
+    priceText: {
+        fontWeight: 'bold',
+        color: COLORS.primary,
+        fontSize: fontPixel(16),
+    },
+    discountPriceText: {
+        fontWeight: 'bold',
+        color: COLORS.primary,
+        fontSize: fontPixel(16),
+        marginRight: 8,
+    },
+    originalPriceText: {
+        color: COLORS.gray, 
+        textDecorationLine: 'line-through',
+        fontSize: fontPixel(14),
+    },
+    controlLabel: {
+        fontSize: fontPixel(14),
+        fontWeight: '600',
+        color: COLORS.gray,
+        marginBottom: 8,
+        marginTop: 10,
     },
 });
 
