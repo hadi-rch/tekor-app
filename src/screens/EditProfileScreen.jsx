@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, TextInput, Modal, Pressable, Platform, StatusBar, ActivityIndicator, Clipboard } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, TextInput, Modal, Pressable, Platform, StatusBar, ActivityIndicator, Clipboard, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import * as ImagePicker from 'expo-image-picker';
@@ -9,6 +9,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { updateUserName, updateUserAvatar, clearAuthError } from '../store/authSlice';
 import { fontPixel, pixelSizeVertical } from '../../helper';
 import { LinearGradient } from 'expo-linear-gradient';
+
+
 const InfoRow = ({ label, value, iconName, onIconPress }) => (
     <View style={styles.infoRowContainer}>
         <Text style={styles.infoLabel}>{label}</Text>
@@ -33,6 +35,7 @@ const EditProfileScreen = ({ navigation }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [nameError, setNameError] = useState('');
 
+    const [isNameInputFocused, setIsNameInputFocused] = useState(false);
 
     // Validasi full name
     const validateFullName = (name) => {
@@ -72,6 +75,14 @@ const EditProfileScreen = ({ navigation }) => {
         setFullName(text);
         const error = validateFullName(text);
         setNameError(error);
+    };
+
+    const handleInputFocus = () => {
+        setIsNameInputFocused(true);
+    };
+
+    const handleInputBlur = () => {
+        setIsNameInputFocused(false);
     };
 
     const handleChangePhoto = () => {
@@ -223,107 +234,113 @@ const EditProfileScreen = ({ navigation }) => {
     const isSaveDisabled = !hasValidChanges() || isLoading;
 
     return (
-        <LinearGradient
-            colors={['#FDEAEB', '#E6ECF5']}
-            style={styles.screenContainer}
-        >
-            <FocusAwareStatusBar
-                barStyle="dark-content"
-                backgroundColor="transparent"
-                translucent={true}
-            />
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerButton}>
-                    <Ionicons name="arrow-back" size={24} color={COLORS.text} />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>Edit Profile</Text>
-                <TouchableOpacity
-                    onPress={handleSaveChanges}
-                    style={[styles.headerButton, isSaveDisabled && styles.disabledButton]}
-                    disabled={isSaveDisabled}
-                >
-                    {isLoading ? (
-                        <ActivityIndicator color={COLORS.primary} />
-                    ) : (
-                        <Text style={[styles.saveText, isSaveDisabled && styles.disabledText]}>
-                            Save
-                        </Text>
-                    )}
-                </TouchableOpacity>
-            </View>
-            <View style={styles.container}>
-                <View style={styles.avatarContainer}>
-                    <Image source={avatarSource} style={styles.avatar} />
-                    <TouchableOpacity onPress={handleChangePhoto}>
-                        <Text style={styles.changePhotoText}>Change Photo</Text>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+            <LinearGradient
+                colors={['#FDEAEB', '#E6ECF5']}
+                style={styles.screenContainer}
+            >
+                <FocusAwareStatusBar
+                    barStyle="dark-content"
+                    backgroundColor="transparent"
+                    translucent={true}
+                />
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerButton}>
+                        <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+                    </TouchableOpacity>
+                    <Text style={styles.headerTitle}>Edit Profile</Text>
+                    <TouchableOpacity
+                        onPress={handleSaveChanges}
+                        style={[styles.headerButton, isSaveDisabled && styles.disabledButton]}
+                        disabled={isSaveDisabled}
+                    >
+                        {isLoading ? (
+                            <ActivityIndicator color={COLORS.primary} />
+                        ) : (
+                            <Text style={[styles.saveText, isSaveDisabled && styles.disabledText]}>
+                                Save
+                            </Text>
+                        )}
                     </TouchableOpacity>
                 </View>
-                <View style={styles.sectionContainer}>
-                    <Text style={styles.sectionTitle}>Informasi yang Dapat Diubah</Text>
-                    <Text style={styles.label}>Full Name</Text>
-                    <TextInput
-                        style={[styles.input, nameError && styles.inputError]}
-                        value={fullName}
-                        onChangeText={handleNameChange}
-                        placeholder="Masukkan nama lengkap Anda"
-                    />
-                    {nameError ? (
-                        <Text style={styles.errorText}>{nameError}</Text>
-                    ) : null}
+                <View style={styles.container}>
+                    <View style={styles.avatarContainer}>
+                        <Image source={avatarSource} style={styles.avatar} />
+                        <TouchableOpacity onPress={handleChangePhoto}>
+                            <Text style={styles.changePhotoText}>Change Photo</Text>
+                        </TouchableOpacity>
+                    </View>
+                    <View style={styles.sectionContainer}>
+                        <Text style={styles.sectionTitle}>Informasi yang Dapat Diubah</Text>
+                        <Text style={styles.label}>Full Name</Text>
+                        <TextInput
+                            style={[
+                                styles.input,
+                                isNameInputFocused && styles.inputFocused, // Style saat fokus
+                                nameError && styles.inputError // Style saat error
+                            ]}
+                            value={fullName}
+                            onChangeText={handleNameChange}
+                            placeholder="Masukkan nama lengkap Anda"
+                            onFocus={handleInputFocus}
+                            onBlur={handleInputBlur}
+                        />
+                        {nameError ? (
+                            <Text style={styles.errorText}>{nameError}</Text>
+                        ) : null}
+                    </View>
+                    <View style={styles.sectionContainer}>
+                        <Text style={styles.sectionTitle}>Informasi Akun</Text>
+                        <InfoRow
+                            label="Username"
+                            value={`@${user?.username || ''}`}
+                        />
+                        <InfoRow
+                            label="Email"
+                            value={user?.email || ''}
+                            iconName="copy-outline"
+                            onIconPress={() => copyToClipboard(user?.email)}
+                        />
+                        <InfoRow
+                            label="Terdaftar sejak"
+                            value={formatDate(user?.createdAt)}
+                            iconName="calendar-outline"
+                        />
+                    </View>
                 </View>
-                <View style={styles.sectionContainer}>
-                    <Text style={styles.sectionTitle}>Informasi Akun</Text>
-                    <InfoRow
-                        label="Username"
-                        value={`@${user?.username || ''}`}
-                    />
-                    <InfoRow
-                        label="Email"
-                        value={user?.email || ''}
-                        iconName="copy-outline"
-                        onIconPress={() => copyToClipboard(user?.email)}
-                    />
-                    <InfoRow
-                        label="Terdaftar sejak"
-                        value={formatDate(user?.createdAt)}
-                        iconName="calendar-outline"
-                    />
-                </View>
-            </View>
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={isModalVisible}
-                onRequestClose={() => {
-                    setIsModalVisible(!isModalVisible);
-                }}
-            >
-                <Pressable
-                    style={styles.modalOverlay}
-                    onPress={() => setIsModalVisible(false)} // Menutup modal saat area luar ditekan
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={isModalVisible}
+                    onRequestClose={() => {
+                        setIsModalVisible(!isModalVisible);
+                    }}
                 >
-                    {/* Menggunakan Pressable agar konten modal tidak ikut menutup saat ditekan */}
-                    <Pressable style={styles.modalContent}>
-                        <TouchableOpacity
-                            style={styles.closeButton}
-                            onPress={() => setIsModalVisible(false)}
-                        >
-                            <Ionicons name="close-circle" size={28} color={COLORS.gray} />
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.modalButton} onPress={takePhotoFromCamera}>
-                            <Text style={styles.modalButtonText}>Ambil Gambar</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={[styles.modalButton, { borderBottomWidth: 0 }]} onPress={choosePhotoFromGallery}>
-                            <Text style={styles.modalButtonText}>Pilih dari Galeri</Text>
-                        </TouchableOpacity>
+                    <Pressable
+                        style={styles.modalOverlay}
+                        onPress={() => setIsModalVisible(false)} // Menutup modal saat area luar ditekan
+                    >
+                        {/* Menggunakan Pressable agar konten modal tidak ikut menutup saat ditekan */}
+                        <Pressable style={styles.modalContent}>
+                            <TouchableOpacity
+                                style={styles.closeButton}
+                                onPress={() => setIsModalVisible(false)}
+                            >
+                                <Ionicons name="close-circle" size={28} color={COLORS.gray} />
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.modalButton} onPress={takePhotoFromCamera}>
+                                <Text style={styles.modalButtonText}>Ambil Gambar</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={[styles.modalButton, { borderBottomWidth: 0 }]} onPress={choosePhotoFromGallery}>
+                                <Text style={styles.modalButtonText}>Pilih dari Galeri</Text>
+                            </TouchableOpacity>
+                        </Pressable>
                     </Pressable>
-                </Pressable>
-            </Modal>
-        </LinearGradient>
+                </Modal>
+            </LinearGradient>
+        </TouchableWithoutFeedback>
     );
 };
-
-
 
 const styles = StyleSheet.create({
     screenContainer: { flex: 1, backgroundColor: COLORS.white, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 },
@@ -340,6 +357,7 @@ const styles = StyleSheet.create({
     formContainer: { marginTop: 20 },
     label: { fontSize: 14, color: COLORS.text, marginBottom: 8, fontWeight: '500' },
     input: { backgroundColor: '#f5f5f5', borderRadius: 10, padding: 15, fontSize: 16, borderWidth: 1, borderColor: 'transparent' },
+    inputFocused: { borderColor: COLORS.primary, backgroundColor: '#fff',},
     inputError: { borderColor: '#ff4444', backgroundColor: '#fff5f5' },
     errorText: { color: '#ff4444', fontSize: 12, marginTop: 5, fontWeight: '500' },
     sectionContainer: { marginBottom: pixelSizeVertical(25) },
