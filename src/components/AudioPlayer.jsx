@@ -6,27 +6,19 @@ import { COLORS } from '../constants/colors';
 import { fontPixel, pixelSizeHorizontal } from '../../helper';
 
 const AudioPlayer = ({ uri }) => {
-    console.log("first")
-    // Pastikan URI valid sebelum membuat player
     const player = useAudioPlayer(uri);
-    console.log("second")
     const status = useAudioPlayerStatus(player);
-    console.log("third")
     
     const handlePlayAudio = async () => {
-        console.log("empat")
         try {
-            console.log("lima")
             if (!status?.isLoaded || !player) {
                 console.warn("Player not loaded yet.");
                 return;
             }
             
-            // Jika audio sedang diputar, jeda. Jika tidak, putar.
             if (status.playing) {
                 await player.pause();
             } else {
-                 // Jika sudah selesai, putar dari awal
                 const isFinished = status.didJustFinish || status.positionMillis >= status.durationMillis;
                 if (isFinished) {
                     await player.seekTo(0);
