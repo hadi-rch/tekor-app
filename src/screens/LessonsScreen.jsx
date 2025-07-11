@@ -33,20 +33,20 @@ const HistoryItem = ({ item, navigation }) => (
   <View style={styles.historyItemContainer}>
     <View style={styles.historyHeader}>
       <View>
-        <StyledText style={styles.historyTitle}>
-          Package ID: {item.packageId}
+        <StyledText fontType="montserrat" style={styles.historyTitle}>
+          {item.testPackageName}
         </StyledText>
-        <StyledText style={styles.historyDate}>
-          Start Time: {new Date(item.startTime).toLocaleString()}
+        <StyledText fontType="montserrat" style={styles.historyDate}>
+          Waktu Mulai: {new Date(item.startTime).toLocaleString()}
         </StyledText>
-        <StyledText style={styles.historyDate}>
-          End Time: {new Date(item.endTime).toLocaleString()}
+        <StyledText fontType="montserrat" style={styles.historyDate}>
+          Waktu Selesai: {new Date(item.endTime).toLocaleString()}
         </StyledText>
       </View>
     </View>
     <View style={styles.scoreRow}>
-      <StyledText style={styles.scoreLabel}>Score</StyledText>
-      <StyledText style={styles.scoreValue}>{item.score} / 100</StyledText>
+      <StyledText fontType="montserrat" style={styles.scoreLabel}>Score</StyledText>
+      <StyledText fontType="montserrat" style={styles.scoreValue}>{item.score} / 100</StyledText>
     </View>
     <View style={styles.buttonContainer}>
       {item.aiEvaluationResult && (
@@ -263,7 +263,7 @@ const LessonsScreen = ({ navigation }) => {
       />
       {/* Header */}
       <View style={styles.header}>
-        <StyledText style={styles.headerTitle}>Materi Belajar</StyledText>
+        <StyledText style={styles.headerTitle}>My Try Out</StyledText>
       </View>
 
       {/* Tab Switcher */}
@@ -364,13 +364,13 @@ const styles = StyleSheet.create({
   inProgressText: { color: COLORS.white, fontSize: 12, fontWeight: "bold" },
   historyItemContainer: { backgroundColor: COLORS.white, marginHorizontal: 15, borderRadius: 12, marginBottom: 12, paddingHorizontal: 20, paddingVertical: 15, borderBottomWidth: 1, borderBottomColor: COLORS.borderColor },
   historyHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 },
-  historyTitle: { fontSize: 16, fontWeight: "bold", color: COLORS.text, marginBottom: 4 },
-  historyDate: { fontSize: 12, color: COLORS.gray, marginTop: 2 },
+  historyTitle: { fontSize: 20, fontWeight: "bold", color: COLORS.text, marginBottom: 4 },
+  historyDate: { fontSize: 14, color: COLORS.gray, marginTop: 2 },
   discussionButton: { flexDirection: "row", alignItems: "center" },
   discussion: { color: COLORS.primary, fontWeight: "bold", marginRight: 4 },
   scoreRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 4, marginTop: 8 },
-  scoreLabel: { fontSize: 14, color: COLORS.gray },
-  scoreValue: { fontSize: 14, color: COLORS.text, fontWeight: "bold" },
+  scoreLabel: { fontSize: 16, color: COLORS.gray },
+  scoreValue: { fontSize: 16, color: COLORS.text, fontWeight: "bold" },
   viewEvaluationButton: { backgroundColor: COLORS.primary, paddingVertical: 8, paddingHorizontal: 12, borderRadius: 8, marginTop: 10, flexDirection: "row", alignItems: "center", justifyContent: "center" },
   viewReviewButton: { backgroundColor: COLORS.kred, paddingVertical: 8, paddingHorizontal: 12, borderRadius: 8, marginTop: 10, flexDirection: "row", alignItems: "center", justifyContent: "center" },
   viewEvaluationButtonText: { color: COLORS.white, fontWeight: "bold", marginRight: 5 },

@@ -457,7 +457,7 @@ const TestScreen = ({ route, navigation }) => {
                         <View style={styles.dragHandle} />
                         <Text style={styles.modalTitle}>Yakin Ingin Keluar?</Text>
                         <Text style={styles.modalSubtitle}>
-                            Progres Anda sudah tersimpan. Anda dapat melanjutkan tes ini nanti dari halaman Materi Belajar.
+                            Progres Anda sudah tersimpan. Anda dapat melanjutkan tes ini nanti dari halaman My Try Out.
                         </Text>
                         <View style={styles.modalButtonContainer}>
                             <TouchableOpacity
