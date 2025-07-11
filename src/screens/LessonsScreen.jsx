@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, StatusBar, Platform, Modal, ActivityIndicator, Pressable, Alert } from 'react-native'
+import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, StatusBar, Platform, Modal, ActivityIndicator, Pressable, Alert, RefreshControl  } from 'react-native'
 import { COLORS } from '../constants/colors'
 import { Ionicons } from '@expo/vector-icons'
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar'
@@ -96,6 +96,7 @@ const LessonsScreen = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [completedTests, setCompletedTests] = useState([]);
   const [isHistoryLoading, setIsHistoryLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
@@ -111,15 +112,15 @@ const LessonsScreen = ({ navigation }) => {
     return unsubscribe;
   }, [navigation]);
 
-  useEffect(() => {
-    const fetchMyTests = async () => {
-      setIsLoading(true);
-      try {
-        const response = await api.get('/api/v1/test-attempts/my-tests');
-        const readyToStartTests = response.data.data.readyToStart;
-        const inProgressTestsData = response.data.data.inProgress;
 
-        const formattedReadyToStart = readyToStartTests.map(item => ({
+  const fetchMyTests = async () => {
+    if (!refreshing) setIsLoading(true); // Hanya tampilkan loader utama jika bukan proses refresh
+    try {
+      const response = await api.get('/api/v1/test-attempts/my-tests');
+      const readyToStartTests = response.data.data.readyToStart;
+      const inProgressTestsData = response.data.data.inProgress;
+
+      const formattedReadyToStart = readyToStartTests.map(item => ({
           id: item.transactionId,
           packageId: item.testPackage.id,
           title: item.testPackage.name,
@@ -139,35 +140,108 @@ const LessonsScreen = ({ navigation }) => {
           status: 'In Progress'
         }));
 
-        setMyTests(formattedReadyToStart);
-        setInProgressTests(formattedInProgress);
-      } catch (error) {
-        console.error("Gagal mengambil data tes:", error.response?.data || error.message);
-        Alert.alert("Error", "Tidak dapat memuat daftar tes Anda.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
+      setMyTests(formattedReadyToStart);
+      setInProgressTests(formattedInProgress);
+    } catch (error) {
+      console.error("Gagal mengambil data tes:", error.response?.data || error.message);
+      Alert.alert("Error", "Tidak dapat memuat daftar tes Anda.");
+    } finally {
+      if (!refreshing) setIsLoading(false);
+    }
+  };
 
-    const fetchCompletedTests = async () => {
-      setIsHistoryLoading(true);
-      try {
-        const response = await api.get('/api/v1/test-attempts/my-tests/completed');
-        const completedData = response.data.data || [];
-        setCompletedTests(completedData);
-      } catch (error) {
-        Alert.alert("Error", "Tidak dapat memuat riwayat tes Anda.");
-      } finally {
-        setIsHistoryLoading(false);
-      }
-    };
+  const fetchCompletedTests = async () => {
+    if (!refreshing) setIsHistoryLoading(true);
+    try {
+      const response = await api.get('/api/v1/test-attempts/my-tests/completed');
+      const completedData = response.data.data || [];
+      setCompletedTests(completedData);
+    } catch (error) {
+      Alert.alert("Error", "Tidak dapat memuat riwayat tes Anda.");
+    } finally {
+      if (!refreshing) setIsHistoryLoading(false);
+    }
+  };
 
+   useEffect(() => {
     if (activeTab === 'Test') {
       fetchMyTests();
     } else if (activeTab === 'History') {
       fetchCompletedTests();
     }
   }, [activeTab]);
+
+
+  const onRefresh = React.useCallback(async () => {
+    setRefreshing(true); // Mulai proses refresh
+    if (activeTab === 'Test') {
+      await fetchMyTests();
+    } else {
+      await fetchCompletedTests();
+    }
+    setRefreshing(false); // Selesaikan proses refresh
+  }, [activeTab]);
+
+
+
+
+  // useEffect(() => {
+  //   const fetchMyTests = async () => {
+  //     setIsLoading(true);
+  //     try {
+  //       const response = await api.get('/api/v1/test-attempts/my-tests');
+  //       const readyToStartTests = response.data.data.readyToStart;
+  //       const inProgressTestsData = response.data.data.inProgress;
+
+  //       const formattedReadyToStart = readyToStartTests.map(item => ({
+  //         id: item.transactionId,
+  //         packageId: item.testPackage.id,
+  //         title: item.testPackage.name,
+  //         description: item.testPackage.description,
+  //         image: item.testPackage.imageUrl,
+  //         transactionId: item.transactionId,
+  //         status: 'Ready to Start'
+  //       }));
+
+  //       const formattedInProgress = inProgressTestsData.map(item => ({
+  //         id: item.attemptId,
+  //         packageId: item.testPackage.id,
+  //         title: item.testPackage.name,
+  //         description: item.testPackage.description,
+  //         image: item.testPackage.imageUrl,
+  //         attemptId: item.attemptId,
+  //         status: 'In Progress'
+  //       }));
+
+  //       setMyTests(formattedReadyToStart);
+  //       setInProgressTests(formattedInProgress);
+  //     } catch (error) {
+  //       console.error("Gagal mengambil data tes:", error.response?.data || error.message);
+  //       Alert.alert("Error", "Tidak dapat memuat daftar tes Anda.");
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   };
+
+    // const fetchCompletedTests = async () => {
+    //   setIsHistoryLoading(true);
+    //   try {
+    //     const response = await api.get('/api/v1/test-attempts/my-tests/completed');
+    //     const completedData = response.data.data || [];
+    //     setCompletedTests(completedData);
+    //   } catch (error) {
+    //     Alert.alert("Error", "Tidak dapat memuat riwayat tes Anda.");
+    //   } finally {
+    //     setIsHistoryLoading(false);
+    //   }
+    // };
+
+  //   if (activeTab === 'Test') {
+  //     fetchMyTests();
+  //   } else if (activeTab === 'History') {
+  //     fetchCompletedTests();
+  //   }
+  // }, [activeTab]);
 
   const handleLessonPress = (item) => {
     setSelectedLesson(item);
@@ -205,6 +279,14 @@ const LessonsScreen = ({ navigation }) => {
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContainer}
           ListEmptyComponent={<View style={styles.emptyContainer}><Text>Anda belum memiliki paket tes.</Text></View>}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={[COLORS.primary]} // Warna spinner di Android
+              tintColor={COLORS.primary} // Warna spinner di iOS
+            />
+          }
         />
       )
     } else if (activeTab === 'History') {
@@ -218,6 +300,14 @@ const LessonsScreen = ({ navigation }) => {
           keyExtractor={(item) => item.transactionId || item.id}
           contentContainerStyle={styles.listContainer}
           ListEmptyComponent={<View style={styles.emptyContainer}><Text>Anda belum memiliki riwayat tes.</Text></View>}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={[COLORS.primary]}
+              tintColor={COLORS.primary}
+            />
+          }
         />
       )
     }

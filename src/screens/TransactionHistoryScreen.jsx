@@ -1,16 +1,5 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    SafeAreaView,
-    FlatList,
-    Image,
-    TouchableOpacity,
-    Platform,
-    StatusBar,
-    ActivityIndicator,
-} from 'react-native';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, SafeAreaView, FlatList, Image, TouchableOpacity, Platform, StatusBar, ActivityIndicator, RefreshControl, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
@@ -53,36 +42,75 @@ const TransactionHistoryScreen = ({ navigation }) => {
     const [activeTab, setActiveTab] = useState('All');
     const [transactions, setTransactions] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
 
     // 4. useEffect untuk mengambil data dari backend
+    // useEffect(() => {
+    //     const fetchHistory = async () => {
+    //         try {
+    //             const response = await api.get('/api/v1/transactions/history');
+    //             const backendData = response.data.data;
+
+    //             // Transformasi data dari backend ke format yang dibutuhkan UI
+    //             const formattedData = backendData.map(tx => ({
+    //                 id: tx.orderId,
+    //                 status: tx.transactionStatus.toLowerCase(),
+    //                 title: tx.packageName || tx.bundleName || 'Try out Tidak Dikenal',
+    //                 price: `Rp ${new Intl.NumberFormat('id-ID').format(tx.amount)}`,
+    //                 date: new Date(tx.createdAt).toLocaleDateString('id-ID', {
+    //                     day: '2-digit', month: 'long', year: 'numeric'
+    //                 }),
+    //                 image: require('../../assets/images/no-image.jpg')
+    //             }));
+
+    //             setTransactions(formattedData);
+    //         } catch (error) {
+    //             console.error("Gagal mengambil riwayat transaksi:", error);
+    //             Alert.alert("Error", "Tidak dapat memuat riwayat transaksi.");
+    //         } finally {
+    //             setIsLoading(false);
+    //         }
+    //     };
+
+    //     fetchHistory();
+    // }, []);
+
+    // Ekstrak logika fetch agar bisa dipakai ulang
+    const fetchHistory = async () => {
+        try {
+            const response = await api.get('/api/v1/transactions/history');
+            const backendData = response.data.data;
+
+            const formattedData = backendData.map(tx => ({
+                id: tx.orderId,
+                status: tx.transactionStatus.toLowerCase(),
+                title: tx.packageName || tx.bundleName || 'Try out Tidak Dikenal',
+                price: `Rp ${new Intl.NumberFormat('id-ID').format(tx.amount)}`,
+                date: new Date(tx.createdAt).toLocaleDateString('id-ID', {
+                    day: '2-digit', month: 'long', year: 'numeric'
+                }),
+                image: require('../../assets/images/no-image.jpg')
+            }));
+
+            setTransactions(formattedData);
+        } catch (error) {
+            console.error("Gagal mengambil riwayat transaksi:", error);
+            Alert.alert("Error", "Tidak dapat memuat riwayat transaksi.");
+        } finally {
+            setIsLoading(false); // Selalu matikan loader utama setelah selesai
+        }
+    };
+
+    // useEffect untuk memuat data pertama kali
     useEffect(() => {
-        const fetchHistory = async () => {
-            try {
-                const response = await api.get('/api/v1/transactions/history');
-                const backendData = response.data.data;
-
-                // Transformasi data dari backend ke format yang dibutuhkan UI
-                const formattedData = backendData.map(tx => ({
-                    id: tx.orderId,
-                    status: tx.transactionStatus.toLowerCase(),
-                    title: tx.packageName || tx.bundleName || 'Try out Tidak Dikenal',
-                    price: `Rp ${new Intl.NumberFormat('id-ID').format(tx.amount)}`,
-                    date: new Date(tx.createdAt).toLocaleDateString('id-ID', {
-                        day: '2-digit', month: 'long', year: 'numeric'
-                    }),
-                    image: require('../../assets/images/no-image.jpg')
-                }));
-
-                setTransactions(formattedData);
-            } catch (error) {
-                console.error("Gagal mengambil riwayat transaksi:", error);
-                Alert.alert("Error", "Tidak dapat memuat riwayat transaksi.");
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
         fetchHistory();
+    }, []);
+
+    // 3. Buat fungsi onRefresh
+    const onRefresh = useCallback(async () => {
+        setRefreshing(true);
+        await fetchHistory();
+        setRefreshing(false);
     }, []);
 
     // Memfilter transaksi berdasarkan tab yang aktif
@@ -142,6 +170,14 @@ const TransactionHistoryScreen = ({ navigation }) => {
                         <View style={styles.emptyContainer}>
                             <Text>Tidak ada transaksi pada kategori ini.</Text>
                         </View>
+                    }
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
+                            colors={[COLORS.primary]} // Warna untuk Android
+                            tintColor={COLORS.primary} // Warna untuk iOS
+                        />
                     }
                 />
             )}
@@ -203,6 +239,7 @@ const styles = StyleSheet.create({
     },
     listContainer: {
         paddingVertical: 10,
+        paddingBottom: 60,
     },
     itemContainer: {
         flexDirection: 'row',
