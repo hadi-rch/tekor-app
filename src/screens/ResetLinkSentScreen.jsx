@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Platform, StatusBar } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-
 import CustomButton from '../components/CustomButton';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
@@ -73,70 +72,19 @@ const ResetLinkSentScreen = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
-    screenContainer: {
-        flex: 1,
-        backgroundColor: COLORS.white,
-        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-    },
-    container: {
-        flex: 1,
-        padding: 20,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: 24,
-    },
-    backButton: {
-        padding: 5,
-    },
-    headerTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: COLORS.text,
-    },
-    content: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingHorizontal: 10,
-    },
-    iconContainer: {
-        marginBottom: 40,
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: COLORS.text,
-        marginBottom: 16,
-        textAlign: 'center',
-    },
-    description: {
-        fontSize: 16,
-        color: COLORS.text,
-        textAlign: 'center',
-        lineHeight: 24,
-        marginBottom: 32,
-    },
-    emailText: {
-        fontWeight: 'bold',
-        color: COLORS.primary,
-    },
-    resendLink: {
-        fontSize: 16,
-        color: COLORS.primary,
-        fontWeight: 'bold',
-        textDecorationLine: 'underline',
-    },
-    backButtonComponent: {
-        backgroundColor: COLORS.primary,
-        marginBottom: pixelSizeVertical(50),
-    },
-    backButtonText: {
-        color: COLORS.black,
-        fontWeight: 'bold',
-    },
+    screenContainer: { flex: 1, backgroundColor: COLORS.white, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 },
+    container: { flex: 1, padding: 20 },
+    header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 },
+    backButton: { padding: 5 },
+    headerTitle: { fontSize: 20, fontWeight: 'bold', color: COLORS.text },
+    content: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 10 },
+    iconContainer: { marginBottom: 40 },
+    title: { fontSize: 24, fontWeight: 'bold', color: COLORS.text, marginBottom: 16, textAlign: 'center' },
+    description: { fontSize: 16, color: COLORS.text, textAlign: 'center', lineHeight: 24, marginBottom: 32 },
+    emailText: { fontWeight: 'bold', color: COLORS.primary },
+    resendLink: { fontSize: 16, color: COLORS.primary, fontWeight: 'bold', textDecorationLine: 'underline' },
+    backButtonComponent: { backgroundColor: COLORS.primary, marginBottom: pixelSizeVertical(50) },
+    backButtonText: { color: COLORS.black, fontWeight: 'bold' },
 });
 
 export default ResetLinkSentScreen;

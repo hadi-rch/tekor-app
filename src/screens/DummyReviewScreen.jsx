@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar, ScrollView, Image, FlatList } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar, Image, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
@@ -147,7 +147,7 @@ const DummyReviewScreen = ({ navigation, route }) => {
                 >
                     <Ionicons name="close" size={fontPixel(28)} color={COLORS.text} />
                 </TouchableOpacity>
-                <StyledText style={styles.headerTitle}>Pembahasan Tes Dummy</StyledText>
+                <StyledText style={styles.headerTitle}>Pembahasan Tes</StyledText>
                 <View style={{ width: fontPixel(28) }} />
             </View>
 
@@ -174,133 +174,33 @@ const DummyReviewScreen = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
-    screenContainer: {
-        flex: 1,
-        backgroundColor: '#F7F8FA',
-        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingVertical: pixelSizeVertical(15),
-        paddingHorizontal: pixelSizeHorizontal(15),
-        backgroundColor: COLORS.white,
-        borderBottomWidth: 1,
-        borderBottomColor: COLORS.borderColor,
-    },
-    headerButton: {
-        padding: pixelSizeHorizontal(5),
-    },
-    headerTitle: {
-        fontSize: fontPixel(20),
-        fontWeight: 'bold',
-    },
-    loadingIndicator: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    emptyContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 20,
-    },
-    emptyText: {
-        fontSize: fontPixel(16),
-        color: COLORS.gray,
-        textAlign: 'center',
-    },
-    listContentContainer: {
-        padding: pixelSizeHorizontal(20),
-        paddingBottom: pixelSizeVertical(20),
-    },
-    questionContainer: {
-        backgroundColor: COLORS.white,
-        borderRadius: 12,
-        padding: pixelSizeHorizontal(15),
-        marginBottom: pixelSizeVertical(20),
-        borderWidth: 1,
-        borderColor: COLORS.borderColor,
-    },
-    questionHeader: {
-        flexDirection: 'row',
-        marginBottom: pixelSizeVertical(15),
-    },
-    indicator: {
-        width: widthPixel(5),
-        height: '100%',
-        borderRadius: 3,
-        marginRight: pixelSizeHorizontal(10),
-    },
+    screenContainer: { flex: 1, backgroundColor: '#F7F8FA', paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 },
+    header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: pixelSizeVertical(15), paddingHorizontal: pixelSizeHorizontal(15), backgroundColor: COLORS.white, borderBottomWidth: 1, borderBottomColor: COLORS.borderColor },
+    headerButton: { padding: pixelSizeHorizontal(5) },
+    headerTitle: { fontSize: fontPixel(20), fontWeight: 'bold' },
+    loadingIndicator: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
+    emptyText: { fontSize: fontPixel(16), color: COLORS.gray, textAlign: 'center' },
+    listContentContainer: { padding: pixelSizeHorizontal(20), paddingBottom: pixelSizeVertical(20) },
+    questionContainer: { backgroundColor: COLORS.white, borderRadius: 12, padding: pixelSizeHorizontal(15), marginBottom: pixelSizeVertical(20), borderWidth: 1, borderColor: COLORS.borderColor },
+    questionHeader: { flexDirection: 'row', marginBottom: pixelSizeVertical(15) },
+    indicator: { width: widthPixel(5), height: '100%', borderRadius: 3, marginRight: pixelSizeHorizontal(10) },
     questionImage: { width: '100%', height: heightPixel(180), borderRadius: 8, resizeMode: 'contain', marginBottom: pixelSizeVertical(15) },
     audioPlayer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f5f5f5', borderRadius: 8, padding: pixelSizeHorizontal(10), marginBottom: pixelSizeVertical(15) },
     audioText: { marginLeft: pixelSizeHorizontal(10), fontSize: fontPixel(14), color: COLORS.text },
-    optionsContainer: {
-        marginBottom: pixelSizeVertical(25),
-    },
-    optionButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: COLORS.borderColor,
-        backgroundColor: COLORS.white,
-        borderRadius: 12,
-        padding: pixelSizeHorizontal(15),
-        marginBottom: pixelSizeVertical(10),
-    },
-    imageOptionButton: {
-        paddingVertical: pixelSizeVertical(10),
-    },
-    optionImage: {
-        flex: 1,
-        height: heightPixel(80),
-        resizeMode: 'contain',
-        borderRadius: 8,
-    },
-    correctOption: {
-        borderColor: '#28a745',
-        backgroundColor: '#e9f7ef',
-    },
-    wrongOption: {
-        borderColor: '#dc3545',
-        backgroundColor: '#fbe9eb',
-    },
-    radioCircle: {
-        height: 20,
-        width: 20,
-        borderRadius: 10,
-        borderWidth: 2,
-        borderColor: COLORS.borderColor,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginRight: 15,
-    },
-    correctRadio: {
-        borderColor: '#28a745',
-    },
-    wrongRadio: {
-        borderColor: '#dc3545',
-    },
-    radioInnerCircle: {
-        height: 10,
-        width: 10,
-        borderRadius: 15,
-    },
-    optionText: {
-        flex: 1,
-        fontSize: fontPixel(16),
-        color: COLORS.text,
-    },
-    correctText: {
-        color: '#28a745',
-        fontWeight: 'bold',
-    },
-    wrongText: {
-        color: '#dc3545',
-        fontWeight: 'bold',
-    },
+    optionsContainer: { marginBottom: pixelSizeVertical(25) },
+    optionButton: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: COLORS.borderColor, backgroundColor: COLORS.white, borderRadius: 12, padding: pixelSizeHorizontal(15), marginBottom: pixelSizeVertical(10) },
+    imageOptionButton: { paddingVertical: pixelSizeVertical(10) },
+    optionImage: { flex: 1, height: heightPixel(80), resizeMode: 'contain', borderRadius: 8 },
+    correctOption: { borderColor: '#28a745', backgroundColor: '#e9f7ef' },
+    wrongOption: { borderColor: '#dc3545', backgroundColor: '#fbe9eb' },
+    radioCircle: { height: 20, width: 20, borderRadius: 10, borderWidth: 2, borderColor: COLORS.borderColor, alignItems: 'center', justifyContent: 'center', marginRight: 15 },
+    correctRadio: { borderColor: '#28a745' },
+    wrongRadio: { borderColor: '#dc3545' },
+    radioInnerCircle: { height: 10, width: 10, borderRadius: 15 },
+    optionText: { flex: 1, fontSize: fontPixel(16), color: COLORS.text },
+    correctText: { color: '#28a745', fontWeight: 'bold' },
+    wrongText: { color: '#dc3545', fontWeight: 'bold' },
 });
 
 export default DummyReviewScreen;

@@ -1,16 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-    Platform,
-    StatusBar,
-    ScrollView,
-    ActivityIndicator,
-    Alert,
-    Clipboard,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar, ScrollView, ActivityIndicator, Alert, Clipboard } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
 import { COLORS } from '../constants/colors';
@@ -161,98 +150,23 @@ const TransactionDetailScreen = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
-    screenContainer: {
-        flex: 1,
-        backgroundColor: '#F7F8FA',
-        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-    },
-    loaderContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingVertical: pixelSizeVertical(15),
-        paddingHorizontal: pixelSizeHorizontal(20),
-        borderBottomWidth: 1,
-        borderBottomColor: COLORS.borderColor,
-        backgroundColor: COLORS.white,
-    },
-    headerButton: {
-        padding: pixelSizeHorizontal(5),
-    },
-    headerTitle: {
-        fontSize: fontPixel(20),
-        fontWeight: 'bold',
-    },
-    scrollContainer: {
-        padding: pixelSizeHorizontal(20),
-    },
-    statusSection: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: pixelSizeVertical(25),
-    },
-    section: {
-        marginBottom: pixelSizeVertical(25),
-    },
-    sectionTitle: {
-        fontSize: fontPixel(18),
-        fontWeight: 'bold',
-        color: COLORS.text,
-        marginBottom: pixelSizeVertical(12),
-    },
-    card: {
-        backgroundColor: COLORS.white,
-        borderRadius: 12,
-        paddingHorizontal: pixelSizeHorizontal(15),
-        borderWidth: 1,
-        borderColor: COLORS.borderColor,
-    },
-    badgeContainer: {
-        borderRadius: 20,
-        paddingVertical: pixelSizeVertical(6),
-        paddingHorizontal: pixelSizeHorizontal(12),
-    },
-    badgeText: {
-        fontSize: fontPixel(12),
-        fontWeight: 'bold',
-        textTransform: 'uppercase',
-    },
-    // PERBAIKAN STYLE DI SINI
-    detailRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingVertical: pixelSizeVertical(15),
-        borderBottomWidth: 1,
-        borderBottomColor: '#f0f0f0',
-    },
-    detailLabel: {
-        fontSize: fontPixel(16),
-        color: COLORS.gray,
-    },
-    valueContainer: {
-        flex: 1, // Memastikan container ini mengambil sisa ruang
-        flexDirection: 'row',
-        justifyContent: 'flex-end', // Mendorong konten ke kanan
-        alignItems: 'center',
-    },
-    detailValue: {
-        fontSize: fontPixel(16),
-        color: COLORS.text,
-        fontWeight: '500',
-        flexShrink: 1, // Mengizinkan teks untuk menyusut dan membungkus (wrap)
-        textAlign: 'right', // Membuat teks rata kanan
-    },
-    copyButton: {
-        marginLeft: pixelSizeHorizontal(10), // Memberi jarak dari teks
-        padding: 5,
-    },
+    screenContainer: { flex: 1, backgroundColor: '#F7F8FA', paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0, },
+    loaderContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', },
+    header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: pixelSizeVertical(15), paddingHorizontal: pixelSizeHorizontal(20), borderBottomWidth: 1, borderBottomColor: COLORS.borderColor, backgroundColor: COLORS.white, },
+    headerButton: { padding: pixelSizeHorizontal(5), },
+    headerTitle: { fontSize: fontPixel(20), fontWeight: 'bold', },
+    scrollContainer: { padding: pixelSizeHorizontal(20), },
+    statusSection: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: pixelSizeVertical(25), },
+    section: { marginBottom: pixelSizeVertical(25), },
+    sectionTitle: { fontSize: fontPixel(18), fontWeight: 'bold', color: COLORS.text, marginBottom: pixelSizeVertical(12), },
+    card: { backgroundColor: COLORS.white, borderRadius: 12, paddingHorizontal: pixelSizeHorizontal(15), borderWidth: 1, borderColor: COLORS.borderColor, },
+    badgeContainer: { borderRadius: 20, paddingVertical: pixelSizeVertical(6), paddingHorizontal: pixelSizeHorizontal(12), },
+    badgeText: { fontSize: fontPixel(12), fontWeight: 'bold', textTransform: 'uppercase', },
+    detailRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: pixelSizeVertical(15), borderBottomWidth: 1, borderBottomColor: '#f0f0f0', },
+    detailLabel: { fontSize: fontPixel(16), color: COLORS.gray, },
+    valueContainer: { flex: 1, flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', },
+    detailValue: { fontSize: fontPixel(16), color: COLORS.text, fontWeight: '500', flexShrink: 1, textAlign: 'right', },
+    copyButton: { marginLeft: pixelSizeHorizontal(10), padding: 5, },
 });
 
 export default TransactionDetailScreen;

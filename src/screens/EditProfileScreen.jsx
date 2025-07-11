@@ -1,19 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    Image,
-    TouchableOpacity,
-    TextInput,
-    Alert,
-    Modal,
-    Pressable,
-    Platform,
-    StatusBar,
-    ActivityIndicator,
-    Clipboard,
-} from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, TextInput, Modal, Pressable, Platform, StatusBar, ActivityIndicator, Clipboard, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import * as ImagePicker from 'expo-image-picker';
@@ -24,7 +10,7 @@ import { updateUserName, updateUserAvatar, clearAuthError } from '../store/authS
 import { fontPixel, pixelSizeVertical } from '../../helper';
 import { LinearGradient } from 'expo-linear-gradient';
 
-// --- Komponen baru untuk menampilkan baris informasi read-only ---
+
 const InfoRow = ({ label, value, iconName, onIconPress }) => (
     <View style={styles.infoRowContainer}>
         <Text style={styles.infoLabel}>{label}</Text>
@@ -39,19 +25,39 @@ const InfoRow = ({ label, value, iconName, onIconPress }) => (
     </View>
 );
 
-// --- Komponen Utama EditProfileScreen ---
-const EditProfileScreen = ({ navigation }) => {
 
+const EditProfileScreen = ({ navigation }) => {
     const dispatch = useDispatch();
     const { user, isLoading, error: authError } = useSelector((state) => state.auth);
-
     const [fullName, setFullName] = useState(user?.fullName || '');
-    // const [avatar, setAvatar] = useState(user?.imageUrl || null); // State untuk URI gambar
     const [avatarUri, setAvatarUri] = useState(user?.imageUrl || null);
-
-    const [newAvatarFile, setNewAvatarFile] = useState(null); // State untuk file gambar baru
+    const [newAvatarFile, setNewAvatarFile] = useState(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
-    // useeffect menangani error dari Redux
+    const [nameError, setNameError] = useState('');
+
+    const [isNameInputFocused, setIsNameInputFocused] = useState(false);
+
+    // Validasi full name
+    const validateFullName = (name) => {
+        const trimmedName = name.trim();
+        if (trimmedName.length < 2) {
+            return 'Nama harus minimal 2 huruf';
+        }
+        // Regex untuk hanya huruf a-z dan spasi
+        const nameRegex = /^[a-zA-Z\s]+$/;
+        if (!nameRegex.test(trimmedName)) {
+            return 'Nama hanya boleh mengandung huruf a-z';
+        }
+        return '';
+    };
+    // Cek apakah ada perubahan yang valid
+    const hasValidChanges = () => {
+        const isNameChanged = fullName.trim() !== user?.fullName && fullName.trim() !== '';
+        const isAvatarChanged = newAvatarFile !== null;
+        const isNameValid = validateFullName(fullName) === '';
+        return (isNameChanged || isAvatarChanged) && isNameValid;
+    };
+    // useEffect menangani error dari Redux
     useEffect(() => {
         if (authError) {
             Toast.show({
@@ -63,13 +69,42 @@ const EditProfileScreen = ({ navigation }) => {
         }
     }, [authError, dispatch]);
 
+
+    // Handle perubahan nama
+    const handleNameChange = (text) => {
+        setFullName(text);
+        const error = validateFullName(text);
+        setNameError(error);
+    };
+
+    const handleInputFocus = () => {
+        setIsNameInputFocused(true);
+    };
+
+    const handleInputBlur = () => {
+        setIsNameInputFocused(false);
+    };
+
     const handleChangePhoto = () => {
-        setIsModalVisible(true); // Buka modal
+        setIsModalVisible(true);
     };
 
     const handleSaveChanges = async () => {
-        const isNameChanged = fullName !== user?.fullName && fullName.trim() !== '';
+        const trimmedName = fullName.trim();
+        const isNameChanged = trimmedName !== user?.fullName && trimmedName !== '';
         const isAvatarChanged = newAvatarFile !== null;
+        const nameValidation = validateFullName(fullName);
+
+        // Validasi nama jika ada perubahan
+        if (isNameChanged && nameValidation) {
+            setNameError(nameValidation);
+            Toast.show({
+                type: 'error',
+                text1: 'Validasi Gagal',
+                text2: nameValidation,
+            });
+            return;
+        }
 
         if (!isNameChanged && !isAvatarChanged) {
             Toast.show({
@@ -78,15 +113,17 @@ const EditProfileScreen = ({ navigation }) => {
                 text2: 'Anda belum mengubah nama atau foto profil.',
             });
             return;
-        }// Buat array untuk menampung semua promise API call
-        const updatePromises = [];
-
-        // Jika nama berubah, tambahkan promise untuk update nama
-        if (isNameChanged) {
-            updatePromises.push(dispatch(updateUserName({ fullName })));
         }
 
-        // Jika avatar berubah, tambahkan promise untuk update avatar
+        // Bikin array buat nampung semua promise API call
+        const updatePromises = [];
+
+        // Kalo nama berubah, tambahin promise buat update nama
+        if (isNameChanged) {
+            updatePromises.push(dispatch(updateUserName({ fullName: trimmedName })));
+        }
+
+        // Kalo avatar berubah, tambahin promise buat update avatar
         if (isAvatarChanged) {
             const formData = new FormData();
             let localUri = newAvatarFile.uri;
@@ -94,19 +131,15 @@ const EditProfileScreen = ({ navigation }) => {
             let match = /\.(\w+)$/.exec(filename);
             let type = match ? `image/${match[1]}` : `image`;
             formData.append('avatar', { uri: localUri, name: filename, type });
-
             updatePromises.push(dispatch(updateUserAvatar({ formData })));
         }
 
-        // Jalankan semua promise secara bersamaan
+        // Jalanin semua promise secara bersamaan
         try {
             const results = await Promise.all(updatePromises);
-
-            // Cek apakah ada yang gagal
+            // Cek ada yang gagal gak
             const hasFailed = results.some(result => result.meta.requestStatus === 'rejected');
-
             if (hasFailed) {
-                // Error sudah ditangani oleh useEffect, tidak perlu alert lagi di sini
                 console.log("Salah satu atau lebih update gagal.");
             } else {
                 Toast.show({
@@ -117,7 +150,6 @@ const EditProfileScreen = ({ navigation }) => {
                 });
             }
         } catch (e) {
-            // Ini untuk menangkap error yang tidak terduga
             console.error("Error saat menjalankan Promise.all:", e);
             Toast.show({
                 type: 'error',
@@ -126,8 +158,6 @@ const EditProfileScreen = ({ navigation }) => {
             });
         }
     };
-
-    // Fungsi untuk meminta izin dan membuka kamera
     const takePhotoFromCamera = async () => {
         const { status } = await ImagePicker.requestCameraPermissionsAsync();
         if (status !== 'granted') {
@@ -139,21 +169,21 @@ const EditProfileScreen = ({ navigation }) => {
             return;
         }
 
+
         let result = await ImagePicker.launchCameraAsync({
             allowsEditing: true,
             aspect: [1, 1],
             quality: 0.5,
         });
 
+
         if (!result.canceled) {
             setNewAvatarFile(result.assets[0]); // Simpan seluruh objek aset
             setAvatarUri(result.assets[0].uri);   // Perbarui preview gambar
         }
-
         setIsModalVisible(false);
-    }
+    };
 
-    // Fungsi untuk meminta izin dan membuka galeri
     const choosePhotoFromGallery = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== 'granted') {
@@ -178,7 +208,8 @@ const EditProfileScreen = ({ navigation }) => {
         }
 
         setIsModalVisible(false);
-    }
+    };
+
 
     const copyToClipboard = (text) => {
         Clipboard.setString(text);
@@ -200,230 +231,147 @@ const EditProfileScreen = ({ navigation }) => {
     };
 
     const avatarSource = avatarUri ? { uri: avatarUri } : require('../../assets/images/no-image.jpg');
+    const isSaveDisabled = !hasValidChanges() || isLoading;
 
     return (
-        <LinearGradient
-            colors={['#FDEAEB', '#E6ECF5']}
-            style={styles.screenContainer}
-        >
-            <FocusAwareStatusBar
-                barStyle="dark-content"
-                backgroundColor="transparent"
-                translucent={true}
-            />
-            {/* Header Kustom */}
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerButton}>
-                    <Ionicons name="arrow-back" size={24} color={COLORS.text} />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>Edit Profile</Text>
-                <TouchableOpacity onPress={handleSaveChanges} style={styles.headerButton} disabled={isLoading}>
-                    {isLoading ? <ActivityIndicator color={COLORS.primary} /> : <Text style={styles.saveText}>Save</Text>}
-                </TouchableOpacity>
-            </View>
-
-            <View style={styles.container}>
-                <View style={styles.avatarContainer}>
-                    <Image source={avatarSource} style={styles.avatar} />
-                    <TouchableOpacity onPress={handleChangePhoto}>
-                        <Text style={styles.changePhotoText}>Change Photo</Text>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+            <LinearGradient
+                colors={['#FDEAEB', '#E6ECF5']}
+                style={styles.screenContainer}
+            >
+                <FocusAwareStatusBar
+                    barStyle="dark-content"
+                    backgroundColor="transparent"
+                    translucent={true}
+                />
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerButton}>
+                        <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+                    </TouchableOpacity>
+                    <Text style={styles.headerTitle}>Edit Profile</Text>
+                    <TouchableOpacity
+                        onPress={handleSaveChanges}
+                        style={[styles.headerButton, isSaveDisabled && styles.disabledButton]}
+                        disabled={isSaveDisabled}
+                    >
+                        {isLoading ? (
+                            <ActivityIndicator color={COLORS.primary} />
+                        ) : (
+                            <Text style={[styles.saveText, isSaveDisabled && styles.disabledText]}>
+                                Save
+                            </Text>
+                        )}
                     </TouchableOpacity>
                 </View>
-
-
-
-                {/* --- Bagian Informasi yang Dapat Diubah --- */}
-                <View style={styles.sectionContainer}>
-                    <Text style={styles.sectionTitle}>Informasi yang Dapat Diubah</Text>
-                    <Text style={styles.label}>Full Name</Text>
-                    <TextInput
-                        style={styles.input}
-                        value={fullName}
-                        onChangeText={setFullName}
-                        placeholder="Masukkan nama lengkap Anda"
-                    />
+                <View style={styles.container}>
+                    <View style={styles.avatarContainer}>
+                        <Image source={avatarSource} style={styles.avatar} />
+                        <TouchableOpacity onPress={handleChangePhoto}>
+                            <Text style={styles.changePhotoText}>Change Photo</Text>
+                        </TouchableOpacity>
+                    </View>
+                    <View style={styles.sectionContainer}>
+                        <Text style={styles.sectionTitle}>Informasi yang Dapat Diubah</Text>
+                        <Text style={styles.label}>Full Name</Text>
+                        <TextInput
+                            style={[
+                                styles.input,
+                                isNameInputFocused && styles.inputFocused, // Style saat fokus
+                                nameError && styles.inputError // Style saat error
+                            ]}
+                            value={fullName}
+                            onChangeText={handleNameChange}
+                            placeholder="Masukkan nama lengkap Anda"
+                            onFocus={handleInputFocus}
+                            onBlur={handleInputBlur}
+                        />
+                        {nameError ? (
+                            <Text style={styles.errorText}>{nameError}</Text>
+                        ) : null}
+                    </View>
+                    <View style={styles.sectionContainer}>
+                        <Text style={styles.sectionTitle}>Informasi Akun</Text>
+                        <InfoRow
+                            label="Username"
+                            value={`@${user?.username || ''}`}
+                        />
+                        <InfoRow
+                            label="Email"
+                            value={user?.email || ''}
+                            iconName="copy-outline"
+                            onIconPress={() => copyToClipboard(user?.email)}
+                        />
+                        <InfoRow
+                            label="Terdaftar sejak"
+                            value={formatDate(user?.createdAt)}
+                            iconName="calendar-outline"
+                        />
+                    </View>
                 </View>
-
-                {/* --- Bagian Informasi Akun --- */}
-                <View style={styles.sectionContainer}>
-                    <Text style={styles.sectionTitle}>Informasi Akun</Text>
-                    <InfoRow
-                        label="Username"
-                        value={`@${user?.username || ''}`}
-                    />
-                    <InfoRow
-                        label="Email"
-                        value={user?.email || ''}
-                        iconName="copy-outline"
-                        onIconPress={() => copyToClipboard(user?.email)}
-                    />
-                    <InfoRow
-                        label="Terdaftar sejak"
-                        value={formatDate(user?.createdAt)}
-                        iconName="calendar-outline"
-                    />
-                </View>
-            </View>
-
-            {/* Bottom Modal */}
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={isModalVisible}
-                onRequestClose={() => {
-                    setIsModalVisible(!isModalVisible);
-                }}
-            >
-                <Pressable
-                    style={styles.modalOverlay}
-                    onPress={() => setIsModalVisible(false)} // Menutup modal saat area luar ditekan
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={isModalVisible}
+                    onRequestClose={() => {
+                        setIsModalVisible(!isModalVisible);
+                    }}
                 >
-                    {/* Menggunakan Pressable agar konten modal tidak ikut menutup saat ditekan */}
-                    <Pressable style={styles.modalContent}>
-                        <TouchableOpacity
-                            style={styles.closeButton}
-                            onPress={() => setIsModalVisible(false)}
-                        >
-                            <Ionicons name="close-circle" size={28} color={COLORS.gray} />
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={styles.modalButton} onPress={takePhotoFromCamera}>
-                            <Text style={styles.modalButtonText}>Ambil Gambar</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={[styles.modalButton, { borderBottomWidth: 0 }]} onPress={choosePhotoFromGallery}>
-                            <Text style={styles.modalButtonText}>Pilih dari Galeri</Text>
-                        </TouchableOpacity>
+                    <Pressable
+                        style={styles.modalOverlay}
+                        onPress={() => setIsModalVisible(false)} // Menutup modal saat area luar ditekan
+                    >
+                        {/* Menggunakan Pressable agar konten modal tidak ikut menutup saat ditekan */}
+                        <Pressable style={styles.modalContent}>
+                            <TouchableOpacity
+                                style={styles.closeButton}
+                                onPress={() => setIsModalVisible(false)}
+                            >
+                                <Ionicons name="close-circle" size={28} color={COLORS.gray} />
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.modalButton} onPress={takePhotoFromCamera}>
+                                <Text style={styles.modalButtonText}>Ambil Gambar</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={[styles.modalButton, { borderBottomWidth: 0 }]} onPress={choosePhotoFromGallery}>
+                                <Text style={styles.modalButtonText}>Pilih dari Galeri</Text>
+                            </TouchableOpacity>
+                        </Pressable>
                     </Pressable>
-                </Pressable>
-            </Modal>
-
-        </LinearGradient>
+                </Modal>
+            </LinearGradient>
+        </TouchableWithoutFeedback>
     );
 };
 
 const styles = StyleSheet.create({
-    screenContainer: {
-        flex: 1,
-        backgroundColor: COLORS.white,
-        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingVertical: 15,
-        paddingHorizontal: 20,
-        borderBottomWidth: 1,
-        borderBottomColor: COLORS.borderColor,
-    },
-    headerButton: {
-        padding: 5,
-        // minWidth: 50, // Beri lebar minimum agar layout stabil
-        alignItems: 'flex-end',
-    },
-    headerTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-    },
-    saveText: {
-        fontSize: 16,
-        color: COLORS.primary,
-        fontWeight: 'bold',
-    },
-    container: {
-        flex: 1,
-        padding: 20,
-    },
-    avatarContainer: {
-        alignItems: 'center',
-        marginVertical: 20,
-    },
-    avatar: {
-        width: 120,
-        height: 120,
-        borderRadius: 60,
-        marginBottom: 10,
-    },
-    changePhotoText: {
-        fontSize: 16,
-        color: COLORS.primary,
-        fontWeight: 'bold',
-    },
-    formContainer: {
-        marginTop: 20,
-    },
-    label: {
-        fontSize: 14,
-        color: COLORS.text,
-        marginBottom: 8,
-        fontWeight: '500',
-    },
-    input: {
-        backgroundColor: '#f5f5f5',
-        borderRadius: 10,
-        padding: 15,
-        fontSize: 16,
-    },
-    sectionContainer: {
-        marginBottom: pixelSizeVertical(25),
-    },
-    sectionTitle: {
-        fontSize: fontPixel(18),
-        fontWeight: 'bold',
-        color: COLORS.text,
-        marginBottom: pixelSizeVertical(15),
-    },
-    // Styles untuk InfoRow
-    infoRowContainer: {
-        marginBottom: pixelSizeVertical(15),
-    },
-    infoLabel: {
-        fontSize: fontPixel(14),
-        color: COLORS.gray,
-        marginBottom: 4,
-    },
-    infoValueContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    infoValue: {
-        fontSize: fontPixel(16),
-        color: COLORS.text,
-        fontWeight: '500',
-    },
-    infoIcon: {
-        padding: 5,
-    },
-    // Styles untuk Modal
-    modalOverlay: {
-        flex: 1,
-        justifyContent: 'flex-end',
-        backgroundColor: 'rgba(0,0,0,0.5)',
-    },
-    modalContent: {
-        backgroundColor: 'white',
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        paddingVertical: 20,
-        paddingTop: 40,
-    },
-    modalButton: {
-        padding: 20,
-        alignItems: 'center',
-        borderBottomWidth: 1,
-        borderColor: '#eee',
-    },
-    modalButtonText: {
-        fontSize: fontPixel(18),
-        color: COLORS.primary,
-    },
-    closeButton: {
-        position: 'absolute',
-        top: 10,
-        right: 15,
-        padding: 5,
-    },
+    screenContainer: { flex: 1, backgroundColor: COLORS.white, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 },
+    header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 15, paddingHorizontal: 20, borderBottomWidth: 1, borderBottomColor: COLORS.borderColor },
+    headerButton: { padding: 5, alignItems: 'flex-end' },
+    headerTitle: { fontSize: 20, fontWeight: 'bold' },
+    saveText: { fontSize: 16, color: COLORS.primary, fontWeight: 'bold' },
+    disabledButton: { opacity: 0.5 },
+    disabledText: { color: COLORS.gray },
+    container: { flex: 1, padding: 20 },
+    avatarContainer: { alignItems: 'center', marginVertical: 20 },
+    avatar: { width: 120, height: 120, borderRadius: 60, marginBottom: 10 },
+    changePhotoText: { fontSize: 16, color: COLORS.primary, fontWeight: 'bold' },
+    formContainer: { marginTop: 20 },
+    label: { fontSize: 14, color: COLORS.text, marginBottom: 8, fontWeight: '500' },
+    input: { backgroundColor: '#f5f5f5', borderRadius: 10, padding: 15, fontSize: 16, borderWidth: 1, borderColor: 'transparent' },
+    inputFocused: { borderColor: COLORS.primary, backgroundColor: '#fff',},
+    inputError: { borderColor: '#ff4444', backgroundColor: '#fff5f5' },
+    errorText: { color: '#ff4444', fontSize: 12, marginTop: 5, fontWeight: '500' },
+    sectionContainer: { marginBottom: pixelSizeVertical(25) },
+    sectionTitle: { fontSize: fontPixel(18), fontWeight: 'bold', color: COLORS.text, marginBottom: pixelSizeVertical(15) },
+    infoRowContainer: { marginBottom: pixelSizeVertical(15) },
+    infoLabel: { fontSize: fontPixel(14), color: COLORS.gray, marginBottom: 4 },
+    infoValueContainer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    infoValue: { fontSize: fontPixel(16), color: COLORS.text, fontWeight: '500' },
+    infoIcon: { padding: 5 },
+    modalOverlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' },
+    modalContent: { backgroundColor: 'white', borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingVertical: 20, paddingTop: 40 },
+    modalButton: { padding: 20, alignItems: 'center', borderBottomWidth: 1, borderColor: '#eee' },
+    modalButtonText: { fontSize: fontPixel(18), color: COLORS.primary },
+    closeButton: { position: 'absolute', top: 10, right: 15, padding: 5 },
 });
 
 export default EditProfileScreen;

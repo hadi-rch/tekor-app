@@ -1,20 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-    Platform,
-    StatusBar,
-    ScrollView,
-    Image,
-    Modal,
-    Pressable,
-    FlatList,
-    AppState,
-    BackHandler,
-    Alert
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar, ScrollView, Image, Modal, Pressable, FlatList, AppState, BackHandler, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import { COLORS } from '../constants/colors';
@@ -107,10 +92,8 @@ const TestScreen = ({ route, navigation }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [playedAudios, setPlayedAudios] = useState([]);
     const timerRef = useRef(null);
-    const finishTimeRef = useRef(null); // Ref untuk menyimpan finishTime
-    const [startTime, setStartTime] = useState(null); // State untuk menyimpan startTime
-
-
+    const finishTimeRef = useRef(null);
+    const [startTime, setStartTime] = useState(null);
 
     // --- State untuk Deteksi Kecurangan ---
     const [leaveAttempts, setLeaveAttempts] = useState(3);
@@ -142,7 +125,7 @@ const TestScreen = ({ route, navigation }) => {
                 if (attemptData) {
                     setQuestions(attemptData.questions);
 
-                    // --- PERBAIKAN 2: Simpan finishTime dan Hitung Sisa Waktu ---
+                    //Simpan finishTime dan Hitung Sisa Waktu ---
                     if (attemptData.finishTime) {
                         finishTimeRef.current = new Date(attemptData.finishTime).getTime();
                         const now = new Date().getTime();
@@ -203,7 +186,7 @@ const TestScreen = ({ route, navigation }) => {
     }, [leaveAttempts]);
 
     const handleAppLeave = () => {
-        if (leaveAttempts <= 0) return; // Jika sudah di-force submit, abaikan
+        if (leaveAttempts <= 0) return; // Jkalo udahh diforce submit, abaikan
 
         const newAttempts = leaveAttempts - 1;
         setLeaveAttempts(newAttempts);
@@ -212,7 +195,7 @@ const TestScreen = ({ route, navigation }) => {
             setWarningMessage(`Anda telah keluar dari ujian. Kesempatan tersisa: ${newAttempts} kali.`);
             setIsWarningModalVisible(true);
         } else {
-            // Kesempatan habis, paksa submit
+            // Kesempatan abis, paksa submit
             forceSubmit();
         }
     };
@@ -220,7 +203,7 @@ const TestScreen = ({ route, navigation }) => {
     const forceSubmit = () => {
         setWarningMessage('Anda telah kehabisan kesempatan. Ujian akan dikumpulkan secara otomatis.');
         setIsWarningModalVisible(true);
-        // Menunggu sejenak agar user bisa membaca pesan sebelum submit
+        // tungguin bentar biar user bisa membaca pesan sebelum submit
         setTimeout(() => {
             setIsWarningModalVisible(false);
             confirmSubmit(true); // Kirim flag 'force'
@@ -232,7 +215,6 @@ const TestScreen = ({ route, navigation }) => {
 
 
     useEffect(() => {
-        // Jangan jalankan timer jika masih loading atau finishTime belum di-set
         if (isLoading || !finishTimeRef.current) return;
 
         timerRef.current = setInterval(() => {
@@ -264,7 +246,6 @@ const TestScreen = ({ route, navigation }) => {
             await submitAnswer(attemptId, currentQuestion.id, optionId, remainingSeconds);
         } catch (error) {
             console.error("Failed to submit answer:", error);
-            // Handle error, maybe show a toast or an alert
             Alert.alert("Error", "Gagal mengirim jawaban. Silakan periksa koneksi Anda.");
         }
     };
@@ -276,7 +257,6 @@ const TestScreen = ({ route, navigation }) => {
     const handleExit = () => {
         clearInterval(timerRef.current);
         confirmSubmit();
-        // navigation.goBack();
     };
 
     const handleNext = () => {
@@ -307,12 +287,12 @@ const TestScreen = ({ route, navigation }) => {
         try {
             const response = await submitTestAttempt(attemptId);
             if (response.status === "OK" && response.data) {
-                console.log("hadi",response.data)
+                console.log("hadi", response.data)
                 // Navigasi ke halaman hasil dengan membawa data hasil tes
                 navigation.replace('TestResult', {
                     testResult: response.data,
                     start: startTime,
-                    attemptId: attemptId, // Juga kirim attemptId jika diperlukan untuk review
+                    attemptId: attemptId,
                 });
             } else {
                 throw new Error(response.message || "Gagal mengirimkan hasil tes.");
@@ -320,7 +300,7 @@ const TestScreen = ({ route, navigation }) => {
         } catch (error) {
             console.error("Failed to submit test:", error);
             Alert.alert("Error", "Gagal mengirimkan hasil tes. Silakan coba lagi.", [
-                { text: "OK", onPress: () => setIsSubmitModalVisible(true) }, // Buka kembali modal jika gagal
+                { text: "OK", onPress: () => setIsSubmitModalVisible(true) },
             ]);
         }
     };
@@ -612,45 +592,13 @@ const styles = StyleSheet.create({
     cancelButtonText: { color: COLORS.primary, fontWeight: 'bold', fontSize: fontPixel(16), },
     exitButtonText: { color: COLORS.white, fontWeight: 'bold', fontSize: fontPixel(16), },
     // Warning Modal Styles
-    warningModalContent: {
-        width: '80%',
-        backgroundColor: 'white',
-        borderRadius: 15,
-        padding: pixelSizeHorizontal(20),
-        alignItems: 'center',
-    },
-    warningTitle: {
-        fontSize: fontPixel(20),
-        fontWeight: 'bold',
-        marginTop: pixelSizeVertical(10),
-        marginBottom: pixelSizeVertical(10),
-    },
-    warningText: {
-        fontSize: fontPixel(16),
-        textAlign: 'center',
-        marginBottom: pixelSizeVertical(20),
-        color: COLORS.gray,
-    },
-    warningButton: {
-        backgroundColor: COLORS.accent,
-        paddingVertical: pixelSizeVertical(12),
-        paddingHorizontal: pixelSizeHorizontal(30),
-        borderRadius: 8,
-    },
-    warningButtonText: {
-        color: 'white',
-        fontWeight: 'bold',
-        fontSize: fontPixel(16),
-    },
-    imageOptionButton: {
-        paddingVertical: pixelSizeVertical(10),
-    },
-    optionImage: {
-        flex: 1,
-        height: heightPixel(80),
-        resizeMode: 'contain',
-        borderRadius: 8,
-    },
+    warningModalContent: { width: '80%', backgroundColor: 'white', borderRadius: 15, padding: pixelSizeHorizontal(20), alignItems: 'center', },
+    warningTitle: { fontSize: fontPixel(20), fontWeight: 'bold', marginTop: pixelSizeVertical(10), marginBottom: pixelSizeVertical(10), },
+    warningText: { fontSize: fontPixel(16), textAlign: 'center', marginBottom: pixelSizeVertical(20), color: COLORS.gray, },
+    warningButton: { backgroundColor: COLORS.accent, paddingVertical: pixelSizeVertical(12), paddingHorizontal: pixelSizeHorizontal(30), borderRadius: 8, },
+    warningButtonText: { color: 'white', fontWeight: 'bold', fontSize: fontPixel(16), },
+    imageOptionButton: { paddingVertical: pixelSizeVertical(10), },
+    optionImage: { flex: 1, height: heightPixel(80), resizeMode: 'contain', borderRadius: 8, },
 });
 
 export default TestScreen;

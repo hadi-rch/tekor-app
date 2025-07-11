@@ -1,15 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-    Platform,
-    StatusBar,
-    Alert,
-    ScrollView,
-    Keyboard,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar, Alert, ScrollView, Keyboard } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import api from '../../api/axiosConfig';
@@ -19,8 +9,6 @@ import CustomTextInput from '../components/CustomTextInput';
 import CustomButton from '../components/CustomButton';
 import { fontPixel, heightPixel, pixelSizeVertical, pixelSizeHorizontal } from '../../helper';
 
-
-// --- Komponen Utama ChangePasswordScreen ---
 const ChangePasswordScreen = ({ navigation }) => {
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
@@ -183,58 +171,17 @@ const ChangePasswordScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-    screenContainer: {
-        flex: 1,
-        backgroundColor: COLORS.white,
-        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingVertical: pixelSizeVertical(15),
-        paddingHorizontal: pixelSizeHorizontal(20),
-        borderBottomWidth: 1,
-        borderBottomColor: COLORS.borderColor,
-    },
-    headerButton: {
-        padding: pixelSizeHorizontal(5),
-    },
-    headerTitle: {
-        fontSize: fontPixel(20),
-        fontWeight: 'bold',
-    },
-    scrollContainer: {
-        flexGrow: 1,
-        padding: pixelSizeHorizontal(20),
-        justifyContent: 'space-between',
-    },
-    eyeIcon: {
-        padding: pixelSizeHorizontal(10),
-    },
-    strengthContainer: {
-        marginTop: pixelSizeVertical(20),
-    },
-    strengthLabel: {
-        fontSize: fontPixel(14),
-        color: COLORS.text,
-        marginBottom: pixelSizeVertical(8),
-    },
-    strengthBarBackground: {
-        height: heightPixel(8),
-        backgroundColor: '#e9ecef',
-        borderRadius: heightPixel(4),
-    },
-    strengthBar: {
-        height: '100%',
-        borderRadius: heightPixel(4),
-    },
-    formErrorText: {
-        color: 'red',
-        textAlign: 'center',
-        marginBottom: 16,
-        fontSize: fontPixel(14),
-    },
+    screenContainer: { flex: 1, backgroundColor: COLORS.white, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 },
+    header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: pixelSizeVertical(15), paddingHorizontal: pixelSizeHorizontal(20), borderBottomWidth: 1, borderBottomColor: COLORS.borderColor },
+    headerButton: { padding: pixelSizeHorizontal(5) },
+    headerTitle: { fontSize: fontPixel(20), fontWeight: 'bold' },
+    scrollContainer: { flexGrow: 1, padding: pixelSizeHorizontal(20), justifyContent: 'space-between' },
+    eyeIcon: { padding: pixelSizeHorizontal(10) },
+    strengthContainer: { marginTop: pixelSizeVertical(20) },
+    strengthLabel: { fontSize: fontPixel(14), color: COLORS.text, marginBottom: pixelSizeVertical(8) },
+    strengthBarBackground: { height: heightPixel(8), backgroundColor: '#e9ecef', borderRadius: heightPixel(4) },
+    strengthBar: { height: '100%', borderRadius: heightPixel(4) },
+    formErrorText: { color: 'red', textAlign: 'center', marginBottom: 16, fontSize: fontPixel(14) },
 });
 
 export default ChangePasswordScreen;

@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Platform, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, StatusBar } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { Ionicons } from '@expo/vector-icons';
-
 import CustomTextInput from '../components/CustomTextInput';
 import CustomButton from '../components/CustomButton';
 import { COLORS } from '../constants/colors';
@@ -246,114 +245,26 @@ const RegisterScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-    screenContainer: {
-        flex: 1,
-        backgroundColor: COLORS.white,
-        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-    },
-    container: {
-        padding: 24,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    logo: {
-        width: 80,
-        height: 80,
-        resizeMode: 'contain',
-        marginBottom: 20,
-    },
-    title: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        color: COLORS.text,
-        marginBottom: 8,
-        marginTop: 20,
-    },
-    subtitle: {
-        fontSize: 16,
-        color: COLORS.gray,
-        marginBottom: 32,
-    },
-    form: {
-        width: '100%',
-        marginBottom: 16,
-    },
-    eyeIcon: {
-        padding: 5,
-    },
-    termsText: {
-        fontSize: 12,
-        color: COLORS.gray,
-        textAlign: 'center',
-        marginBottom: 24,
-        marginHorizontal: 20,
-    },
-    linkText: {
-        color: COLORS.primary,
-        fontWeight: 'bold',
-    },
-    dividerContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        width: '100%',
-        marginVertical: 24,
-    },
-    dividerLine: {
-        flex: 1,
-        height: 1,
-        backgroundColor: COLORS.borderColor,
-    },
-    dividerText: {
-        marginHorizontal: 10,
-        color: COLORS.gray,
-    },
-    socialLoginContainer: {
-        width: '100%',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 32,
-    },
-    socialButton: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderWidth: 1,
-        borderColor: COLORS.borderColor,
-        borderRadius: 8,
-        paddingVertical: 12,
-        marginHorizontal: 5,
-    },
-    socialButtonText: {
-        marginLeft: 10,
-        fontSize: 16,
-        fontWeight: '500',
-    },
-    footer: {
-        flexDirection: 'row',
-        paddingTop: 20,
-    },
-    footerText: {
-        fontSize: 14,
-        color: COLORS.text,
-    },
-    formErrorText: {
-        color: 'red',
-        textAlign: 'center',
-        marginBottom: 16,
-        fontSize: fontPixel(14),
-    },
-    termsText: {
-        fontSize: 12,
-        color: COLORS.gray,
-        textAlign: 'center',
-        marginBottom: 24,
-        marginHorizontal: 20,
-    },
-    linkText: {
-        color: COLORS.primary,
-        fontWeight: 'bold',
-    },
+    screenContainer: { flex: 1, backgroundColor: COLORS.white, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 },
+    container: { padding: 24, alignItems: 'center', justifyContent: 'center' },
+    logo: { width: 80, height: 80, resizeMode: 'contain', marginBottom: 20 },
+    title: { fontSize: 28, fontWeight: 'bold', color: COLORS.text, marginBottom: 8, marginTop: 20 },
+    subtitle: { fontSize: 16, color: COLORS.gray, marginBottom: 32 },
+    form: { width: '100%', marginBottom: 16 },
+    eyeIcon: { padding: 5 },
+    termsText: { fontSize: 12, color: COLORS.gray, textAlign: 'center', marginBottom: 24, marginHorizontal: 20 },
+    linkText: { color: COLORS.primary, fontWeight: 'bold' },
+    dividerContainer: { flexDirection: 'row', alignItems: 'center', width: '100%', marginVertical: 24 },
+    dividerLine: { flex: 1, height: 1, backgroundColor: COLORS.borderColor },
+    dividerText: { marginHorizontal: 10, color: COLORS.gray },
+    socialLoginContainer: { width: '100%', flexDirection: 'row', justifyContent: 'space-between', marginBottom: 32 },
+    socialButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: COLORS.borderColor, borderRadius: 8, paddingVertical: 12, marginHorizontal: 5 },
+    socialButtonText: { marginLeft: 10, fontSize: 16, fontWeight: '500' },
+    footer: { flexDirection: 'row', paddingTop: 20 },
+    footerText: { fontSize: 14, color: COLORS.text },
+    formErrorText: { color: 'red', textAlign: 'center', marginBottom: 16, fontSize: fontPixel(14) },
+    termsText: { fontSize: 12, color: COLORS.gray, textAlign: 'center', marginBottom: 24, marginHorizontal: 20 },
+    linkText: { color: COLORS.primary, fontWeight: 'bold' },
 });
 
 export default RegisterScreen;
