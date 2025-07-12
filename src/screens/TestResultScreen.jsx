@@ -97,11 +97,6 @@ const TestResultScreen = ({ navigation, route }) => {
                         </View>
                         <StatBox label="Waktu Selesai" value={formatTime(finishTime)} fullWidth={true} />
                     </View>
-
-                    <Image
-                        source={require('../../assets/images/no-image.jpg')}
-                        style={styles.promoImage}
-                    />
                 </View>
             </ScrollView>
 
@@ -110,7 +105,7 @@ const TestResultScreen = ({ navigation, route }) => {
                 <CustomButton
                     title="Lihat Pembahasan"
                     onPress={() => navigation.navigate('Review', { attemptId: attemptId })}
-                    style={{ backgroundColor: COLORS.primary, marginBottom: pixelSizeVertical(50) }}
+                    style={{ backgroundColor: COLORS.primary }}
                 />
             </View>
         </View>

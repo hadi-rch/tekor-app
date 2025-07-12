@@ -75,7 +75,11 @@ const ProductsScreen = ({ navigation }) => {
 
             } catch (error) {
                 console.log("Gagal mengambil data Try out:", error);
-                Alert.alert("Error", "Tidak dapat memuat data Try out.");
+                Toast.show({
+                    type: 'error',
+                    text1: 'Gagal',
+                    text2: 'Tidak dapat memuat data Try out.',
+                });
             } finally {
                 setIsLoading(false);
             }

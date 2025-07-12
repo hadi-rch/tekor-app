@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar, ScrollView, Image, Modal, Pressable, FlatList, AppState, BackHandler, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar, ScrollView, Image, Modal, Pressable, FlatList, AppState, BackHandler } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 import { fontPixel, heightPixel, pixelSizeVertical, pixelSizeHorizontal } from '../../helper';
 import { startTestAttempt, getTestAttemptDetails, submitAnswer, submitTestAttempt } from '../../services/testService';
+import Toast from 'react-native-toast-message';
 
 // --- Komponen-komponen Kecil ---
 const Timer = ({ timeLeft }) => {
@@ -89,6 +90,8 @@ const TestScreen = ({ route, navigation }) => {
     const [isNavModalVisible, setIsNavModalVisible] = useState(false);
     const [isExitModalVisible, setIsExitModalVisible] = useState(false);
     const [isSubmitModalVisible, setIsSubmitModalVisible] = useState(false);
+    const [isTimeUpModalVisible, setIsTimeUpModalVisible] = useState(false);
+    const [isSubmitErrorModalVisible, setIsSubmitErrorModalVisible] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [playedAudios, setPlayedAudios] = useState([]);
     const timerRef = useRef(null);
@@ -142,9 +145,12 @@ const TestScreen = ({ route, navigation }) => {
 
             } catch (error) {
                 console.log("Failed to initialize test:", error.response?.data || error.message);
-                Alert.alert("Error", "Gagal memuat tes. Silakan coba lagi.", [
-                    { text: "OK", onPress: () => navigation.goBack() },
-                ]);
+                Toast.show({
+                    type: 'error',
+                    text1: 'Gagal',
+                    text2: 'Gagal memuat tes. Silakan coba lagi.',
+                    onHide: () => navigation.goBack(),
+                });
             } finally {
                 setIsLoading(false);
             }
@@ -211,9 +217,6 @@ const TestScreen = ({ route, navigation }) => {
     };
 
 
-
-
-
     useEffect(() => {
         if (isLoading || !finishTimeRef.current) return;
 
@@ -226,10 +229,8 @@ const TestScreen = ({ route, navigation }) => {
             // Jika waktu habis, submit otomatis
             if (remainingSeconds <= 0) {
                 clearInterval(timerRef.current);
-                // Menampilkan alert sebelum auto-submit
-                Alert.alert("Waktu Habis", "Waktu pengerjaan Anda telah berakhir. Jawaban akan dikumpulkan secara otomatis.", [
-                    { text: "OK", onPress: () => confirmSubmit(true) } // true menandakan forced submit
-                ]);
+                // Menampilkan modal sebelum auto-submit
+                setIsTimeUpModalVisible(true);
             }
         }, 1000);
 
@@ -246,7 +247,11 @@ const TestScreen = ({ route, navigation }) => {
             await submitAnswer(attemptId, currentQuestion.id, optionId, remainingSeconds);
         } catch (error) {
             console.log("Failed to submit answer:", error);
-            Alert.alert("Error", "Gagal mengirim jawaban. Silakan periksa koneksi Anda.");
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Gagal mengirim jawaban. Silakan periksa koneksi Anda.',
+            });
         }
     };
 
@@ -299,9 +304,7 @@ const TestScreen = ({ route, navigation }) => {
             }
         } catch (error) {
             console.log("Failed to submit test:", error);
-            Alert.alert("Error", "Gagal mengirimkan hasil tes. Silakan coba lagi.", [
-                { text: "OK", onPress: () => setIsSubmitModalVisible(true) },
-            ]);
+            setIsSubmitErrorModalVisible(true);
         }
     };
 
@@ -529,6 +532,63 @@ const TestScreen = ({ route, navigation }) => {
                                     <Text style={styles.warningButtonText}>Saya Mengerti</Text>
                                 </TouchableOpacity>
                             )}
+                        </View>
+                    </Pressable>
+                </Pressable>
+            </Modal>
+
+            {/* Modal Peringatan Waktu Habis */}
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={isTimeUpModalVisible}
+            >
+                <Pressable style={styles.modalOverlay}>
+                    <Pressable>
+                        <View style={styles.warningModalContent}>
+                            <Ionicons name="time" size={fontPixel(48)} color="#d9534f" />
+                            <Text style={styles.warningTitle}>Waktu Habis</Text>
+                            <Text style={styles.warningText}>
+                                Waktu pengerjaan Anda telah berakhir. Jawaban akan dikumpulkan secara otomatis.
+                            </Text>
+                            <TouchableOpacity
+                                style={styles.warningButton}
+                                onPress={() => {
+                                    setIsTimeUpModalVisible(false);
+                                    confirmSubmit(true); // true menandakan forced submit
+                                }}
+                            >
+                                <Text style={styles.warningButtonText}>OK</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </Pressable>
+                </Pressable>
+            </Modal>
+
+            {/* Modal Gagal Submit */}
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={isSubmitErrorModalVisible}
+                onRequestClose={() => setIsSubmitErrorModalVisible(false)}
+            >
+                <Pressable style={styles.modalOverlay} onPress={() => setIsSubmitErrorModalVisible(false)}>
+                    <Pressable>
+                        <View style={styles.warningModalContent}>
+                            <Ionicons name="alert-circle" size={fontPixel(48)} color="#d9534f" />
+                            <Text style={styles.warningTitle}>Gagal Mengirim</Text>
+                            <Text style={styles.warningText}>
+                                Gagal mengirimkan hasil tes. Silakan periksa koneksi Anda dan coba lagi.
+                            </Text>
+                            <TouchableOpacity
+                                style={styles.warningButton}
+                                onPress={() => {
+                                    setIsSubmitErrorModalVisible(false);
+                                    setIsSubmitModalVisible(true); // Buka kembali modal konfirmasi submit
+                                }}
+                            >
+                                <Text style={styles.warningButtonText}>Coba Lagi</Text>
+                            </TouchableOpacity>
                         </View>
                     </Pressable>
                 </Pressable>

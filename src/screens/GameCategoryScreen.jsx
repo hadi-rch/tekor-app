@@ -5,6 +5,7 @@ import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 import { fontPixel, pixelSizeVertical, pixelSizeHorizontal, widthPixel } from '../../helper';
 import api from '../../api/axiosConfig';
 import { LinearGradient } from 'expo-linear-gradient';
+import Toast from 'react-native-toast-message';
 
 const categoryDisplayMap = {
     "VERB": { title: 'Kata Kerja', image: require('../../assets/images/kerja.jpg') },
@@ -42,7 +43,12 @@ const GameCategoryScreen = ({ navigation }) => {
                 setCategories(formattedCategories);
             } catch (error) {
                 console.log("Gagal mengambil kategori:", error);
-                Alert.alert("Error", "Tidak dapat memuat kategori permainan.");
+                Toast.show({
+                    type: 'error',
+                    text1: 'Gagal Memuat Kategori',
+                    text2: 'Tidak dapat memuat kategori permainan.',
+                    // onHide: () => navigation.goBack(),
+                });
             } finally {
                 setIsLoading(false);
             }

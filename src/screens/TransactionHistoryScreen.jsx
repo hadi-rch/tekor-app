@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Platform, StatusBar, ActivityIndicator, RefreshControl, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Platform, StatusBar, ActivityIndicator, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
@@ -64,7 +64,11 @@ const TransactionHistoryScreen = ({ navigation }) => {
             setTransactions(formattedData);
         } catch (error) {
             console.log("Gagal mengambil riwayat transaksi:", error);
-            Alert.alert("Error", "Tidak dapat memuat riwayat transaksi.");
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Tidak dapat memuat riwayat transaksi.',
+            });
         } finally {
             setIsLoading(false); // Selalu matikan loader utama setelah selesai
         }

@@ -30,6 +30,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
             setIsLoading(true);
             try {
                 const response = await api.post('/api/v1/auth/forgot-password', { email });
+                
 
                 Alert.alert("Permintaan Terkirim", response.data.message || 'Jika email terdaftar, link reset telah dikirim.');
                 navigation.navigate('ResetLinkSent', { email: email });

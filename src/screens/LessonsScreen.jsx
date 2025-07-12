@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, StatusBar, Platform, Modal, ActivityIndicator, Pressable, Alert, RefreshControl } from 'react-native'
+import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, StatusBar, Platform, Modal, ActivityIndicator, Pressable, RefreshControl } from 'react-native'
 import { COLORS } from '../constants/colors'
 import { Ionicons } from '@expo/vector-icons'
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar'
@@ -7,6 +7,7 @@ import { fontPixel } from '../../helper'
 import { LinearGradient } from 'expo-linear-gradient'
 import api from '../../api/axiosConfig';
 import StyledText from '../components/StyledText'
+import Toast from 'react-native-toast-message'
 
 // --- Komponen untuk setiap item dalam daftar Test ---
 const LessonItem = ({ item, onPress }) => {
@@ -88,7 +89,7 @@ const HistoryItem = ({ item, navigation }) => (
 const WarningItem = ({ icon, text }) => (
   <View style={styles.warningItem}>
     <StyledText style={styles.warningIcon}>{icon}</StyledText>
-    <StyledText style={styles.warningText}>{text}</StyledText>
+    <StyledText fontType='montserrat' style={styles.warningText}>{text}</StyledText>
   </View>
 );
 
@@ -150,7 +151,11 @@ const LessonsScreen = ({ navigation }) => {
       setInProgressTests(formattedInProgress);
     } catch (error) {
       console.log("Gagal mengambil data tes:", error.response?.data || error.message);
-      Alert.alert("Error", "Tidak dapat memuat daftar tes Anda.");
+      Toast.show({
+        type: 'error',
+        text1: 'Gagal mengambil data tes',
+        text2: "Tidak dapat memuat daftar tes Anda.",
+      });
     } finally {
       if (!refreshing) setIsLoading(false);
     }
@@ -163,7 +168,11 @@ const LessonsScreen = ({ navigation }) => {
       const completedData = response.data.data || [];
       setCompletedTests(completedData);
     } catch (error) {
-      Alert.alert("Error", "Tidak dapat memuat riwayat tes Anda.");
+      Toast.show({
+        type: 'error',
+        text1: 'Gagal Mengambil Riwayat tes',
+        text2: "Tidak dapat memuat riwayat tes Anda.",
+      });
     } finally {
       if (!refreshing) setIsHistoryLoading(false);
     }
@@ -315,15 +324,45 @@ const LessonsScreen = ({ navigation }) => {
         <Pressable style={styles.modalOverlay} onPress={() => setIsModalVisible(false)}>
           <Pressable style={styles.confirmModalContent}>
             <View style={styles.dragHandle} />
-            <StyledText style={styles.modalTitle}>
-              {selectedLesson?.status === 'In Progress' ? 'Lanjutkan Tes?' : 'Anda Yakin Ingin Mengerjakan?'}
+            <StyledText fontType='montserrat' style={styles.modalTitle}>
+              {selectedLesson?.status === 'In Progress' ? 'Lanjutkan Tes?' : 'Harap baca dan patuhi ketentuan berikut dengan saksama:'}
             </StyledText>
 
             {selectedLesson?.status !== 'In Progress' && (
               <View style={styles.warningsContainer}>
-                <WarningItem icon="⚠️" text="Ujian ini hanya bisa dikerjakan 1 (satu) kali. Progres tidak dapat diulang atau dibatalkan setelah dimulai." />
-                <WarningItem icon="⏱️" text="Waktu pengerjaan adalah 50 menit dan timer tidak bisa dijeda (pause)." />
-                <WarningItem icon="📶" text="Pastikan koneksi internet Anda stabil." />
+                <WarningItem
+                  icon="⚠️"
+                  text="Ujian ini hanya bisa dikerjakan 1 (satu) kali dan tidak dapat diulang."
+                />
+                <WarningItem
+                  icon="📝"
+                  text="Format soal dalam bentuk pilihan ganda berisi 20 soal Membaca (읽기 - Ilgi) dan 20 soal Mendengarkan (듣기 - Teutgi)."
+                />
+                <WarningItem
+                  icon="⏱️"
+                  text="Waktu pengerjaan selama 50 menit, waktu tidak bisa dijeda dan waktu akan terus berjalan."
+                />
+                <WarningItem
+                  icon="📶"
+                  text="Pastikan koneksi internet Anda stabil."
+                />
+                <WarningItem
+                  icon="🚫"
+                  text="Tidak boleh berganti tab atau keluar dari aplikasi, jika terdeteksi keluar dari tab atau aplikasi sebanyak tiga kali, try out akan otomatis tersubmit."
+                />
+                <WarningItem
+                  icon="🔊"
+                  text="Audio di setiap soal Mendengarkan (듣기 - Teutgi) hanya dapat diputar satu kali."
+                />
+                <WarningItem
+                  icon="⏰"
+                  text="Perhatikan waktu yang ditampilkan. Jika waktu habis, pengerjaan try out akan otomatis tersubmit."
+                />
+                <WarningItem
+                  icon="📊"
+                  text="Hasil try out dapat dilihat di profil riwayat try out."
+                />
+                <StyledText fontType='montserrat' style={styles.modalTitleFooter}>Terima Kasih, Salam Hangat TE-KOR.</StyledText>
               </View>
             )}
 
@@ -385,6 +424,7 @@ const styles = StyleSheet.create({
   confirmModalContent: { backgroundColor: "white", borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, alignItems: "center" },
   dragHandle: { width: 40, height: 5, backgroundColor: COLORS.borderColor, borderRadius: 3, marginBottom: 15 },
   modalTitle: { fontSize: fontPixel(20), fontWeight: "bold", color: COLORS.text, marginBottom: 20 },
+  modalTitleFooter: { fontSize: fontPixel(16), fontWeight: "bold", color: COLORS.text, marginBottom: 10, paddingTop: 10, textAlign: "center" },
   warningsContainer: { width: "100%", marginBottom: 25 },
   warningItem: { flexDirection: "row", alignItems: "flex-start", marginBottom: 15 },
   warningIcon: { fontSize: fontPixel(16), marginRight: 10 },

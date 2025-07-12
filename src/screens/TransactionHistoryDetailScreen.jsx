@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar, ScrollView, ActivityIndicator, Alert, Clipboard } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar, ScrollView, ActivityIndicator, Clipboard } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
 import { COLORS } from '../constants/colors';
@@ -7,6 +7,7 @@ import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 import { fontPixel, heightPixel, pixelSizeVertical, pixelSizeHorizontal } from '../../helper';
 import api from '../../api/axiosConfig';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Toast from 'react-native-toast-message';
 
 // --- Komponen untuk Badge Status ---
 const StatusBadge = ({ status }) => {
@@ -35,7 +36,11 @@ const StatusBadge = ({ status }) => {
 const DetailRow = ({ label, value, canCopy = false }) => {
     const handleCopy = () => {
         Clipboard.setString(value);
-        Alert.alert("Disalin", `${label} telah disalin ke clipboard.`);
+        Toast.show({
+            type: 'success',
+            text1: 'Disalin',
+            text2: `${label} telah disalin ke clipboard.`,
+        });
     };
 
     return (
@@ -62,8 +67,12 @@ const TransactionDetailScreen = ({ navigation, route }) => {
 
     useEffect(() => {
         if (!orderId) {
-            Alert.alert("Error", "ID Pesanan tidak ditemukan.");
-            navigation.goBack();
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'ID Pesanan tidak ditemukan.',
+                onHide: () => navigation.goBack(),
+            });
             return;
         }
 
@@ -73,7 +82,12 @@ const TransactionDetailScreen = ({ navigation, route }) => {
                 setTransaction(response.data);
             } catch (error) {
                 console.log("Gagal mengambil detail transaksi:", error);
-                Alert.alert("Error", "Tidak dapat memuat detail transaksi.");
+                Toast.show({
+                    type: 'error',
+                    text1: 'Error',
+                    text2: 'Tidak dapat memuat detail transaksi.',
+                    onHide: () => navigation.goBack(),
+                });
             } finally {
                 setIsLoading(false);
             }
