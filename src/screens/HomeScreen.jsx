@@ -16,7 +16,14 @@ const ProductCard = ({ item, navigation }) => (
     >
         <Image source={{ uri: item.imageUrl }} style={styles.productImage} />
         <StyledText style={styles.productTitle} numberOfLines={1}>{item.name}</StyledText>
-        <StyledText style={styles.productDescription} numberOfLines={2}>{item.description}</StyledText>
+        <StyledText
+            fontType="montserrat"
+            style={styles.productDescription}
+            numberOfLines={4}
+            ellipsizeMode="tail"
+        >
+            {item.description}
+        </StyledText>
     </TouchableOpacity>
 );
 
@@ -87,8 +94,13 @@ const HomeScreen = ({ navigation }) => {
                     {specialOffer && !loading && (
                         <View style={styles.specialOfferCard}>
                             <View style={styles.specialOfferText}>
-                                <StyledText style={styles.specialOfferTitle}>{specialOffer.name}</StyledText>
-                                <StyledText fontType="montserrat" style={styles.specialOfferDesc}>
+                                <StyledText fontType="montserrat" style={styles.specialOfferTitle}>{specialOffer.name}</StyledText>
+                                <StyledText
+                                    fontType="montserrat"
+                                    style={styles.specialOfferDesc}
+                                    numberOfLines={3}
+                                    ellipsizeMode="tail"
+                                >
                                     {specialOffer.description}
                                 </StyledText>
                                 <TouchableOpacity

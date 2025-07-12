@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, StatusBar, Platform, Modal, ActivityIndicator, Pressable, Alert, RefreshControl  } from 'react-native'
+import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, StatusBar, Platform, Modal, ActivityIndicator, Pressable, Alert, RefreshControl } from 'react-native'
 import { COLORS } from '../constants/colors'
 import { Ionicons } from '@expo/vector-icons'
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar'
@@ -15,8 +15,15 @@ const LessonItem = ({ item, onPress }) => {
   return (
     <TouchableOpacity style={styles.itemContainer} onPress={onPress}>
       <View style={styles.itemTextContainer}>
-        <StyledText style={styles.itemTitle}>{item.title}</StyledText>
-        <StyledText style={styles.itemDescription}>{item.description}</StyledText>
+        <StyledText fontType="montserrat" style={styles.itemTitle}>{item.title}</StyledText>
+        <StyledText
+          fontType="montserrat"
+          style={styles.itemDescription}
+          numberOfLines={3}
+          ellipsizeMode="tail"
+        >
+          {item.description}
+        </StyledText>
         {item.status === 'In Progress' && (
           <View style={styles.inProgressBadge}>
             <StyledText style={styles.inProgressText}>In Progress</StyledText>
@@ -120,24 +127,24 @@ const LessonsScreen = ({ navigation }) => {
       const inProgressTestsData = response.data.data.inProgress;
 
       const formattedReadyToStart = readyToStartTests.map(item => ({
-          id: item.transactionId,
-          packageId: item.testPackage.id,
-          title: item.testPackage.name,
-          description: item.testPackage.description,
-          image: item.testPackage.imageUrl,
-          transactionId: item.transactionId,
-          status: 'Ready to Start'
-        }));
+        id: item.transactionId,
+        packageId: item.testPackage.id,
+        title: item.testPackage.name,
+        description: item.testPackage.description,
+        image: item.testPackage.imageUrl,
+        transactionId: item.transactionId,
+        status: 'Ready to Start'
+      }));
 
-        const formattedInProgress = inProgressTestsData.map(item => ({
-          id: item.attemptId,
-          packageId: item.testPackage.id,
-          title: item.testPackage.name,
-          description: item.testPackage.description,
-          image: item.testPackage.imageUrl,
-          attemptId: item.attemptId,
-          status: 'In Progress'
-        }));
+      const formattedInProgress = inProgressTestsData.map(item => ({
+        id: item.attemptId,
+        packageId: item.testPackage.id,
+        title: item.testPackage.name,
+        description: item.testPackage.description,
+        image: item.testPackage.imageUrl,
+        attemptId: item.attemptId,
+        status: 'In Progress'
+      }));
 
       setMyTests(formattedReadyToStart);
       setInProgressTests(formattedInProgress);
@@ -162,7 +169,7 @@ const LessonsScreen = ({ navigation }) => {
     }
   };
 
-   useEffect(() => {
+  useEffect(() => {
     if (activeTab === 'Test') {
       fetchMyTests();
     } else if (activeTab === 'History') {
@@ -172,7 +179,7 @@ const LessonsScreen = ({ navigation }) => {
 
 
   const onRefresh = React.useCallback(async () => {
-    setRefreshing(true); 
+    setRefreshing(true);
     if (activeTab === 'Test') {
       await fetchMyTests();
     } else {
@@ -221,7 +228,7 @@ const LessonsScreen = ({ navigation }) => {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              colors={[COLORS.primary]} 
+              colors={[COLORS.primary]}
               tintColor={COLORS.primary}
             />
           }
