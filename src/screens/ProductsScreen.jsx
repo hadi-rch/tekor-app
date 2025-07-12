@@ -113,7 +113,6 @@ const ProductsScreen = ({ navigation }) => {
 
         setFilteredProducts(result);
     }, [products, searchQuery, activeFilter, sortOrder]);
-    console.log("sortOrder:", sortOrder)
     return (
         <LinearGradient
             colors={['#E6ECF5', '#FDEAEB']}
