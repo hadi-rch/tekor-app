@@ -292,7 +292,6 @@ const TestScreen = ({ route, navigation }) => {
         try {
             const response = await submitTestAttempt(attemptId);
             if (response.status === "OK" && response.data) {
-                console.log("hadi", response.data)
                 // Navigasi ke halaman hasil dengan membawa data hasil tes
                 navigation.replace('TestResult', {
                     testResult: response.data,

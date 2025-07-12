@@ -137,7 +137,6 @@ const ProductDetailScreen = ({ navigation, route }) => {
                 <Text style={styles.headerTitle}>Detail Try out</Text>
                 <View style={{ width: fontPixel(24) }} />
             </View>
-            {console.log("product : ", product)}
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <Image source={imageSource} style={styles.productImage} />
                 <View style={styles.detailsContainer}>

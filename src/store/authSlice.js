@@ -23,7 +23,6 @@ export const loginUser = createAsyncThunk(
             try {
                 const profileResponse = await api.get('/api/v1/users');
                 const userProfile = profileResponse.data?.data;
-                // console.log("userProfile:", userProfile);
 
                 return { token: accessToken, user: userProfile };
 
@@ -75,7 +74,6 @@ export const restoreUserSession = createAsyncThunk(
             // Biarkan interceptor menangani refresh token jika diperlukan
             const profileResponse = await api.get('/api/v1/users');
             const userProfile = profileResponse.data?.data;
-            // console.log("userProfile:", userProfile);
             // Setelah berhasil (mungkin setelah refresh), kita perlu token terbaru
             const newAccessToken = await getAccessToken();
             return { token: newAccessToken, user: userProfile };

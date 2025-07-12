@@ -51,8 +51,6 @@ const TestResultScreen = ({ navigation, route }) => {
     } else {
         finishTime = 0;
     }
-    
-    console.log("finishTime:", finishTime);
 
     const formatTime = (seconds) => {
         if (seconds === null || seconds === undefined || isNaN(seconds)) {

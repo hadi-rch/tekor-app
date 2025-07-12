@@ -210,9 +210,7 @@ const LessonsScreen = ({ navigation }) => {
   };
 
   const handleContinueTest = () => {
-    console.log("hadie")
     if (!selectedLesson || !selectedLesson.attemptId) return;
-    console.log("hadie2")
 
     setIsModalVisible(false);
     navigation.navigate('Test', { attemptId: selectedLesson.attemptId });
