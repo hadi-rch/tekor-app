@@ -66,7 +66,7 @@ const ReviewScreen = ({ navigation, route }) => {
                 );
                 setReviewData(response.data.data);
             } catch (err) {
-                console.error(
+                console.log(
                     "Failed to fetch review data:",
                     err.response?.data || err.message
                 );

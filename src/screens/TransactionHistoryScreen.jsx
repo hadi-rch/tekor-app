@@ -63,7 +63,7 @@ const TransactionHistoryScreen = ({ navigation }) => {
 
             setTransactions(formattedData);
         } catch (error) {
-            console.error("Gagal mengambil riwayat transaksi:", error);
+            console.log("Gagal mengambil riwayat transaksi:", error);
             Alert.alert("Error", "Tidak dapat memuat riwayat transaksi.");
         } finally {
             setIsLoading(false); // Selalu matikan loader utama setelah selesai

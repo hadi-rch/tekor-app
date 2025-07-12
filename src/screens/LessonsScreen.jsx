@@ -149,7 +149,7 @@ const LessonsScreen = ({ navigation }) => {
       setMyTests(formattedReadyToStart);
       setInProgressTests(formattedInProgress);
     } catch (error) {
-      console.error("Gagal mengambil data tes:", error.response?.data || error.message);
+      console.log("Gagal mengambil data tes:", error.response?.data || error.message);
       Alert.alert("Error", "Tidak dapat memuat daftar tes Anda.");
     } finally {
       if (!refreshing) setIsLoading(false);

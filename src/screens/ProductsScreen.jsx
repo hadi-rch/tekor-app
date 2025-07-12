@@ -74,7 +74,7 @@ const ProductsScreen = ({ navigation }) => {
                 setFilteredProducts(allItems);
 
             } catch (error) {
-                console.error("Gagal mengambil data Try out:", error);
+                console.log("Gagal mengambil data Try out:", error);
                 Alert.alert("Error", "Tidak dapat memuat data Try out.");
             } finally {
                 setIsLoading(false);

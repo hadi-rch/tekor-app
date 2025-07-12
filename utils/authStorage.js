@@ -10,7 +10,7 @@ export const saveTokens = async (accessToken, refreshToken) => {
         await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, accessToken);
         await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refreshToken);
     } catch (error) {
-        console.error('Gagal menyimpan token', error);
+        console.log('Gagal menyimpan token', error);
     }
 };
 
@@ -19,7 +19,7 @@ export const getAccessToken = async () => {
     try {
         return await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
     } catch (error) {
-        console.error('Gagal mengambil access token', error);
+        console.log('Gagal mengambil access token', error);
         return null;
     }
 };
@@ -29,7 +29,7 @@ export const getRefreshToken = async () => {
     try {
         return await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
     } catch (error) {
-        console.error('Gagal mengambil refresh token', error);
+        console.log('Gagal mengambil refresh token', error);
         return null;
     }
 };
@@ -40,6 +40,6 @@ export const deleteTokens = async () => {
         await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
         await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
     } catch (error) {
-        console.error('Gagal menghapus token', error);
+        console.log('Gagal menghapus token', error);
     }
 };

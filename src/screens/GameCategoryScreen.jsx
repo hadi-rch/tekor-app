@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar, FlatList, Image, ActivityIndicator} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar, FlatList, Image, ActivityIndicator } from 'react-native';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 import { fontPixel, pixelSizeVertical, pixelSizeHorizontal, widthPixel } from '../../helper';
@@ -31,17 +31,17 @@ const GameCategoryScreen = ({ navigation }) => {
         const fetchCategories = async () => {
             try {
                 const response = await api.get('/api/v1/vocabularies/categories');
-                const backendCategories = response.data.data; 
+                const backendCategories = response.data.data;
 
                 const formattedCategories = backendCategories.map(categoryKey => ({
                     id: categoryKey,
-                    backendKey: categoryKey, 
-                    ...categoryDisplayMap[categoryKey] 
+                    backendKey: categoryKey,
+                    ...categoryDisplayMap[categoryKey]
                 }));
 
                 setCategories(formattedCategories);
             } catch (error) {
-                console.error("Gagal mengambil kategori:", error);
+                console.log("Gagal mengambil kategori:", error);
                 Alert.alert("Error", "Tidak dapat memuat kategori permainan.");
             } finally {
                 setIsLoading(false);
@@ -49,7 +49,7 @@ const GameCategoryScreen = ({ navigation }) => {
         };
 
         fetchCategories();
-    }, []); 
+    }, []);
     const handleCategoryPress = (category) => {
         navigation.navigate('MemoryCardGame', { category: category.backendKey });
     };
@@ -96,15 +96,15 @@ const GameCategoryScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-    screenContainer: {flex: 1,backgroundColor: COLORS.white,paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,},
-    header: {flexDirection: 'row',alignItems: 'center',justifyContent: 'center',paddingVertical: pixelSizeVertical(15),paddingHorizontal: pixelSizeHorizontal(20),borderBottomWidth: 1,borderBottomColor: COLORS.borderColor,},
-    headerTitle: {fontSize: fontPixel(20),fontWeight: 'bold',},
-    listContainer: {paddingHorizontal: pixelSizeHorizontal(15),},
-    description: {fontSize: fontPixel(16),color: COLORS.text,paddingVertical: pixelSizeVertical(20),lineHeight: fontPixel(24),},
-    cardContainer: {flex: 1,margin: pixelSizeHorizontal(5),alignItems: 'center',marginBottom: pixelSizeVertical(15),},
-    cardImage: {width: '100%',height: widthPixel(150), borderRadius: 12,backgroundColor: '#f0f0f0',},
-    cardTitle: {fontSize: fontPixel(16),fontWeight: '500',marginTop: pixelSizeVertical(8),},
-    centerContainer: {justifyContent: 'center',alignItems: 'center',},
+    screenContainer: { flex: 1, backgroundColor: COLORS.white, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0, },
+    header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: pixelSizeVertical(15), paddingHorizontal: pixelSizeHorizontal(20), borderBottomWidth: 1, borderBottomColor: COLORS.borderColor, },
+    headerTitle: { fontSize: fontPixel(20), fontWeight: 'bold', },
+    listContainer: { paddingHorizontal: pixelSizeHorizontal(15), },
+    description: { fontSize: fontPixel(16), color: COLORS.text, paddingVertical: pixelSizeVertical(20), lineHeight: fontPixel(24), },
+    cardContainer: { flex: 1, margin: pixelSizeHorizontal(5), alignItems: 'center', marginBottom: pixelSizeVertical(15), },
+    cardImage: { width: '100%', height: widthPixel(150), borderRadius: 12, backgroundColor: '#f0f0f0', },
+    cardTitle: { fontSize: fontPixel(16), fontWeight: '500', marginTop: pixelSizeVertical(8), },
+    centerContainer: { justifyContent: 'center', alignItems: 'center', },
 });
 
 export default GameCategoryScreen;

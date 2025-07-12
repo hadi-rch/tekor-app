@@ -47,7 +47,7 @@ const HomeScreen = ({ navigation }) => {
                 setFeaturedProducts(prodUnggulan);
 
             } catch (e) {
-                console.error("API Error:", e);
+                console.log("API Error:", e);
                 setError('Gagal memuat data. Coba lagi nanti.');
             } finally {
                 setLoading(false);

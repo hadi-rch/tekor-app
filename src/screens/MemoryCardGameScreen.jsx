@@ -62,7 +62,7 @@ const MemoryCardGameScreen = ({ navigation, route }) => {
             setIsLoading(true); // Set loading true saat mengambil halaman baru
             try {
                 const response = await api.get(`/api/v1/vocabularies?category=${category}&page=${currentPage}`);
-                
+
                 const backendData = response.data.data.content;
                 const totalPagesFromApi = response.data.data.totalPages;
 
@@ -76,7 +76,7 @@ const MemoryCardGameScreen = ({ navigation, route }) => {
                 setTotalPages(totalPagesFromApi);
                 setCurrentPageOriginalCards(formattedData); // Simpan kartu asli halaman ini
                 setCards([...formattedData].sort(() => Math.random() - 0.5)); // Atur kartu untuk view saat ini
-                
+
                 // Tambahkan kartu baru ke daftar global tanpa duplikasi
                 setAllOriginalCards(prevAllCards => {
                     const existingIds = new Set(prevAllCards.map(c => c.id));
@@ -86,7 +86,7 @@ const MemoryCardGameScreen = ({ navigation, route }) => {
 
             } catch (error) {
                 Alert.alert("Error", `Tidak dapat memuat data permainan untuk halaman ${currentPage + 1}.`);
-                console.error("Fetch error:", error);
+                console.log("Fetch error:", error);
             } finally {
                 setIsLoading(false);
             }
@@ -115,7 +115,7 @@ const MemoryCardGameScreen = ({ navigation, route }) => {
         handleReset(); // Tetap reset kartu yang terbuka
         setCards([...currentPageOriginalCards].sort(() => Math.random() - 0.5));
     };
-    
+
     // Handler untuk pagination
     const handleNextPage = () => {
         if (currentPage < totalPages - 1) {
@@ -154,7 +154,7 @@ const MemoryCardGameScreen = ({ navigation, route }) => {
         </>
     );
 
-    if (isLoading && allOriginalCards.length === 0) { 
+    if (isLoading && allOriginalCards.length === 0) {
         return (
             <View style={[styles.screenContainer, styles.centerContainer]}>
                 <ActivityIndicator size="large" color={COLORS.primary} />

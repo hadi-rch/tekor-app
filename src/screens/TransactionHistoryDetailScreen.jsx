@@ -72,7 +72,7 @@ const TransactionDetailScreen = ({ navigation, route }) => {
                 const response = await api.get(`/api/v1/transactions/status/${orderId}`);
                 setTransaction(response.data);
             } catch (error) {
-                console.error("Gagal mengambil detail transaksi:", error);
+                console.log("Gagal mengambil detail transaksi:", error);
                 Alert.alert("Error", "Tidak dapat memuat detail transaksi.");
             } finally {
                 setIsLoading(false);

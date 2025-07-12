@@ -141,7 +141,7 @@ const TestScreen = ({ route, navigation }) => {
                 }
 
             } catch (error) {
-                console.error("Failed to initialize test:", error.response?.data || error.message);
+                console.log("Failed to initialize test:", error.response?.data || error.message);
                 Alert.alert("Error", "Gagal memuat tes. Silakan coba lagi.", [
                     { text: "OK", onPress: () => navigation.goBack() },
                 ]);
@@ -245,7 +245,7 @@ const TestScreen = ({ route, navigation }) => {
             const remainingSeconds = Math.max(0, Math.floor((finishTimeRef.current - now) / 1000));
             await submitAnswer(attemptId, currentQuestion.id, optionId, remainingSeconds);
         } catch (error) {
-            console.error("Failed to submit answer:", error);
+            console.log("Failed to submit answer:", error);
             Alert.alert("Error", "Gagal mengirim jawaban. Silakan periksa koneksi Anda.");
         }
     };
@@ -298,7 +298,7 @@ const TestScreen = ({ route, navigation }) => {
                 throw new Error(response.message || "Gagal mengirimkan hasil tes.");
             }
         } catch (error) {
-            console.error("Failed to submit test:", error);
+            console.log("Failed to submit test:", error);
             Alert.alert("Error", "Gagal mengirimkan hasil tes. Silakan coba lagi.", [
                 { text: "OK", onPress: () => setIsSubmitModalVisible(true) },
             ]);

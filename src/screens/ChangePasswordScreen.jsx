@@ -87,7 +87,7 @@ const ChangePasswordScreen = ({ navigation }) => {
             });
 
         } catch (err) {
-            // console.error("Change Password Error:", err.response ? err.response.data : err.message);
+            // console.log("Change Password Error:", err.response ? err.response.data : err.message);
             const errorMessage = err.response?.data?.message || 'Gagal mengubah kata sandi. Silakan coba lagi.';
             if (err.response && err.response.status === 400) {
                 setErrors(prev => ({ ...prev, currentPassword: errorMessage }));

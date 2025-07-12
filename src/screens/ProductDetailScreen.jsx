@@ -34,7 +34,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
                     setProduct(response.data.data);
                 }
             } catch (error) {
-                console.error("Gagal mengambil detail Try out:", error);
+                console.log("Gagal mengambil detail Try out:", error);
                 Alert.alert("Error", "Tidak dapat memuat detail Try out.");
             } finally {
                 setIsLoading(false);
@@ -73,7 +73,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
             }
 
         } catch (error) {
-            console.error("Gagal membuat transaksi:", error.response?.data || error.message);
+            console.log("Gagal membuat transaksi:", error.response?.data || error.message);
             Alert.alert("Error", error.response?.data?.message || "Gagal memulai transaksi. Silakan coba lagi.");
         } finally {
             setIsBuying(false);
@@ -92,7 +92,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
             </View>
         );
     }
-    
+
     if (!product) {
         return (
             <View style={styles.loaderContainer}>
@@ -104,7 +104,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
     console.log("discountPrice : ", product)
     console.log("price : ", product.price)
     const hasDiscount = product.discountPrice != null;
-    
+
     const imageSource = product.imageUrl ? { uri: product.imageUrl } : require('../../assets/images/no-image.jpg');
 
     return (
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
     priceContainer: { flexDirection: 'row', alignItems: 'center', marginTop: 10, },
     priceText: { fontWeight: 'bold', color: COLORS.primary, fontSize: fontPixel(16), },
     discountPriceText: { fontWeight: 'bold', color: COLORS.primary, fontSize: fontPixel(16), marginRight: 8, },
-    originalPriceText: { color: COLORS.gray,  textDecorationLine: 'line-through', fontSize: fontPixel(14), },
+    originalPriceText: { color: COLORS.gray, textDecorationLine: 'line-through', fontSize: fontPixel(14), },
 });
 
 export default ProductDetailScreen;
