@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, StatusBar, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import Toast from 'react-native-toast-message';
@@ -9,6 +9,7 @@ import CustomTextInput from '../components/CustomTextInput';
 import CustomButton from '../components/CustomButton';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const LoginScreen = ({ navigation }) => {
     const [formData, setFormData] = useState({ username: '', password: '' });
@@ -82,9 +83,16 @@ const LoginScreen = ({ navigation }) => {
     const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
     return (
-        <View style={styles.screenContainer}>
+        <LinearGradient
+            colors={['#FDEAEB', '#E6ECF5']}
+            style={styles.screenContainer}
+        >
             <FocusAwareStatusBar barStyle="dark-content" backgroundColor="transparent" translucent={true} />
             <ScrollView contentContainerStyle={styles.container}>
+                <Image
+                    source={{ uri: 'https://res.cloudinary.com/dyhlt43k7/image/upload/v1752389393/image_i7kqmp.png' }}
+                    style={styles.heroLogo}
+                />
                 <Text style={styles.title}>Selamat Datang</Text>
                 <Text style={styles.subtitle}>Silahkan masuk untuk melanjutkan</Text>
 
@@ -129,13 +137,14 @@ const LoginScreen = ({ navigation }) => {
                     </TouchableOpacity>
                 </View>
             </ScrollView>
-        </View>
+        </LinearGradient>
     );
 };
 
 const styles = StyleSheet.create({
-    screenContainer: { flex: 1, backgroundColor: COLORS.white, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0, },
-    container: { flexGrow: 1, padding: 24, justifyContent: 'center', },
+    screenContainer: {flex: 1, backgroundColor: COLORS.white, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0},
+    container: { padding: 24, alignItems: 'center', justifyContent: 'center', marginTop: 100 },
+    heroLogo: { width: 200, height: 50, resizeMode: 'contain', marginBottom: 10, marginTop:50, alignSelf: 'center', },
     title: { fontSize: 28, fontWeight: 'bold', color: COLORS.text, textAlign: 'center', marginBottom: 8 },
     subtitle: { fontSize: 16, color: COLORS.gray, textAlign: 'center', marginBottom: 40 },
     form: { width: '100%' },

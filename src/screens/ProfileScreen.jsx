@@ -55,7 +55,7 @@ const ProfileScreen = ({ navigation }) => {
 
     const avatarSource = (user && user.imageUrl)
         ? { uri: user.imageUrl }
-        : require('../../assets/images/no-image.jpg');
+        : {uri: 'https://res.cloudinary.com/dyhlt43k7/image/upload/v1752392053/no-image_mijies.jpg'}
 
     if (!user) {
         return (

@@ -120,7 +120,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
 
     const hasDiscount = product.discountPrice != null;
 
-    const imageSource = product.imageUrl ? { uri: product.imageUrl } : require('../../assets/images/no-image.jpg');
+    const imageSource = product.imageUrl ? { uri: product.imageUrl } : { uri: 'https://res.cloudinary.com/dyhlt43k7/image/upload/v1752392053/no-image_mijies.jpg' };
 
     return (
         <View style={styles.screenContainer}>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, StatusBar, Image } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { Ionicons } from '@expo/vector-icons';
 import CustomTextInput from '../components/CustomTextInput';
@@ -8,6 +8,7 @@ import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 import api from '../../api/axiosConfig';
 import { fontPixel } from '../../helper';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const RegisterScreen = ({ navigation }) => {
     const [fullname, setFullname] = useState('');
@@ -150,14 +151,20 @@ const RegisterScreen = ({ navigation }) => {
     };
 
     return (
-        <View style={styles.screenContainer}>
+        <LinearGradient
+            colors={['#FDEAEB', '#E6ECF5']}
+            style={styles.screenContainer}
+        >
             <FocusAwareStatusBar
                 barStyle="dark-content"
                 backgroundColor="transparent"
                 translucent={true}
             />
             <ScrollView contentContainerStyle={styles.container}>
-
+                <Image
+                    source={{ uri: 'https://res.cloudinary.com/dyhlt43k7/image/upload/v1752389393/image_i7kqmp.png' }}
+                    style={styles.heroLogo}
+                />
                 <Text style={styles.title}>Daftar</Text>
                 <Text style={styles.subtitle}>Buat akun baru untuk memulai</Text>
 
@@ -222,10 +229,6 @@ const RegisterScreen = ({ navigation }) => {
 
                 {errors.form && <Text style={styles.formErrorText}>{errors.form}</Text>}
 
-                <Text style={styles.termsText}>
-                    Dengan mendaftar, Anda menyetujui <Text style={styles.linkText}>Ketentuan Layanan</Text> dan <Text style={styles.linkText}>Kebijakan Privasi</Text> kami.
-                </Text>
-
                 <CustomButton
                     title={isLoading ? 'Mendaftar...' : 'Daftar'}
                     onPress={handleRegister}
@@ -240,16 +243,17 @@ const RegisterScreen = ({ navigation }) => {
                 </View>
 
             </ScrollView>
-        </View>
+        </LinearGradient>
     );
 };
 
 const styles = StyleSheet.create({
-    screenContainer: { flex: 1, backgroundColor: COLORS.white, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 },
-    container: { padding: 24, alignItems: 'center', justifyContent: 'center' },
+    screenContainer: { backgroundColor: COLORS.white, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 },
+    container: { padding: 24, alignItems: 'center', justifyContent: 'center', paddingBottom:150 },
+    heroLogo: { width: 200, height: 50, resizeMode: 'contain', marginBottom: 10, marginTop:50 },
     logo: { width: 80, height: 80, resizeMode: 'contain', marginBottom: 20 },
-    title: { fontSize: 28, fontWeight: 'bold', color: COLORS.text, marginBottom: 8, marginTop: 20 },
-    subtitle: { fontSize: 16, color: COLORS.gray, marginBottom: 32 },
+    title: { fontSize: 28, fontWeight: 'bold', color: COLORS.text, marginBottom: 8, marginTop: 0 },
+    subtitle: { fontSize: 20, color: COLORS.gray, marginBottom: 32 },
     form: { width: '100%', marginBottom: 16 },
     eyeIcon: { padding: 5 },
     termsText: { fontSize: 12, color: COLORS.gray, textAlign: 'center', marginBottom: 24, marginHorizontal: 20 },
