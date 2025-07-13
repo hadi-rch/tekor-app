@@ -150,7 +150,7 @@ const EditProfileScreen = ({ navigation }) => {
                 });
             }
         } catch (e) {
-            console.error("Error saat menjalankan Promise.all:", e);
+            console.log("Error saat menjalankan Promise.all:", e);
             Toast.show({
                 type: 'error',
                 text1: 'Error',
@@ -357,7 +357,7 @@ const styles = StyleSheet.create({
     formContainer: { marginTop: 20 },
     label: { fontSize: 14, color: COLORS.text, marginBottom: 8, fontWeight: '500' },
     input: { backgroundColor: '#f5f5f5', borderRadius: 10, padding: 15, fontSize: 16, borderWidth: 1, borderColor: 'transparent' },
-    inputFocused: { borderColor: COLORS.primary, backgroundColor: '#fff',},
+    inputFocused: { borderColor: COLORS.primary, backgroundColor: '#fff', },
     inputError: { borderColor: '#ff4444', backgroundColor: '#fff5f5' },
     errorText: { color: '#ff4444', fontSize: 12, marginTop: 5, fontWeight: '500' },
     sectionContainer: { marginBottom: pixelSizeVertical(25) },

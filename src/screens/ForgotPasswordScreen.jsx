@@ -30,17 +30,18 @@ const ForgotPasswordScreen = ({ navigation }) => {
             setIsLoading(true);
             try {
                 const response = await api.post('/api/v1/auth/forgot-password', { email });
+                
 
                 Alert.alert("Permintaan Terkirim", response.data.message || 'Jika email terdaftar, link reset telah dikirim.');
                 navigation.navigate('ResetLinkSent', { email: email });
 
             } catch (err) {
-                console.error("Forgot Password Error:", err);
+                console.log("Forgot Password Error:", err);
                 let errorMessage = 'Gagal mengirim permintaan. Silakan coba lagi.';
 
                 if (err.response) {
                     // Jika ada respons dari server (meskipun error)
-                    console.error("Error Data:", err.response.data);
+                    console.log("Error Data:", err.response.data);
                     // Cek jika ada pesan error spesifik dari backend
                     if (err.response.data && err.response.data.message) {
                         errorMessage = err.response.data.message;
@@ -108,13 +109,13 @@ const ForgotPasswordScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-    screenContainer: { flex: 1, backgroundColor: COLORS.white, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0},
-    container: { flex: 1, padding: 20},
-    header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24},
-    backButton: { padding: 5},
-    headerTitle: { fontSize: fontPixel(20), fontWeight: 'bold', color: COLORS.text},
-    content: { flex: 1},
-    description: { fontSize: fontPixel(16), color: COLORS.text, lineHeight: fontPixel(24), marginBottom: 32},
+    screenContainer: { flex: 1, backgroundColor: COLORS.white, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 },
+    container: { flex: 1, padding: 20 },
+    header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 },
+    backButton: { padding: 5 },
+    headerTitle: { fontSize: fontPixel(20), fontWeight: 'bold', color: COLORS.text },
+    content: { flex: 1 },
+    description: { fontSize: fontPixel(16), color: COLORS.text, lineHeight: fontPixel(24), marginBottom: 32 },
 });
 
 export default ForgotPasswordScreen;

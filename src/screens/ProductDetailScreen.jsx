@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Platform, StatusBar, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Platform, StatusBar, ScrollView, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -9,6 +9,7 @@ import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 import CustomButton from '../components/CustomButton';
 import api from '../../api/axiosConfig';
 import StyledText from '../components/StyledText';
+import Toast from 'react-native-toast-message';
 
 const ProductDetailScreen = ({ navigation, route }) => {
     const { productId, productType } = route.params;
@@ -19,8 +20,12 @@ const ProductDetailScreen = ({ navigation, route }) => {
 
     useEffect(() => {
         if (!productId) {
-            Alert.alert("Error", "ID Try out tidak ditemukan.");
-            navigation.goBack();
+            Toast.show({
+                type: 'error',
+                text1: 'Gagal mengambil data try out',
+                text2: "ID Try out tidak ditemukan.",
+                onHide: () => navigation.goBack(),
+            });
             return;
         }
 
@@ -34,8 +39,12 @@ const ProductDetailScreen = ({ navigation, route }) => {
                     setProduct(response.data.data);
                 }
             } catch (error) {
-                console.error("Gagal mengambil detail Try out:", error);
-                Alert.alert("Error", "Tidak dapat memuat detail Try out.");
+                console.log("Gagal mengambil detail Try out:", error);
+                Toast.show({
+                    type: 'error',
+                    text1: 'Gagal mengambil data detail try out',
+                    text2: "Tidak dapat memuat detail Try out.",
+                });
             } finally {
                 setIsLoading(false);
             }
@@ -69,12 +78,20 @@ const ProductDetailScreen = ({ navigation, route }) => {
                 await WebBrowser.openBrowserAsync(redirectUrl);
                 navigation.navigate('TransactionHistory');
             } else {
-                Alert.alert("Error", "Gagal mendapatkan link pembayaran.");
+                Toast.show({
+                    type: 'error',
+                    text1: 'Gagal',
+                    text2: 'Gagal mendapatkan link pembayaran.',
+                });
             }
 
         } catch (error) {
-            console.error("Gagal membuat transaksi:", error.response?.data || error.message);
-            Alert.alert("Error", error.response?.data?.message || "Gagal memulai transaksi. Silakan coba lagi.");
+            console.log("Gagal membuat transaksi:", error.response?.data || error.message);
+            Toast.show({
+                type: 'error',
+                text1: 'Gagal',
+                text2: error.response?.data?.message || 'Gagal memulai transaksi. Silakan coba lagi.',
+            });
         } finally {
             setIsBuying(false);
         }
@@ -92,7 +109,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
             </View>
         );
     }
-    
+
     if (!product) {
         return (
             <View style={styles.loaderContainer}>
@@ -101,10 +118,8 @@ const ProductDetailScreen = ({ navigation, route }) => {
         );
     }
 
-    console.log("discountPrice : ", product)
-    console.log("price : ", product.price)
     const hasDiscount = product.discountPrice != null;
-    
+
     const imageSource = product.imageUrl ? { uri: product.imageUrl } : require('../../assets/images/no-image.jpg');
 
     return (
@@ -122,7 +137,6 @@ const ProductDetailScreen = ({ navigation, route }) => {
                 <Text style={styles.headerTitle}>Detail Try out</Text>
                 <View style={{ width: fontPixel(24) }} />
             </View>
-            {console.log("product : ", product)}
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <Image source={imageSource} style={styles.productImage} />
                 <View style={styles.detailsContainer}>
@@ -180,7 +194,7 @@ const styles = StyleSheet.create({
     priceContainer: { flexDirection: 'row', alignItems: 'center', marginTop: 10, },
     priceText: { fontWeight: 'bold', color: COLORS.primary, fontSize: fontPixel(16), },
     discountPriceText: { fontWeight: 'bold', color: COLORS.primary, fontSize: fontPixel(16), marginRight: 8, },
-    originalPriceText: { color: COLORS.gray,  textDecorationLine: 'line-through', fontSize: fontPixel(14), },
+    originalPriceText: { color: COLORS.gray, textDecorationLine: 'line-through', fontSize: fontPixel(14), },
 });
 
 export default ProductDetailScreen;

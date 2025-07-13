@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar, FlatList, Animated, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar, FlatList, Animated, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 import { fontPixel, pixelSizeVertical, pixelSizeHorizontal, heightPixel } from '../../helper';
 import api from '../../api/axiosConfig';
+import Toast from 'react-native-toast-message';
 
 const MemoryCard = ({ item, isFlipped, onPress }) => {
     const animatedValue = useRef(new Animated.Value(0)).current;
@@ -55,14 +56,18 @@ const MemoryCardGameScreen = ({ navigation, route }) => {
     useEffect(() => {
         const fetchVocabularies = async () => {
             if (!category) {
-                Alert.alert("Error", "Kategori tidak ditemukan.");
+                Toast.show({
+                    type: 'error',
+                    text1: 'Gagal mengambil data kategori',
+                    text2: "Kategori tidak ditemukan.",
+                });
                 setIsLoading(false);
                 return;
             }
             setIsLoading(true); // Set loading true saat mengambil halaman baru
             try {
                 const response = await api.get(`/api/v1/vocabularies?category=${category}&page=${currentPage}`);
-                
+
                 const backendData = response.data.data.content;
                 const totalPagesFromApi = response.data.data.totalPages;
 
@@ -76,7 +81,7 @@ const MemoryCardGameScreen = ({ navigation, route }) => {
                 setTotalPages(totalPagesFromApi);
                 setCurrentPageOriginalCards(formattedData); // Simpan kartu asli halaman ini
                 setCards([...formattedData].sort(() => Math.random() - 0.5)); // Atur kartu untuk view saat ini
-                
+
                 // Tambahkan kartu baru ke daftar global tanpa duplikasi
                 setAllOriginalCards(prevAllCards => {
                     const existingIds = new Set(prevAllCards.map(c => c.id));
@@ -85,8 +90,12 @@ const MemoryCardGameScreen = ({ navigation, route }) => {
                 });
 
             } catch (error) {
-                Alert.alert("Error", `Tidak dapat memuat data permainan untuk halaman ${currentPage + 1}.`);
-                console.error("Fetch error:", error);
+                Toast.show({
+                    type: 'error',
+                    text1: 'Gagal mengambil page',
+                    text2: `Tidak dapat memuat data permainan untuk halaman ${currentPage + 1}.`,
+                });
+                console.log("Fetch error:", error);
             } finally {
                 setIsLoading(false);
             }
@@ -115,7 +124,7 @@ const MemoryCardGameScreen = ({ navigation, route }) => {
         handleReset(); // Tetap reset kartu yang terbuka
         setCards([...currentPageOriginalCards].sort(() => Math.random() - 0.5));
     };
-    
+
     // Handler untuk pagination
     const handleNextPage = () => {
         if (currentPage < totalPages - 1) {
@@ -154,7 +163,7 @@ const MemoryCardGameScreen = ({ navigation, route }) => {
         </>
     );
 
-    if (isLoading && allOriginalCards.length === 0) { 
+    if (isLoading && allOriginalCards.length === 0) {
         return (
             <View style={[styles.screenContainer, styles.centerContainer]}>
                 <ActivityIndicator size="large" color={COLORS.primary} />

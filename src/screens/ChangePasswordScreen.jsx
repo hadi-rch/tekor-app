@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar, Alert, ScrollView, Keyboard } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar, ScrollView, Keyboard } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import api from '../../api/axiosConfig';
@@ -87,7 +87,7 @@ const ChangePasswordScreen = ({ navigation }) => {
             });
 
         } catch (err) {
-            // console.error("Change Password Error:", err.response ? err.response.data : err.message);
+            // console.log("Change Password Error:", err.response ? err.response.data : err.message);
             const errorMessage = err.response?.data?.message || 'Gagal mengubah kata sandi. Silakan coba lagi.';
             if (err.response && err.response.status === 400) {
                 setErrors(prev => ({ ...prev, currentPassword: errorMessage }));

@@ -86,7 +86,7 @@ const CreateNewPasswordScreen = ({ navigation, route }) => {
                 );
 
             } catch (err) {
-                console.error("Reset Password Error:", err.response ? err.response.data : err.message);
+                console.log("Reset Password Error:", err.response ? err.response.data : err.message);
                 const errorMessage = err.response?.data?.message || 'Gagal mengubah kata sandi. Token mungkin tidak valid atau sudah kedaluwarsa.';
                 Alert.alert('Error', errorMessage);
             } finally {

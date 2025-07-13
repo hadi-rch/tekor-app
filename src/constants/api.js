@@ -1,4 +1,4 @@
-const API_URL = 'https://0a44046f54c6.ngrok-free.app';
+const API_URL = 'https://eef10c7918e3.ngrok-free.app';
 
 export const API_URLS = {
   LOGIN: '/auth/login',

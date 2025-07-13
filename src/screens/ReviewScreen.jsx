@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar, Image, ActivityIndicator, FlatList, Alert } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar, Image, ActivityIndicator, FlatList } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "../constants/colors";
 import FocusAwareStatusBar from "../components/FocusAwareStatusBar";
@@ -66,12 +66,16 @@ const ReviewScreen = ({ navigation, route }) => {
                 );
                 setReviewData(response.data.data);
             } catch (err) {
-                console.error(
-                    "Failed to fetch review data:",
+                console.log(
+                    "Gagal mendapatkan review:",
                     err.response?.data || err.message
                 );
-                setError("Failed to load review data. Please try again.");
-                Alert.alert("Error", "Failed to load review data. Please try again.");
+                setError("Gagal mendapatkan review data.");
+                Toast.show({
+                    type: 'error',
+                    text1: 'Gagal',
+                    text2: 'Gagal mendapatkan review.',
+                });
             } finally {
                 setIsLoading(false);
             }

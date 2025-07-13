@@ -6,8 +6,15 @@ import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
 import { LinearGradient } from 'expo-linear-gradient';
 import StyledText from '../components/StyledText';
 import api from '../../api/axiosConfig';
+import { fontPixel } from '../../helper';
 
-const ProductCard = ({ item, navigation }) => (
+const ProductCard = ({ item, navigation }) => {
+    const formatPrice = (price) => {
+        return `Rp ${new Intl.NumberFormat('id-ID').format(price)}`;
+    };
+
+    const hasDiscount = item.discountPrice != null;
+    return (
     <TouchableOpacity
         style={styles.productCard}
         onPress={() => {
@@ -16,9 +23,32 @@ const ProductCard = ({ item, navigation }) => (
     >
         <Image source={{ uri: item.imageUrl }} style={styles.productImage} />
         <StyledText style={styles.productTitle} numberOfLines={1}>{item.name}</StyledText>
-        <StyledText style={styles.productDescription} numberOfLines={2}>{item.description}</StyledText>
+        <StyledText
+            fontType="montserrat"
+            style={styles.productDescription}
+            numberOfLines={4}
+            ellipsizeMode="tail"
+        >
+            {item.description}
+        </StyledText>
+        <View style={styles.priceContainer}>
+            {hasDiscount ? (
+                <>
+                    <StyledText style={styles.discountPriceText}>
+                        {formatPrice(item.discountPrice)}
+                    </StyledText>
+                    <StyledText style={styles.originalPriceText}>
+                        {formatPrice(item.price)}
+                    </StyledText>
+                </>
+            ) : (
+                <StyledText style={styles.priceText}>
+                    {formatPrice(item.price)}
+                </StyledText>
+            )}
+        </View>
     </TouchableOpacity>
-);
+)};
 
 const HomeScreen = ({ navigation }) => {
     const [specialOffer, setSpecialOffer] = useState(null);
@@ -40,7 +70,7 @@ const HomeScreen = ({ navigation }) => {
                 setFeaturedProducts(prodUnggulan);
 
             } catch (e) {
-                console.error("API Error:", e);
+                console.log("API Error:", e);
                 setError('Gagal memuat data. Coba lagi nanti.');
             } finally {
                 setLoading(false);
@@ -69,7 +99,7 @@ const HomeScreen = ({ navigation }) => {
                     />
                     <Text style={styles.heroSubtitle}>Ukur kemampuan bahasa Koreamu dengan tes terstandarisasi.</Text>
                     <CustomButton
-                        title="Mulai Tes Sekarang!"
+                        title="Coba Test Gratis Sekarang!"
                         onPress={() => navigation.navigate('DummyTest')}
                         style={{ backgroundColor: COLORS.primary }}
                     />
@@ -87,8 +117,13 @@ const HomeScreen = ({ navigation }) => {
                     {specialOffer && !loading && (
                         <View style={styles.specialOfferCard}>
                             <View style={styles.specialOfferText}>
-                                <StyledText style={styles.specialOfferTitle}>{specialOffer.name}</StyledText>
-                                <StyledText fontType="montserrat" style={styles.specialOfferDesc}>
+                                <StyledText fontType="montserrat" style={styles.specialOfferTitle}>{specialOffer.name}</StyledText>
+                                <StyledText
+                                    fontType="montserrat"
+                                    style={styles.specialOfferDesc}
+                                    numberOfLines={3}
+                                    ellipsizeMode="tail"
+                                >
                                     {specialOffer.description}
                                 </StyledText>
                                 <TouchableOpacity
@@ -165,6 +200,11 @@ const styles = StyleSheet.create({
     productImage: { width: '100%', height: 100, borderRadius: 8, marginBottom: 8 },
     productTitle: { fontSize: 14, fontWeight: 'bold' },
     productDescription: { fontSize: 12, color: COLORS.gray, marginTop: 4 },
+    priceContainer: { flexDirection: 'row', alignItems: 'center', marginTop: 10, paddingBottom: 10 },
+    priceText: { fontWeight: 'bold', color: COLORS.primary, fontSize: fontPixel(16), },
+    discountPriceText: { fontWeight: 'bold', color: COLORS.primary, fontSize: fontPixel(16), marginRight: 8, },
+    originalPriceText: { color: COLORS.gray, textDecorationLine: 'line-through', fontSize: fontPixel(14), },
+    controlLabel: { fontSize: fontPixel(14), fontWeight: '600', color: COLORS.gray, marginBottom: 8, marginTop: 10, },
     // CTA
     ctaBanner: { marginHorizontal: 20, backgroundColor: '#F97B22', borderRadius: 12, paddingBottom: 50, paddingTop: 50, flexDirection: 'row', alignItems: 'center', marginBottom: 30, },
     ctaText: { color: 'white', fontWeight: 'bold', fontSize: 22, marginLeft: 12, flex: 1 },

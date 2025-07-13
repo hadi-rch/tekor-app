@@ -6,7 +6,7 @@ export const getCompletedTests = async () => {
     const response = await api.get(API_URLS.COMPLETED_TESTS);
     return response.data;
   } catch (error) {
-    console.error('Error fetching completed tests:', error);
+    console.log('Error fetching completed tests:', error);
     throw error;
   }
 };

@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
 });
 
 const markdownStyles = {
-    body: { fontSize: 14, lineHeight: 20, color: COLORS.text, marginBottom: 15 },
+    body: { fontSize: 14, lineHeight: 20, color: COLORS.text, marginBottom: 15, paddingBottom: 60 },
     heading1: { fontSize: 24, fontWeight: 'bold', marginTop: 10, marginBottom: 5, color: COLORS.primary },
     heading2: { fontSize: 20, fontWeight: 'bold', marginTop: 8, marginBottom: 4, color: COLORS.primary },
     heading3: { fontSize: 18, fontWeight: 'bold', marginTop: 6, marginBottom: 3, color: COLORS.primary },
