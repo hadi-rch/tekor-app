@@ -69,9 +69,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
                     quantity: 1,
                 };
             }
-            console.log("requestBody : ", requestBody)
             const response = await api.post('/api/v1/transactions/create', requestBody);
-            console.log("responses : ", response)
             const redirectUrl = response.data.data?.redirectUrl;
 
             if (redirectUrl) {
