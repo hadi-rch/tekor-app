@@ -63,7 +63,7 @@ const HistoryItem = ({ item, navigation }) => (
           onPress={() =>
             navigation.navigate("EvaluationDetail", {
               aiEvaluationResult: item.aiEvaluationResult,
-              packageId: item.packageId,
+              testPackageName: item.testPackageName,
             })
           }
         >

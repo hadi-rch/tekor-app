@@ -9,7 +9,7 @@ import { fontPixel } from '../../helper';
 
 const EvaluationDetailScreen = ({ route }) => {
     const navigation = useNavigation();
-    const { aiEvaluationResult, packageId } = route.params;
+    const { aiEvaluationResult, testPackageName } = route.params;
 
     const handleGoBack = () => {
         navigation.navigate('MainApp', { screen: 'My Try out', params: { setActiveTab: 'History' } });
@@ -27,7 +27,7 @@ const EvaluationDetailScreen = ({ route }) => {
 
             </View>
             <ScrollView style={styles.content}>
-                <Text style={styles.packageId}>Package ID: {packageId}</Text>
+                <Text style={styles.packageId}>{testPackageName}</Text>
                 <Markdown style={markdownStyles}>
                     {aiEvaluationResult}
                 </Markdown>
