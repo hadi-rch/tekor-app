@@ -94,7 +94,7 @@ const HomeScreen = ({ navigation }) => {
                 {/* 1. Hero Section */}
                 <View style={styles.heroSection}>
                     <Image
-                        source={require('../../assets/images/logo-new.png')}
+                        source={{uri: 'https://res.cloudinary.com/dyhlt43k7/image/upload/v1752389393/image_i7kqmp.png'}}
                         style={styles.heroLogo}
                     />
                     <Text style={styles.heroSubtitle}>Ukur kemampuan bahasa Koreamu dengan tes terstandarisasi.</Text>
