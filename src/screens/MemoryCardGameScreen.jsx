@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
     cardTextKorean: { fontSize: fontPixel(26), fontWeight: 'bold', textAlign: 'center', marginBottom: pixelSizeVertical(4), },
     cardTextRomanization: { fontSize: fontPixel(16), textAlign: 'center', color: COLORS.gray, },
     cardTextIndonesian: { fontSize: fontPixel(22), textAlign: 'center', color: COLORS.primary, fontWeight: '500', },
-    footer: { padding: pixelSizeHorizontal(20), borderTopWidth: 1, borderTopColor: '#E0E0E0', backgroundColor: COLORS.white, paddingBottom: Platform.OS === 'ios' ? 34 : pixelSizeVertical(20), },
+    footer: { padding: pixelSizeHorizontal(20), borderTopWidth: 1, borderTopColor: '#E0E0E0', backgroundColor: COLORS.white, paddingBottom: Platform.OS === 'ios' ? 34 : pixelSizeVertical(50), },
     buttonContainer: { flexDirection: 'row', marginBottom: pixelSizeVertical(15) },
     resetButton: { backgroundColor: '#f0f0f0', paddingVertical: pixelSizeVertical(15), borderRadius: 12, alignItems: 'center', flex: 1, marginRight: pixelSizeHorizontal(10), },
     resetButtonText: { fontSize: fontPixel(16), fontWeight: 'bold', color: COLORS.text, },

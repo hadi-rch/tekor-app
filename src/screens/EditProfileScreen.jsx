@@ -230,7 +230,7 @@ const EditProfileScreen = ({ navigation }) => {
         });
     };
 
-    const avatarSource = avatarUri ? { uri: avatarUri } : require('../../assets/images/no-image.jpg');
+    const avatarSource = avatarUri ? { uri: avatarUri } : { uri: 'https://res.cloudinary.com/dyhlt43k7/image/upload/v1752392053/no-image_mijies.jpg' };
     const isSaveDisabled = !hasValidChanges() || isLoading;
 
     return (

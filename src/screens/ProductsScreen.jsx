@@ -14,7 +14,7 @@ const ProductCard = ({ item, navigation }) => {
     };
 
     const hasDiscount = item.discountPrice != null;
-    const imageSource = item.imageUrl ? { uri: item.imageUrl } : require('../../assets/images/no-image.jpg');
+    const imageSource = item.imageUrl ? { uri: item.imageUrl } : { uri: 'https://res.cloudinary.com/dyhlt43k7/image/upload/v1752392053/no-image_mijies.jpg' };
 
     return (
         <TouchableOpacity

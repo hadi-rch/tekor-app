@@ -11,7 +11,7 @@ import Toast from 'react-native-toast-message'
 
 // --- Komponen untuk setiap item dalam daftar Test ---
 const LessonItem = ({ item, onPress }) => {
-  const imageSource = item.image ? { uri: item.image } : require('../../assets/images/no-image.jpg');
+  const imageSource = item.image ? { uri: item.image } : { uri: 'https://res.cloudinary.com/dyhlt43k7/image/upload/v1752392053/no-image_mijies.jpg' };
 
   return (
     <TouchableOpacity style={styles.itemContainer} onPress={onPress}>
@@ -63,7 +63,7 @@ const HistoryItem = ({ item, navigation }) => (
           onPress={() =>
             navigation.navigate("EvaluationDetail", {
               aiEvaluationResult: item.aiEvaluationResult,
-              packageId: item.packageId,
+              testPackageName: item.testPackageName,
             })
           }
         >

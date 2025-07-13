@@ -58,7 +58,7 @@ const TransactionHistoryScreen = ({ navigation }) => {
                 date: new Date(tx.createdAt).toLocaleDateString('id-ID', {
                     day: '2-digit', month: 'long', year: 'numeric'
                 }),
-                image: require('../../assets/images/no-image.jpg')
+                image: { uri: 'https://res.cloudinary.com/dyhlt43k7/image/upload/v1752392053/no-image_mijies.jpg' }
             }));
 
             setTransactions(formattedData);
