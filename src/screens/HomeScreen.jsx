@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Image, FlatList, Platform, StatusBar, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Image, FlatList, Platform, StatusBar, ActivityIndicator, Modal } from 'react-native';
 import { COLORS } from '../constants/colors';
 import CustomButton from '../components/CustomButton';
 import FocusAwareStatusBar from '../components/FocusAwareStatusBar';
@@ -8,53 +8,63 @@ import StyledText from '../components/StyledText';
 import api from '../../api/axiosConfig';
 import { fontPixel } from '../../helper';
 
+const WarningItem = ({ icon, text }) => (
+    <View style={styles.warningItem}>
+        <StyledText style={styles.warningIcon}>{icon}</StyledText>
+        <StyledText fontType='montserrat' style={styles.warningText}>{text}</StyledText>
+    </View>
+);
+
 const ProductCard = ({ item, navigation }) => {
     const formatPrice = (price) => {
         return `Rp ${new Intl.NumberFormat('id-ID').format(price)}`;
     };
 
+
     const hasDiscount = item.discountPrice != null;
     return (
-    <TouchableOpacity
-        style={styles.productCard}
-        onPress={() => {
-            navigation.navigate('ProductDetail', { productId: item.id, productType: item.type });
-        }}
-    >
-        <Image source={{ uri: item.imageUrl }} style={styles.productImage} />
-        <StyledText style={styles.productTitle} numberOfLines={1}>{item.name}</StyledText>
-        <StyledText
-            fontType="montserrat"
-            style={styles.productDescription}
-            numberOfLines={4}
-            ellipsizeMode="tail"
+        <TouchableOpacity
+            style={styles.productCard}
+            onPress={() => {
+                navigation.navigate('ProductDetail', { productId: item.id, productType: item.type });
+            }}
         >
-            {item.description}
-        </StyledText>
-        <View style={styles.priceContainer}>
-            {hasDiscount ? (
-                <>
-                    <StyledText style={styles.discountPriceText}>
-                        {formatPrice(item.discountPrice)}
-                    </StyledText>
-                    <StyledText style={styles.originalPriceText}>
+            <Image source={{ uri: item.imageUrl }} style={styles.productImage} />
+            <StyledText style={styles.productTitle} numberOfLines={1}>{item.name}</StyledText>
+            <StyledText
+                fontType="montserrat"
+                style={styles.productDescription}
+                numberOfLines={4}
+                ellipsizeMode="tail"
+            >
+                {item.description}
+            </StyledText>
+            <View style={styles.priceContainer}>
+                {hasDiscount ? (
+                    <>
+                        <StyledText style={styles.discountPriceText}>
+                            {formatPrice(item.discountPrice)}
+                        </StyledText>
+                        <StyledText style={styles.originalPriceText}>
+                            {formatPrice(item.price)}
+                        </StyledText>
+                    </>
+                ) : (
+                    <StyledText style={styles.priceText}>
                         {formatPrice(item.price)}
                     </StyledText>
-                </>
-            ) : (
-                <StyledText style={styles.priceText}>
-                    {formatPrice(item.price)}
-                </StyledText>
-            )}
-        </View>
-    </TouchableOpacity>
-)};
+                )}
+            </View>
+        </TouchableOpacity>
+    )
+};
 
 const HomeScreen = ({ navigation }) => {
     const [specialOffer, setSpecialOffer] = useState(null);
     const [featuredProducts, setFeaturedProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isModalVisible, setModalVisible] = useState(false);
 
     useEffect(() => {
         const fetchHomePageData = async () => {
@@ -80,6 +90,11 @@ const HomeScreen = ({ navigation }) => {
         fetchHomePageData();
     }, []);
 
+    const handleNavigateToDummyTest = () => {
+        setModalVisible(false);
+        navigation.navigate('DummyTest');
+    };
+
     return (
         <LinearGradient
             colors={['#FDEAEB', '#E6ECF5']}
@@ -94,16 +109,78 @@ const HomeScreen = ({ navigation }) => {
                 {/* 1. Hero Section */}
                 <View style={styles.heroSection}>
                     <Image
-                        source={{uri: 'https://res.cloudinary.com/dyhlt43k7/image/upload/v1752389393/image_i7kqmp.png'}}
+                        source={{ uri: 'https://res.cloudinary.com/dyhlt43k7/image/upload/v1752389393/image_i7kqmp.png' }}
                         style={styles.heroLogo}
                     />
                     <Text style={styles.heroSubtitle}>Ukur kemampuan bahasa Koreamu dengan tes terstandarisasi.</Text>
                     <CustomButton
                         title="Coba Test Gratis Sekarang!"
-                        onPress={() => navigation.navigate('DummyTest')}
+                        onPress={() => setModalVisible(true)}
                         style={{ backgroundColor: COLORS.primary }}
                     />
                 </View>
+
+                {/* Modal */}
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={isModalVisible}
+                    onRequestClose={() => {
+                        setModalVisible(!isModalVisible);
+                    }}
+                >
+                    <View style={styles.centeredView}>
+                        <View style={styles.modalView}>
+                            <Text font='montserrat' style={styles.modalText}>Anda akan memulai tes gratis. Lanjutkan?</Text>
+                            <WarningItem
+                                icon="⚠️"
+                                text="Ujian ini hanya bisa dikerjakan berulang."
+                            />
+                            <WarningItem
+                                icon="📝"
+                                text="Format soal dalam bentuk pilihan ganda berisi 5 soal Membaca (읽기 - Ilgi) dan 5 soal Mendengarkan (듣기 - Teutgi)."
+                            />
+                            <WarningItem
+                                icon="⏱️"
+                                text="Waktu pengerjaan selama 10 menit, waktu tidak bisa dijeda dan waktu akan terus berjalan."
+                            />
+                            <WarningItem
+                                icon="📶"
+                                text="Pastikan koneksi internet Anda stabil."
+                            />
+                            <WarningItem
+                                icon="🚫"
+                                text="Tidak boleh berganti tab atau keluar dari aplikasi."
+                            />
+                            <WarningItem
+                                icon="🔊"
+                                text="Audio di setiap soal Mendengarkan (듣기 - Teutgi) hanya dapat diputar satu kali."
+                            />
+                            <WarningItem
+                                icon="⏰"
+                                text="Perhatikan waktu yang ditampilkan. Jika waktu habis, pengerjaan try out akan otomatis tersubmit."
+                            />
+                            <View style={styles.modalButtonContainer}>
+                                <TouchableOpacity style={[styles.modalButton, styles.cancelButton]} onPress={() => setModalVisible(false)}>
+                                    <StyledText style={styles.cancelButtonText}>Nanti saja</StyledText>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={[styles.modalButton, styles.startButton]} onPress={handleNavigateToDummyTest}>
+                                    <StyledText style={styles.startButtonText}>Mulai Sekarang</StyledText>
+                                </TouchableOpacity>
+                            </View>
+                            {/* <CustomButton
+                                title="Lanjutkan"
+                                onPress={handleNavigateToDummyTest}
+                                style={{ backgroundColor: COLORS.primary, marginBottom: 10 }}
+                            />
+                            <CustomButton
+                                title="Batal"
+                                onPress={() => setModalVisible(false)}
+                                style={{ backgroundColor: COLORS.gray }}
+                            /> */}
+                        </View>
+                    </View>
+                </Modal>
 
                 {/* 2. Penawaran Spesial */}
                 <View style={styles.sectionContainer}>
@@ -208,6 +285,19 @@ const styles = StyleSheet.create({
     // CTA
     ctaBanner: { marginHorizontal: 20, backgroundColor: '#F97B22', borderRadius: 12, paddingBottom: 50, paddingTop: 50, flexDirection: 'row', alignItems: 'center', marginBottom: 30, },
     ctaText: { color: 'white', fontWeight: 'bold', fontSize: 22, marginLeft: 12, flex: 1 },
+    // Modal styles
+    centeredView: { flex: 1, justifyContent: "center", alignItems: "center", marginTop: 22, backgroundColor: 'rgba(0,0,0,0.5)' },
+    modalView: { margin: 20, backgroundColor: "white", borderRadius: 20, padding: 35, alignItems: "center", shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4, elevation: 5 },
+    modalText: { marginBottom: 15, textAlign: "center" , fontSize: 24,},
+    warningItem: { flexDirection: "row", alignItems: "flex-start", marginBottom: 15 },
+    warningIcon: { fontSize: fontPixel(16), marginRight: 10 },
+    warningText: { flex: 1, fontSize: fontPixel(14), color: COLORS.text, lineHeight: fontPixel(20) },
+    modalButtonContainer: { flexDirection: "row", width: "100%", justifyContent: "space-around", marginTop: 20 },
+    modalButton: { paddingVertical: 15, borderRadius: 12, alignItems: "center" },
+    cancelButton: { backgroundColor: COLORS.secondary, marginRight: 10, padding: 10 },
+    startButton: { backgroundColor: COLORS.primary, marginLeft: 10 , padding: 10},
+    cancelButtonText: { color: COLORS.primary, fontWeight: "bold", fontSize: fontPixel(16) },
+    startButtonText: { color: COLORS.white, fontWeight: "bold", fontSize: fontPixel(16) },
 });
 
 export default HomeScreen;
