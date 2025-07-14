@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
     errorText: { fontSize: fontPixel(16), color: 'red', textAlign: 'center',},
     header: { paddingVertical: pixelSizeVertical(15), alignItems: 'center', backgroundColor: COLORS.white, borderBottomWidth: 1, borderBottomColor: COLORS.borderColor,},
     headerTitle: { fontSize: fontPixel(20), fontWeight: 'bold',},
-    scrollContainer: { paddingBottom: heightPixel(120),},
+    scrollContainer: { paddingBottom: heightPixel(70),},
     mainContent: { padding: pixelSizeHorizontal(20), alignItems: 'center',},
     congratsTitle: { fontSize: fontPixel(22), fontWeight: 'bold', textAlign: 'center', color: COLORS.text, marginBottom: pixelSizeVertical(20),},
     scoreContainer: { width: '100%', alignItems: 'flex-end', marginBottom: pixelSizeVertical(25),},
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
     statLabel: { fontSize: fontPixel(14), color: COLORS.gray,},
     statValue: { fontSize: fontPixel(28), fontWeight: 'bold', marginTop: pixelSizeVertical(8),},
     promoImage: { width: '100%', height: heightPixel(180), borderRadius: 12,},
-    footer: { position: 'absolute', bottom: 0, left: 0, right: 0, paddingHorizontal: pixelSizeHorizontal(20), paddingTop: pixelSizeVertical(15), paddingBottom: pixelSizeVertical(30), borderTopWidth: 1, borderTopColor: COLORS.borderColor, backgroundColor: COLORS.white,}
+    footer: { position: 'absolute', bottom: 0, left: 0, right: 0, paddingHorizontal: pixelSizeHorizontal(20), paddingTop: pixelSizeVertical(15), paddingBottom: pixelSizeVertical(10), borderTopWidth: 1, borderTopColor: COLORS.borderColor, backgroundColor: COLORS.white, marginBottom: 50}
 });
 
 export default TestResultScreen;
