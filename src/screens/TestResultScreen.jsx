@@ -79,7 +79,7 @@ const TestResultScreen = ({ navigation, route }) => {
 
             <View contentContainerStyle={styles.scrollContainer}>
                 <View style={styles.mainContent}>
-                    <Text style={styles.congratsTitle}>Selamat! Kamu telah menyelesaikan ujian</Text>
+                    <Text style={styles.congratsTitle}>Selamat! Kamu telah menyelesaikan ujian.</Text>
 
                     <View style={styles.scoreSection}>
                         <Text style={styles.sectionTitle}>Ringkasan</Text>
