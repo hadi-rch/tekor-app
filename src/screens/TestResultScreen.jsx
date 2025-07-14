@@ -77,7 +77,7 @@ const TestResultScreen = ({ navigation, route }) => {
                 <Text style={styles.headerTitle}>Hasil Ujian</Text>
             </View>
 
-            <ScrollView contentContainerStyle={styles.scrollContainer}>
+            <View contentContainerStyle={styles.scrollContainer}>
                 <View style={styles.mainContent}>
                     <Text style={styles.congratsTitle}>Selamat! Kamu telah menyelesaikan ujian</Text>
 
@@ -96,7 +96,7 @@ const TestResultScreen = ({ navigation, route }) => {
                         <StatBox label="Waktu Selesai" value={formatTime(finishTime)} fullWidth={true} />
                     </View>
                 </View>
-            </ScrollView>
+            </View>
 
             {/* Tombol Lihat Pembahasan */}
             <View style={styles.footer}>
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
     statLabel: { fontSize: fontPixel(14), color: COLORS.gray,},
     statValue: { fontSize: fontPixel(28), fontWeight: 'bold', marginTop: pixelSizeVertical(8),},
     promoImage: { width: '100%', height: heightPixel(180), borderRadius: 12,},
-    footer: { position: 'absolute', bottom: 0, left: 0, right: 0, paddingHorizontal: pixelSizeHorizontal(20), paddingTop: pixelSizeVertical(15), paddingBottom: pixelSizeVertical(10), borderTopWidth: 1, borderTopColor: COLORS.borderColor, backgroundColor: COLORS.white, marginBottom: 50}
+    footer: { position: 'absolute', bottom: 0, left: 0, right: 0, paddingHorizontal: pixelSizeHorizontal(20), paddingTop: pixelSizeVertical(15), paddingBottom: pixelSizeVertical(10), borderTopWidth: 1, borderTopColor: COLORS.borderColor, backgroundColor: COLORS.white, marginBottom: 60}
 });
 
 export default TestResultScreen;
