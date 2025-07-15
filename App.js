@@ -24,14 +24,10 @@ const AppContent = () => {
 
 export default function App() {
   const [fontsLoaded] = useFonts({
-    // Pastikan nama file ini cocok dengan file di assets/font/
     'Montserrat': require('./assets/font/Montserrat/static/Montserrat-Regular.ttf'),
     'OpenSans': require('./assets/font/Open_Sans/static/OpenSans-Regular.ttf'),
-    // Anda bisa menambahkan bobot font yang berbeda di sini
-    // 'Montserrat-Bold': require('./assets/font/Montserrat-Bold.ttf'),
   });
 
-  // Tampilkan layar loading atau null jika font belum dimuat
   if (!fontsLoaded) {
     return null;
   }
